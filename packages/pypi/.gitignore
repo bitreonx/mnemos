@@ -1,0 +1,8 @@
+# Prebuilt binaries dropped in by CI — not tracked in git
+_bundled/
+*.pyc
+__pycache__/
+dist/
+build/
+*.egg-info/
+.venv/

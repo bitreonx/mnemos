@@ -1,0 +1,107 @@
+name: publish-pypi
+
+# Builds the Node SEA binary on Linux, macOS, and Windows,
+# bundles them into the Python package, and publishes to PyPI.
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-binaries:
+    name: build binary (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install JS deps
+        run: npm ci
+
+      - name: Build CLI bundle + standalone binary
+        shell: bash
+        run: |
+          cd packages/cli
+          npm run bundle
+          npm run pkg
+          ls -la dist/mnemos-bin* 2>/dev/null || dir dist\mnemos-bin*
+
+      - name: Stage binary into PyPI package
+        shell: bash
+        run: |
+          mkdir -p packages/pypi/src/mnemos/_bundled
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            cp packages/cli/dist/mnemos-bin.exe   packages/pypi/src/mnemos/_bundled/mnemos-bin-windows-x64.exe
+          elif [ "${{ runner.os }}" = "macOS" ]; then
+            ARCH=$(uname -m)
+            if [ "$ARCH" = "arm64" ]; then
+              cp packages/cli/dist/mnemos-bin packages/pypi/src/mnemos/_bundled/mnemos-bin-macos-arm64
+            else
+              cp packages/cli/dist/mnemos-bin packages/pypi/src/mnemos/_bundled/mnemos-bin-macos-x64
+            fi
+          else
+            ARCH=$(uname -m)
+            if [ "$ARCH" = "aarch64" ]; then
+              cp packages/cli/dist/mnemos-bin packages/pypi/src/mnemos/_bundled/mnemos-bin-linux-arm64
+            else
+              cp packages/cli/dist/mnemos-bin packages/pypi/src/mnemos/_bundled/mnemos-bin-linux-x64
+            fi
+          fi
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: binary-${{ runner.os }}
+          path: packages/pypi/src/mnemos/_bundled/
+
+  publish:
+    name: publish to PyPI
+    needs: build-binaries
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Download all platform binaries
+        uses: actions/download-artifact@v4
+        with:
+          path: dist-binaries
+          merge-multiple: true
+
+      - name: Stage binaries into package
+        run: |
+          mkdir -p packages/pypi/src/mnemos/_bundled
+          cp -r dist-binaries/* packages/pypi/src/mnemos/_bundled/ || true
+          ls -la packages/pypi/src/mnemos/_bundled/
+
+      - name: Build wheel
+        working-directory: packages/pypi
+        run: |
+          python -m pip install --upgrade build
+          python -m build --wheel
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          packages-dir: packages/pypi/dist/

@@ -1,0 +1,25 @@
+{
+  "name": "@mnemos/cli",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "mnemos": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "bundle": "node scripts/bundle.mjs",
+    "pkg": "node scripts/pkg.mjs"
+  },
+  "dependencies": {
+    "@mnemos/core": "*",
+    "chalk": "^5.4.1",
+    "commander": "^13.1.0",
+    "ora": "^8.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.21",
+    "@yao-pkg/pkg": "^5.16.1",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.8.3"
+  }
+}

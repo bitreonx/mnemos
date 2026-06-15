@@ -1,0 +1,33 @@
+{
+  "name": "@mnemos/core",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./search": {
+      "types": "./dist/search/index.d.ts",
+      "import": "./dist/search/index.js"
+    },
+    "./copilot": {
+      "types": "./dist/copilot.d.ts",
+      "import": "./dist/copilot.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "node --test dist/**/*.test.js"
+  },
+  "dependencies": {
+    "fast-glob": "^3.3.3",
+    "graphology": "^0.25.4",
+    "graphology-types": "^0.24.8"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
+}

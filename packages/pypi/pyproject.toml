@@ -1,0 +1,36 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mnemos-cli"
+version = "0.1.0"
+description = "The memory layer for software — AI-ready codebase analysis."
+requires-python = ">=3.8"
+license = "MIT"
+authors = [{ name = "Mnemos" }]
+keywords = ["code-analysis", "ai", "codebase", "developer-tools"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Topic :: Software Development",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/bitreonx/mnemos"
+Repository = "https://github.com/bitreonx/mnemos"
+Issues = "https://github.com/bitreonx/mnemos/issues"
+
+[project.scripts]
+mnemos = "mnemos_cli:_run"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mnemos_cli"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"src/mnemos_cli/_bundled" = "mnemos_cli/_bundled"
