@@ -32,11 +32,11 @@
   <line class="scan" x1="20" y1="52" x2="620" y2="52" stroke="url(#term-accent)" stroke-width="1"/>
 
   <text class="l1" x="24" y="76" font-family="ui-monospace,monospace" font-size="14" fill="#a1a1aa">$ npx mnemos .</text>
-  <text class="l2" x="24" y="104" font-family="ui-monospace,monospace" font-size="13" fill="#818cf8">’ Scanning repository&</text>
-  <text class="l3" x="24" y="132" font-family="ui-monospace,monospace" font-size="13" fill="#22c55e"> 1,724 files · 446 nodes · 49 domains</text>
-  <text class="l4" x="24" y="160" font-family="ui-monospace,monospace" font-size="13" fill="#22c55e"> project.dna.json · agent_context.json</text>
-  <text class="l5" x="24" y="188" font-family="ui-monospace,monospace" font-size="13" fill="#22c55e"> snapshots/*.svg · report/index.html</text>
-  <text class="l6" x="24" y="216" font-family="ui-monospace,monospace" font-size="13" fill="#c8f542">Done in 2.6 min · AI readiness 83%</text>
+  <text class="l2" x="24" y="104" font-family="ui-monospace,monospace" font-size="13" fill="#818cf8">ï¿½ Scanning repository&</text>
+  <text class="l3" x="24" y="132" font-family="ui-monospace,monospace" font-size="13" fill="#22c55e"> 1,724 files ï¿½ 446 nodes ï¿½ 49 domains</text>
+  <text class="l4" x="24" y="160" font-family="ui-monospace,monospace" font-size="13" fill="#22c55e"> project.dna.json ï¿½ agent_context.json</text>
+  <text class="l5" x="24" y="188" font-family="ui-monospace,monospace" font-size="13" fill="#22c55e"> snapshots/*.svg ï¿½ report/index.html</text>
+  <text class="l6" x="24" y="216" font-family="ui-monospace,monospace" font-size="13" fill="#c8f542">Done in 2.6 min ï¿½ AI readiness 83%</text>
 
   <rect x="24" y="240" width="592" height="8" rx="4" fill="#27272a"/>
   <rect x="24" y="240" width="480" height="8" rx="4" fill="url(#term-accent)" opacity=".6"/>

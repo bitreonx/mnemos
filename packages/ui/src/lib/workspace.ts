@@ -91,6 +91,16 @@ export async function triggerBuild(repoId: string): Promise<{ ok: boolean; messa
 }
 
 export async function fetchBuildHistory(repoId: string): Promise<BuildHistoryEntry[]> {
+  if (repoId === 'local') {
+    try {
+      const res = await fetch('/.mnemos/build-history.json');
+      if (!res.ok) return [];
+      const data = (await res.json()) as BuildHistoryEntry[] | { history: BuildHistoryEntry[] };
+      return Array.isArray(data) ? data : data.history ?? [];
+    } catch {
+      return [];
+    }
+  }
   const res = await fetch(`/api/history/${repoId}`);
   if (!res.ok) return [];
   const data = (await res.json()) as { history: BuildHistoryEntry[] };
@@ -123,7 +133,7 @@ export async function fetchRepoMemory(repoId: string): Promise<{
   dna: Record<string, unknown> | null;
   suggestedPrompts: string[];
 }> {
-  const base = `/.mnemos/${repoId}`;
+  const base = repoId === 'local' ? '/.mnemos' : `/.mnemos/${repoId}`;
   const [memRes, graphRes, healthRes, heatRes, dnaRes, promptsRes] = await Promise.all([
     fetch(`${base}/memory.json`),
     fetch(`${base}/graph.json`),
@@ -148,7 +158,8 @@ export async function fetchRepoMemory(repoId: string): Promise<{
 
 export async function fetchContextDoc(repoId: string, doc: string): Promise<string | null> {
   try {
-    const res = await fetch(`/.mnemos/${repoId}/context/${doc}`);
+    const base = repoId === 'local' ? '/.mnemos/context' : `/.mnemos/${repoId}/context`;
+    const res = await fetch(`${base}/${doc}`);
     if (!res.ok) return null;
     return res.text();
   } catch {

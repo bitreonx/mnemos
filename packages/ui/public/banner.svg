@@ -49,7 +49,7 @@
   </g>
   <text x="156" y="108" font-family="Inter,system-ui,sans-serif" font-size="52" font-weight="800" fill="#fafafa" letter-spacing="-0.04em">Mnemos</text>
   <text x="156" y="148" font-family="Inter,system-ui,sans-serif" font-size="22" fill="#a1a1aa">The memory layer for software</text>
-  <text x="156" y="186" font-family="Inter,system-ui,sans-serif" font-size="16" fill="#71717a">One command ’ structured intelligence for humans &amp; AI agents</text>
+  <text x="156" y="186" font-family="Inter,system-ui,sans-serif" font-size="16" fill="#71717a">One command ï¿½ structured intelligence for humans &amp; AI agents</text>
 
   <!-- Center: animated terminal -->
   <g transform="translate(64,220)">
@@ -57,7 +57,7 @@
     <circle cx="22" cy="22" r="5" fill="#ef4444"/><circle cx="40" cy="22" r="5" fill="#f59e0b"/><circle cx="58" cy="22" r="5" fill="#22c55e"/>
     <text x="20" y="52" font-family="ui-monospace,monospace" font-size="13" fill="#71717a">$ npx mnemos .</text>
     <rect x="20" y="62" height="14" rx="2" fill="#6366f1" opacity=".3" class="t1"/>
-    <text x="20" y="74" font-family="ui-monospace,monospace" font-size="12" fill="#22c55e"> DNA · 49 domains · 80% bench accuracy</text>
+    <text x="20" y="74" font-family="ui-monospace,monospace" font-size="12" fill="#22c55e"> DNA ï¿½ 49 domains ï¿½ 80% bench accuracy</text>
     <rect x="20" y="84" height="12" rx="2" fill="#818cf8" opacity=".25" class="t2"/>
     <line class="scan-line" x1="20" y1="40" x2="400" y2="40" stroke="url(#accent)" stroke-width="1" opacity=".4"/>
     <rect x="210" y="58" width="2" height="16" fill="#c8f542" class="cursor"/>
@@ -66,7 +66,7 @@
   <!-- Right: animated results bars -->
   <g transform="translate(520,220)">
     <rect width="616" height="112" rx="14" fill="rgba(255,255,255,.03)" stroke="rgba(255,255,255,.08)"/>
-    <text x="24" y="36" font-family="Inter,system-ui,sans-serif" font-size="11" fill="#71717a" font-weight="600" letter-spacing=".08em">BENCHMARK · EXPRESS</text>
+    <text x="24" y="36" font-family="Inter,system-ui,sans-serif" font-size="11" fill="#71717a" font-weight="600" letter-spacing=".08em">BENCHMARK ï¿½ EXPRESS</text>
     <text x="24" y="58" font-family="Inter,system-ui,sans-serif" font-size="13" fill="#fafafa">Task accuracy</text>
     <rect x="160" y="46" width="280" height="18" rx="4" fill="url(#accent)" class="bar-mnemos"/>
     <text x="450" y="60" font-family="Inter,system-ui,sans-serif" font-size="14" fill="#c8f542" font-weight="700">80%</text>
@@ -81,5 +81,5 @@
   <rect x="196" y="28" width="100" height="28" rx="14" fill="rgba(200,245,66,.1)" stroke="rgba(200,245,66,.25)"/>
   <text x="216" y="47" font-family="Inter,system-ui,sans-serif" font-size="12" fill="#c8f542" font-weight="600">AI-ready</text>
   <rect x="308" y="28" width="130" height="28" rx="14" fill="rgba(139,92,246,.12)" stroke="rgba(139,92,246,.25)"/>
-  <text x="328" y="47" font-family="Inter,system-ui,sans-serif" font-size="12" fill="#a78bfa" font-weight="600">29× compression</text>
+  <text x="328" y="47" font-family="Inter,system-ui,sans-serif" font-size="12" fill="#a78bfa" font-weight="600">29ï¿½ compression</text>
 </svg>

@@ -36,7 +36,7 @@ export function MnemosBanner({ className = '' }: { className?: string }) {
   return (
     <div className={`mnemos-banner-wrap ${className}`}>
       <img
-        src="/banner.svg"
+        src="/banner.png"
         alt="Mnemos — The memory layer for software"
         className="mnemos-banner-img"
         draggable={false}

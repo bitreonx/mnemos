@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { askCopilot } from '../lib/workspace';
 
 interface WorkspaceCopilotProps {
@@ -6,6 +6,8 @@ interface WorkspaceCopilotProps {
   repoName: string;
   suggestedPrompts?: string[];
   onAskAbout?: (topic: string) => void;
+  seedQuestion?: string | null;
+  onSeedHandled?: () => void;
 }
 
 interface ChatMessage {
@@ -22,18 +24,25 @@ const DEFAULT_PROMPTS = [
   'Summarize the tech stack and architecture layers',
 ];
 
-export function WorkspaceCopilot({ repoId, repoName, suggestedPrompts = [], onAskAbout }: WorkspaceCopilotProps) {
+export function WorkspaceCopilot({
+  repoId,
+  repoName,
+  suggestedPrompts = [],
+  onAskAbout,
+  seedQuestion,
+  onSeedHandled,
+}: WorkspaceCopilotProps) {
   const prompts = suggestedPrompts.length > 0 ? suggestedPrompts : DEFAULT_PROMPTS;
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: 'assistant',
-      content: `I'm connected to **${repoName}** via Mnemos memory. Ask about auth, flows, domains, impact analysis, or any system — I use the built graph, not raw file grep.`,
+      content: `Connected to ${repoName} via Mnemos memory. Ask about auth, flows, domains, impact, or routing — graph-aware, not raw grep.`,
     },
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const submit = async (question: string) => {
+  const submit = useCallback(async (question: string) => {
     const q = question.trim();
     if (!q || loading) return;
     setMessages((m) => [...m, { role: 'user', content: q }]);
@@ -51,11 +60,21 @@ export function WorkspaceCopilot({ repoId, repoName, suggestedPrompts = [], onAs
         },
       ]);
     } catch (err) {
-      setMessages((m) => [...m, { role: 'assistant', content: `Error: ${err instanceof Error ? err.message : 'Ask failed'}` }]);
+      setMessages((m) => [
+        ...m,
+        { role: 'assistant', content: `Error: ${err instanceof Error ? err.message : 'Ask failed'}` },
+      ]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [repoId, loading, onAskAbout]);
+
+  useEffect(() => {
+    if (seedQuestion) {
+      submit(seedQuestion);
+      onSeedHandled?.();
+    }
+  }, [seedQuestion, submit, onSeedHandled]);
 
   return (
     <div className="workspace-copilot">

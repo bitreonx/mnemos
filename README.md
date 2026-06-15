@@ -1,11 +1,7 @@
 # Mnemos
 
 <p align="center">
-  <img src="packages/ui/public/banner.svg" alt="Mnemos — The memory layer for software" width="100%" />
-</p>
-
-<p align="center">
-  <img src="packages/ui/public/logo.svg" alt="Mnemos logo" height="40" />
+  <img src="images/mnemos_github_banner_final.png" alt="Mnemos — The memory layer for software" width="100%" />
 </p>
 
 > **The memory layer for software.** One command turns any repository into structured intelligence that humans and AI agents understand instantly.
@@ -151,7 +147,7 @@ npm run bench:regression
 | `mnemos serve [path]` | Memory server for agents (`:4000`) |
 | `mnemos snapshot [path]` | Animated SVG cards (terminal, results, architecture) |
 | `mnemos setup [path]` | Install Cursor rules + AGENTS.md for AI |
-| `mnemos ui` | Launch interactive dashboard with graph & terminal |
+| `mnemos ui` | Launch interactive **developer cockpit** — repos, architecture, flows, terminal, AI inspector |
 
 ---
 
@@ -166,6 +162,19 @@ npx mnemos .
 ```
 
 Monorepo: `@mnemos/core` · `@mnemos/cli` · `@mnemos/ui`
+
+### Dashboard (`mnemos ui`)
+
+The UI is a full **repository intelligence cockpit** — not a static report viewer.
+
+| View | What it shows |
+|------|----------------|
+| **Platform overview** | All repos, aggregate health, AI readiness, quick actions |
+| **Repo workspace** | Overview, architecture, flows, code map, history, AI context |
+| **AI Inspector** | Auth summaries, routes, architecture excerpts, start-here tasks |
+| **Terminal panel** | Embedded `mnemos` CLI (`build`, `ask`, `flows`, `impact`) |
+
+See [packages/ui/README.md](./packages/ui/README.md) for layout, shortcuts, and agent workflows.
 
 ## License
 

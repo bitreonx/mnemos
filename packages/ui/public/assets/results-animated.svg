@@ -26,7 +26,7 @@
   <rect x="1" y="1" width="638" height="358" rx="19" stroke="#e8e8ed" stroke-width="2"/>
   <text x="32" y="48" font-family="Inter,system-ui,sans-serif" font-size="11" fill="#6366f1" font-weight="700" letter-spacing=".1em">VERIFIED BENCHMARK</text>
   <text x="32" y="80" font-family="Inter,system-ui,sans-serif" font-size="28" font-weight="800" fill="#111827" letter-spacing="-.03em">Mnemos vs alternatives</text>
-  <text x="32" y="108" font-family="Inter,system-ui,sans-serif" font-size="14" fill="#6b7280">expressjs/express · measured on real repos</text>
+  <text x="32" y="108" font-family="Inter,system-ui,sans-serif" font-size="14" fill="#6b7280">expressjs/express ï¿½ measured on real repos</text>
 
   <!-- Task accuracy -->
   <g class="card c1" transform="translate(32,132)">
@@ -37,7 +37,7 @@
     <text x="140" y="28" font-family="Inter,sans-serif" font-size="11" fill="#9ca3af">Mnemos</text>
     <rect x="140" y="40" width="400" height="14" rx="4" fill="#f3f4f6"/>
     <rect class="b-acc-g" x="140" y="40" height="14" rx="4" fill="#d1d5db"/>
-    <text x="160" y="52" font-family="Inter,sans-serif" font-size="11" fill="#9ca3af">Graphify · Gitingest  0%</text>
+    <text x="160" y="52" font-family="Inter,sans-serif" font-size="11" fill="#9ca3af">Graphify ï¿½ Gitingest  0%</text>
   </g>
 
   <!-- Compression -->
@@ -45,10 +45,10 @@
     <text x="0" y="0" font-family="Inter,sans-serif" font-size="13" fill="#374151" font-weight="600">AI context compression</text>
     <rect x="140" y="-12" width="400" height="22" rx="6" fill="#f3f4f6"/>
     <rect class="b-tok-m" x="140" y="-12" height="22" rx="6" fill="url(#mnemos-bar)"/>
-    <text class="val" x="552" y="4" font-family="Inter,sans-serif" font-size="14" fill="#6366f1" font-weight="700">29.9×</text>
+    <text class="val" x="552" y="4" font-family="Inter,sans-serif" font-size="14" fill="#6366f1" font-weight="700">29.9ï¿½</text>
     <rect x="140" y="40" width="400" height="14" rx="4" fill="#f3f4f6"/>
     <rect class="b-tok-g" x="140" y="40" height="14" rx="4" fill="#d1d5db"/>
-    <text x="160" y="52" font-family="Inter,sans-serif" font-size="11" fill="#9ca3af">Gitingest expands context 0.16×</text>
+    <text x="160" y="52" font-family="Inter,sans-serif" font-size="11" fill="#9ca3af">Gitingest expands context 0.16ï¿½</text>
   </g>
 
   <!-- stat pills -->

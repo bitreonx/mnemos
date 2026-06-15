@@ -4,6 +4,8 @@ import { runTerminalCommand } from '../lib/workspace';
 interface IntegratedTerminalProps {
   repoId: string;
   repositoryPath: string;
+  outputFilter?: string;
+  compact?: boolean;
 }
 
 interface TerminalLine {
@@ -11,7 +13,7 @@ interface TerminalLine {
   content: string;
 }
 
-export function IntegratedTerminal({ repoId, repositoryPath }: IntegratedTerminalProps) {
+export function IntegratedTerminal({ repoId, repositoryPath, outputFilter = '', compact = false }: IntegratedTerminalProps) {
   const [lines, setLines] = useState<TerminalLine[]>([
     { type: 'output', content: `Mnemos Terminal · ${repositoryPath}` },
     { type: 'output', content: 'Type "help" for commands · "ask \\"how does auth work?\\"" for copilot' },
@@ -86,21 +88,28 @@ export function IntegratedTerminal({ repoId, repositoryPath }: IntegratedTermina
     }
   };
 
+  const filter = outputFilter.trim().toLowerCase();
+  const visibleLines = filter
+    ? lines.filter((line) => line.content.toLowerCase().includes(filter))
+    : lines;
+
   return (
-    <div className="integrated-terminal">
-      <div className="terminal-header">
-        <div className="terminal-tabs">
-          <div className="terminal-tab active">
-            <span>Mnemos CLI</span>
+    <div className={`integrated-terminal ${compact ? 'integrated-terminal--compact' : ''}`}>
+      {!compact && (
+        <div className="terminal-header">
+          <div className="terminal-tabs">
+            <div className="terminal-tab active">
+              <span>Mnemos CLI</span>
+            </div>
+          </div>
+          <div className="terminal-controls">
+            <button type="button" className="terminal-btn" title="Clear" onClick={() => setLines([])}>⌫</button>
           </div>
         </div>
-        <div className="terminal-controls">
-          <button type="button" className="terminal-btn" title="Clear" onClick={() => setLines([])}>⌫</button>
-        </div>
-      </div>
+      )}
 
       <div className="terminal-body" ref={terminalRef}>
-        {lines.map((line, i) => (
+        {visibleLines.map((line, i) => (
           <div key={i} className={`terminal-line ${line.type}`}>
             {line.content}
           </div>
