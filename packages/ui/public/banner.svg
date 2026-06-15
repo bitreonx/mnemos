@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="360" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0c0c0f"/>
+      <stop offset=".5" stop-color="#141420"/>
+      <stop offset="1" stop-color="#0c0c0f"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#c8f542"/>
+      <stop offset="1" stop-color="#8b5cf6"/>
+    </linearGradient>
+    <radialGradient id="glow1" cx="85%" cy="20%" r="40%">
+      <stop stop-color="#8b5cf6" stop-opacity=".35"/>
+      <stop offset="1" stop-color="#8b5cf6" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow2" cx="15%" cy="80%" r="35%">
+      <stop stop-color="#c8f542" stop-opacity=".25"/>
+      <stop offset="1" stop-color="#c8f542" stop-opacity="0"/>
+    </radialGradient>
+    <style>
+      @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+      @keyframes scan { 0% { transform: translateY(-20px); opacity: 0; } 10%,90% { opacity: .6; } 100% { transform: translateY(200px); opacity: 0; } }
+      @keyframes bar1 { from { width: 0; } to { width: 280px; } }
+      @keyframes bar2 { from { width: 0; } to { width: 18px; } }
+      @keyframes blink { 0%,49% { opacity: 1; } 50%,100% { opacity: 0; } }
+      @keyframes type1 { 0%,5% { width: 0; } 20%,100% { width: 220px; } }
+      @keyframes type2 { 0%,25% { width: 0; } 45%,100% { width: 180px; } }
+      @keyframes type3 { 0%,50% { width: 0; } 70%,100% { width: 140px; } }
+      .logo-mark { animation: float 4s ease-in-out infinite; }
+      .scan-line { animation: scan 3s linear infinite; }
+      .bar-mnemos { animation: bar1 2s ease-out forwards; }
+      .bar-other { animation: bar2 2s ease-out .3s forwards; }
+      .cursor { animation: blink 1s step-end infinite; }
+      .t1 { animation: type1 4s ease-out infinite; }
+      .t2 { animation: type2 4s ease-out infinite; }
+      .t3 { animation: type3 4s ease-out infinite; }
+    </style>
+  </defs>
+  <rect width="1200" height="360" fill="url(#bg)"/>
+  <rect width="1200" height="360" fill="url(#glow1)"/>
+  <rect width="1200" height="360" fill="url(#glow2)"/>
+  <rect x="1" y="1" width="1198" height="358" rx="24" stroke="rgba(255,255,255,.08)" stroke-width="2"/>
+
+  <!-- Left: brand -->
+  <g class="logo-mark" transform="translate(64,72)">
+    <rect width="72" height="72" rx="18" fill="#1c1c1f" stroke="rgba(255,255,255,.1)"/>
+    <path d="M36 16 L54 36 L36 56 L18 36 Z" fill="url(#accent)"/>
+    <circle cx="36" cy="36" r="5" fill="#1c1c1f"/>
+  </g>
+  <text x="156" y="108" font-family="Inter,system-ui,sans-serif" font-size="52" font-weight="800" fill="#fafafa" letter-spacing="-0.04em">Mnemos</text>
+  <text x="156" y="148" font-family="Inter,system-ui,sans-serif" font-size="22" fill="#a1a1aa">The memory layer for software</text>
+  <text x="156" y="186" font-family="Inter,system-ui,sans-serif" font-size="16" fill="#71717a">One command ’ structured intelligence for humans &amp; AI agents</text>
+
+  <!-- Center: animated terminal -->
+  <g transform="translate(64,220)">
+    <rect width="420" height="112" rx="14" fill="#0a0a0b" stroke="rgba(255,255,255,.12)"/>
+    <circle cx="22" cy="22" r="5" fill="#ef4444"/><circle cx="40" cy="22" r="5" fill="#f59e0b"/><circle cx="58" cy="22" r="5" fill="#22c55e"/>
+    <text x="20" y="52" font-family="ui-monospace,monospace" font-size="13" fill="#71717a">$ npx mnemos .</text>
+    <rect x="20" y="62" height="14" rx="2" fill="#6366f1" opacity=".3" class="t1"/>
+    <text x="20" y="74" font-family="ui-monospace,monospace" font-size="12" fill="#22c55e"> DNA · 49 domains · 80% bench accuracy</text>
+    <rect x="20" y="84" height="12" rx="2" fill="#818cf8" opacity=".25" class="t2"/>
+    <line class="scan-line" x1="20" y1="40" x2="400" y2="40" stroke="url(#accent)" stroke-width="1" opacity=".4"/>
+    <rect x="210" y="58" width="2" height="16" fill="#c8f542" class="cursor"/>
+  </g>
+
+  <!-- Right: animated results bars -->
+  <g transform="translate(520,220)">
+    <rect width="616" height="112" rx="14" fill="rgba(255,255,255,.03)" stroke="rgba(255,255,255,.08)"/>
+    <text x="24" y="36" font-family="Inter,system-ui,sans-serif" font-size="11" fill="#71717a" font-weight="600" letter-spacing=".08em">BENCHMARK · EXPRESS</text>
+    <text x="24" y="58" font-family="Inter,system-ui,sans-serif" font-size="13" fill="#fafafa">Task accuracy</text>
+    <rect x="160" y="46" width="280" height="18" rx="4" fill="url(#accent)" class="bar-mnemos"/>
+    <text x="450" y="60" font-family="Inter,system-ui,sans-serif" font-size="14" fill="#c8f542" font-weight="700">80%</text>
+    <text x="24" y="88" font-family="Inter,system-ui,sans-serif" font-size="13" fill="#71717a">Graphify / Gitingest</text>
+    <rect x="160" y="76" width="18" height="18" rx="4" fill="#27272a" class="bar-other"/>
+    <text x="190" y="90" font-family="Inter,system-ui,sans-serif" font-size="14" fill="#71717a">0%</text>
+  </g>
+
+  <!-- Footer pills -->
+  <rect x="64" y="28" width="120" height="28" rx="14" fill="rgba(99,102,241,.15)" stroke="rgba(99,102,241,.3)"/>
+  <text x="84" y="47" font-family="Inter,system-ui,sans-serif" font-size="12" fill="#818cf8" font-weight="600">Local-first</text>
+  <rect x="196" y="28" width="100" height="28" rx="14" fill="rgba(200,245,66,.1)" stroke="rgba(200,245,66,.25)"/>
+  <text x="216" y="47" font-family="Inter,system-ui,sans-serif" font-size="12" fill="#c8f542" font-weight="600">AI-ready</text>
+  <rect x="308" y="28" width="130" height="28" rx="14" fill="rgba(139,92,246,.12)" stroke="rgba(139,92,246,.25)"/>
+  <text x="328" y="47" font-family="Inter,system-ui,sans-serif" font-size="12" fill="#a78bfa" font-weight="600">29× compression</text>
+</svg>

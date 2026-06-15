@@ -1,4 +1,5 @@
 import type { MemoryModel } from '../types';
+import { MnemosLogo } from './illustrations/MnemosLogo';
 
 interface SidebarProps {
   memory: MemoryModel;
@@ -7,10 +8,14 @@ interface SidebarProps {
   selectedDomain: string | null;
   onDomainSelect: (d: string | null) => void;
   healthScore?: number | null;
+  onToggleTerminal?: () => void;
 }
 
 const NAV_ITEMS = [
   { id: 'overview', label: 'Overview', icon: '◉' },
+  { id: 'explorer', label: 'File Explorer', icon: '📁' },
+  { id: 'system-analyzer', label: 'System Analyzer', icon: '🔍' },
+  { id: 'timeline', label: 'Timeline', icon: '⏱️' },
   { id: 'capabilities', label: 'Capabilities', icon: '◇' },
   { id: 'journeys', label: 'Journeys', icon: '⇣' },
   { id: 'heatmap', label: 'Heatmap', icon: '🔥' },
@@ -20,6 +25,7 @@ const NAV_ITEMS = [
   { id: 'graph', label: 'Graph', icon: '✕' },
   { id: 'smells', label: 'Smells', icon: '!' },
   { id: 'companion', label: 'Ask Mnemos', icon: '✦' },
+  { id: 'ai-setup', label: 'AI Setup', icon: '⚡' },
 ];
 
 export function Sidebar({
@@ -29,11 +35,14 @@ export function Sidebar({
   selectedDomain,
   onDomainSelect,
   healthScore,
+  onToggleTerminal,
 }: SidebarProps) {
   return (
     <aside className="sidebar">
       <div className="brand">
-        <div className="brand-mark" />
+        <div className="brand-mark">
+          <MnemosLogo size={28} />
+        </div>
         <div>
           <div className="brand-name">Mnemos</div>
           <div className="brand-sub">Software Intelligence</div>
@@ -78,6 +87,16 @@ export function Sidebar({
       )}
 
       <div className="sidebar-footer">
+        {onToggleTerminal && (
+          <button
+            className="nav-item"
+            onClick={onToggleTerminal}
+            style={{ marginBottom: '12px' }}
+          >
+            <span className="nav-icon">▶︎</span>
+            <span className="nav-label">Toggle Terminal</span>
+          </button>
+        )}
         <div className="meta-row">
           <span>Capabilities</span>
           <b>{memory.capabilities?.length ?? 0}</b>

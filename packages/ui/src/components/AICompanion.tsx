@@ -61,12 +61,14 @@ function hitsToCards(hits: SearchHit[]): ResultCard[] {
 }
 
 const SUGGESTIONS = [
+  'Explain this codebase — where do I start?',
+  'What breaks if I change the most central service?',
   'How does authentication work?',
   'What are the user journeys?',
-  'Show critical paths',
-  'Which services have the most dependencies?',
-  'What are the architecture smells?',
-  'List all capabilities',
+  'Show critical paths and blast radius',
+  'List all business capabilities',
+  'What smells should I fix before shipping?',
+  'I want to vibe-code a feature — which domain?',
 ];
 
 export function AICompanion({ memory }: AICompanionProps) {

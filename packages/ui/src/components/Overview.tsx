@@ -1,4 +1,5 @@
 import type { MemoryModel, HealthScore } from '../types';
+import { MnemosBanner } from './illustrations/VisualShowcase';
 
 
 
@@ -34,6 +35,8 @@ export function Overview({ memory, healthScore = null }: OverviewProps) {
   return (
 
     <div className="p-8 max-w-5xl">
+
+      <MnemosBanner className="overview-hero" />
 
       <div className="mb-8">
 

@@ -37,6 +37,7 @@ export function explainRepository(memory: MemoryModel): ExplainResult {
   const highestRisk = sortedByComplexity[0]?.domain ?? 'Unknown';
   const mostCritical =
     [...memory.domains]
+      .filter((d) => !isAuxiliaryDomainName(d.name))
       .map((d) => {
         const services = memory.services.filter(
           (s) => s.domain === d.id || s.domain === d.name,
@@ -44,7 +45,17 @@ export function explainRepository(memory: MemoryModel): ExplainResult {
         const deps = services.reduce((sum, s) => sum + s.dependencies.length + s.dependents.length, 0);
         return { name: d.name, centrality: deps + d.nodes.length };
       })
-      .sort((a, b) => b.centrality - a.centrality)[0]?.name ?? 'Unknown';
+      .sort((a, b) => b.centrality - a.centrality)[0]?.name ??
+    [...memory.domains]
+      .map((d) => {
+        const services = memory.services.filter(
+          (s) => s.domain === d.id || s.domain === d.name,
+        );
+        const deps = services.reduce((sum, s) => sum + s.dependencies.length + s.dependents.length, 0);
+        return { name: d.name, centrality: deps + d.nodes.length };
+      })
+      .sort((a, b) => b.centrality - a.centrality)[0]?.name ??
+    'Unknown';
 
   const mainCapabilities = capabilities.slice(0, 8).map((c) => c.signature.name);
   const mainUserJourneys = journeys.slice(0, 6).map((j) => j.signature.name);
@@ -127,4 +138,8 @@ export function formatExplainReport(result: ExplainResult, memory: MemoryModel):
   }
 
   return lines.join('\n');
+}
+
+function isAuxiliaryDomainName(name: string): boolean {
+  return /^(test|tests|spec|e2e|examples?|fixtures?|mocks?|stubs?|acceptance|general|packages)$/i.test(name.trim());
 }

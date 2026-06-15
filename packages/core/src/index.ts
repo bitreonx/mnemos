@@ -1,7 +1,7 @@
 export * from './types.js';
 export { scanRepository, inferLanguage, isTestFile, inferRoutePath, inferDomainFromPath, formatDomainName } from './scanner/index.js';
 export { parseFile, parseFiles, parseFilesIncremental, parseContent } from './parser/index.js';
-export { createGraph, addNode, addEdge, getNodesByKind, getNeighbors, bfsPaths, toSerializable, fanIn, fanOut, findCycles, nodeId } from './graph/graph.js';
+export { createGraph, addNode, addEdge, getNodesByKind, getNeighbors, bfsPaths, toSerializable, fromSerializable, fanIn, fanOut, findCycles, nodeId } from './graph/graph.js';
 export type { MnemosGraph } from './graph/graph.js';
 export { buildGraph, buildGraphAsync, resolveNodeQuery } from './graph/builder.js';
 export { loadPathAliases, resolveAliasImport, resolveRelativeImport } from './graph/paths.js';
@@ -52,6 +52,17 @@ export { askCopilot } from './copilot.js';
 export type { CopilotAnswer } from './copilot.js';
 export { computeDomainHeatmap } from './analysis/heatmap.js';
 export type { DomainHeatmapEntry } from './analysis/heatmap.js';
+export {
+  buildAiToolkit,
+  buildAgentsMd,
+  buildCursorRule,
+  buildAiPrompt,
+  buildSuggestedPrompts,
+  buildContextFiles,
+} from './ai-toolkit.js';
+export type { AiToolkit } from './ai-toolkit.js';
+export { writeAiToolkit, installAiIntegrations } from './ai-toolkit-io.js';
+export type { SetupOptions, SetupResult } from './ai-toolkit-io.js';
 export { startMemoryServer } from './serve.js';
 export type { ServeOptions, ServeHandle } from './serve.js';
 export {

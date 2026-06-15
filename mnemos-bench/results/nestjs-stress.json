@@ -1,0 +1,23 @@
+{
+  "repo": "nestjs",
+  "tier": "medium",
+  "measured_at": "2026-06-15T11:32:00.000Z",
+  "stress_test": true,
+  "build": {
+    "files_scanned": 1724,
+    "graph_nodes": 4686,
+    "graph_edges": 18755,
+    "domains": 49,
+    "flows": 37,
+    "capabilities": 12,
+    "duration_ms": 62700,
+    "duration_seconds": 62.7
+  },
+  "output": {
+    "dna_bytes": 9875,
+    "estimated_tokens": 2469,
+    "health_score": 85,
+    "ai_readiness_score": 87
+  },
+  "notes": "Measured on Windows 11, Node v26.3.0, nestjs/nest shallow clone (depth 1)."
+}

@@ -1,0 +1,46 @@
+{
+  "$schema": "mnemos-bench/tasks/v1",
+  "description": "Every tool answers the same six questions. Scoring is objective — keyword coverage against per-repo ground truth.",
+  "tasks": [
+    {
+      "id": "task1_login_start",
+      "question": "Where does login start?",
+      "expected_dimensions": ["route", "controller", "service", "entry", "handler"],
+      "intent": "auth_entry"
+    },
+    {
+      "id": "task2_impact",
+      "question": "What breaks if {impact_target} changes?",
+      "expected_dimensions": ["dependencies", "apis", "flows", "blast", "dependents"],
+      "intent": "impact",
+      "impact_target_field": "impact_target"
+    },
+    {
+      "id": "task3_explain",
+      "question": "Explain the repository in under 300 words.",
+      "expected_dimensions": ["architecture", "capabilities", "framework", "layers", "modules"],
+      "intent": "overview",
+      "max_words": 300
+    },
+    {
+      "id": "task4_critical",
+      "question": "Find the most critical subsystem.",
+      "expected_dimensions": ["centrality", "critical", "domain", "core", "hub"],
+      "intent": "critical"
+    },
+    {
+      "id": "task5_capabilities",
+      "question": "List business capabilities.",
+      "expected_dimensions": ["capability", "authentication", "payments", "notifications"],
+      "reject_folder_names": true,
+      "intent": "list_capabilities"
+    },
+    {
+      "id": "task6_context",
+      "question": "Generate AI context package.",
+      "expected_dimensions": ["dna", "context", "agent", "architecture"],
+      "intent": "context_export",
+      "measures": ["size_bytes", "coverage_files", "token_count"]
+    }
+  ]
+}

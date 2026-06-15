@@ -1,0 +1,36 @@
+{
+  "$schema": "mnemos-bench/repos/v1",
+  "description": "Verified open-source repositories for Mnemos benchmarking. All repos are cloned locally — never simulated.",
+  "repos": [
+    {
+      "id": "express",
+      "tier": "small",
+      "url": "https://github.com/expressjs/express",
+      "description": "Minimal Node.js HTTP framework — industry standard small repo",
+      "clone": "git clone --depth 1 https://github.com/expressjs/express.git repos/express"
+    },
+    {
+      "id": "nestjs",
+      "tier": "medium",
+      "url": "https://github.com/nestjs/nest",
+      "description": "Enterprise TypeScript framework with auth, DI, modules",
+      "clone": "git clone --depth 1 https://github.com/nestjs/nest.git repos/nestjs"
+    },
+    {
+      "id": "nextjs",
+      "tier": "large",
+      "url": "https://github.com/vercel/next.js",
+      "description": "React meta-framework — stress test for scale",
+      "clone": "git clone --depth 1 --filter=blob:none https://github.com/vercel/next.js.git repos/nextjs"
+    },
+    {
+      "id": "vscode",
+      "tier": "huge",
+      "url": "https://github.com/microsoft/vscode",
+      "description": "VS Code editor — maximum scale stress test",
+      "clone": "git clone --depth 1 --filter=blob:none https://github.com/microsoft/vscode.git repos/vscode",
+      "optional": true,
+      "note": "Clone is large (~1GB+). Run stress test separately."
+    }
+  ]
+}

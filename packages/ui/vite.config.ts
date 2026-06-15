@@ -4,6 +4,7 @@ import tailwindcss from '@tailwindcss/vite';
 import path from 'node:path';
 import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
+import { workspacePlugin, resolveCliPath, resolveWorkspaceFile } from './vite.workspace';
 
 function mnemosStaticPlugin(): Plugin {
   const mnemosRoot = process.env.MNEMOS_ROOT ?? process.cwd();
@@ -13,6 +14,7 @@ function mnemosStaticPlugin(): Plugin {
     configureServer(server) {
       server.middlewares.use(async (req, res, next) => {
         if (!req.url?.startsWith('/.mnemos/')) return next();
+        if (req.url.match(/^\/\.mnemos\/[^/]+\//)) return next();
 
         const filePath = path.join(mnemosRoot, req.url);
         if (!existsSync(filePath)) {
@@ -35,12 +37,18 @@ function mnemosStaticPlugin(): Plugin {
   };
 }
 
+const workspaceFile = resolveWorkspaceFile();
+const plugins: Plugin[] = [react(), tailwindcss(), mnemosStaticPlugin()];
+if (workspaceFile) {
+  plugins.push(workspacePlugin(workspaceFile, resolveCliPath()));
+}
+
 export default defineConfig({
-  plugins: [react(), tailwindcss(), mnemosStaticPlugin()],
+  plugins,
   server: {
     port: 5173,
     fs: {
-      allow: ['..', '../..', '../../..', '../../../..'],
+      allow: ['..', '../..', '../../..', '../../../..', 'D:/Dabt', 'D:/Mnemos'],
     },
   },
   resolve: {

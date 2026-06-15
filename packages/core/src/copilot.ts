@@ -4,6 +4,10 @@ import { explainRepository } from './explain.js';
 
 import { computeDomainHeatmap } from './analysis/heatmap.js';
 
+import { analyzeImpact, formatImpactReport } from './analysis/impact.js';
+
+import type { MnemosGraph } from './graph/graph.js';
+
 import {
 
   buildSearchIndex,
@@ -19,6 +23,14 @@ import {
   type CopilotIntent,
 
 } from './search/index.js';
+
+
+
+export interface CopilotOptions {
+
+  graph?: MnemosGraph;
+
+}
 
 
 
@@ -42,7 +54,7 @@ export interface CopilotAnswer {
 
 
 
-export function askCopilot(memory: MemoryModel, question: string): CopilotAnswer {
+export function askCopilot(memory: MemoryModel, question: string, options: CopilotOptions = {}): CopilotAnswer {
 
   const index = buildSearchIndex(memory);
 
@@ -63,6 +75,16 @@ export function askCopilot(memory: MemoryModel, question: string): CopilotAnswer
   const baseHits = searchResult.hits;
 
   const relatedTopics = baseHits.slice(0, 5).map((h) => h.title);
+
+
+
+  const impactTarget = extractImpactTarget(question) ?? classification.target;
+
+  if (/what breaks|what happens if|impact of|blast radius|affected by/i.test(question)) {
+
+    return answerImpactQuestion(memory, question, impactTarget, baseHits, options.graph);
+
+  }
 
 
 
@@ -104,6 +126,10 @@ export function askCopilot(memory: MemoryModel, question: string): CopilotAnswer
 
     case 'auth':
 
+      if (/where.*(login|sign-?in).*start|where.*(login|sign-?in)/i.test(question)) {
+        return answerLoginStartQuestion(memory, question, baseHits);
+      }
+
       return answerThemedQuestion(memory, question, capabilities, /auth|identity|login|sign.?in/i, 'Authentication', baseHits);
 
 
@@ -118,7 +144,7 @@ export function askCopilot(memory: MemoryModel, question: string): CopilotAnswer
 
     case 'dependency':
 
-      return answerDependencyQuestion(memory, question, classification.target, baseHits);
+      return answerImpactQuestion(memory, question, impactTarget, baseHits, options.graph);
 
 
 
@@ -282,7 +308,7 @@ function answerThemedQuestion(
 
 
 
-  if (cap) {
+  if (cap && cap.confidence >= 0.25) {
 
     return {
 
@@ -356,6 +382,212 @@ function answerThemedQuestion(
 
 
 
+function answerLoginStartQuestion(
+  memory: MemoryModel,
+  question: string,
+  hits: SearchHit[],
+): CopilotAnswer {
+  const loginApis = memory.apis.filter((a) => /login|sign-?in|auth/i.test(a.path));
+  const loginFlows = memory.flows.filter((f) => /login|sign-?in|auth/i.test(f.name + f.description + (f.entryPoint ?? '')));
+  const loginHits = hits.filter((h) => /login|sign-?in|auth/i.test(h.title + (h.path ?? '') + h.snippet));
+
+  if (loginApis.length > 0) {
+    const entry = loginApis[0]!;
+    return {
+      question,
+      answer: `Login starts at route **${entry.method} ${entry.path}** in \`${entry.file}\`${entry.handler ? ` (handler: ${entry.handler})` : ''}.`,
+      confidence: 0.9,
+      sources: ['apis.json', 'flows.json'],
+      relatedTopics: loginApis.slice(1, 4).map((a) => `${a.method} ${a.path}`),
+      intent: 'auth',
+      hits: loginHits,
+    };
+  }
+
+  if (loginFlows.length > 0) {
+    const prodFlows = loginFlows.filter((f) => !isAuxiliaryPath(f.entryPoint));
+    const flow = prodFlows[0];
+    if (flow) {
+      return {
+        question,
+        answer: `Login flow **${flow.name}** starts at **${flow.entryPoint}**.\n${flow.description}`,
+        confidence: flow.confidence,
+        sources: ['flows.json'],
+        relatedTopics: prodFlows.slice(1, 3).map((f) => f.name),
+        intent: 'auth',
+        hits: loginHits,
+      };
+    }
+  }
+
+  const exampleHit = loginHits.find((h) => /examples?[/\\]auth|\/login/i.test((h.path ?? '') + h.snippet));
+  const authEvidence = (memory.capabilities ?? [])
+    .flatMap((c) => c.evidence)
+    .find((e) => /examples?[/\\]auth/i.test(e));
+  const depAuthPath = memory.dependencies
+    .flatMap((d) => [d.from, d.to])
+    .find((p) => /examples?[/\\]auth/i.test(p));
+  const exampleFile = memory.services
+    .map((s) => s.path)
+    .concat(memory.domains.flatMap((d) => d.entryPoints))
+    .concat(memory.dependencies.flatMap((d) => [d.from, d.to]))
+    .find((p) => p && /examples?[/\\]auth/i.test(p)) ?? authEvidence?.replace(/^file:/, '') ?? depAuthPath;
+
+  if (exampleHit || exampleFile) {
+    const pathHint = exampleHit?.path ?? exampleFile ?? 'examples/auth';
+    return {
+      question,
+      answer: exampleHit
+        ? `No production login in core framework. Example login starts at **${exampleHit.title}** — ${exampleHit.snippet}\nPath: \`${exampleHit.path ?? pathHint}\``
+        : `No production login in core framework. Example implementation: \`${pathHint}\` (see GET/POST /login routes).`,
+      confidence: 0.78,
+      sources: ['search-index.json', 'apis.json'],
+      relatedTopics: loginHits.slice(1, 4).map((h) => h.title),
+      intent: 'auth',
+      hits: loginHits,
+    };
+  }
+
+  const authCap = (memory.capabilities ?? []).find((c) => c.signature.id === 'authentication' && c.confidence >= 0.25);
+  if (authCap) {
+    return {
+      question,
+      answer: `Authentication capability detected but no explicit login route mapped. Check: ${authCap.evidence.slice(0, 3).join(', ')}`,
+      confidence: authCap.confidence,
+      sources: ['capabilities.json'],
+      relatedTopics: authCap.services.slice(0, 3),
+      intent: 'auth',
+      hits: loginHits,
+    };
+  }
+
+  return {
+    question,
+    answer: `No login entry point detected in ${memory.repository}. This may be a library/framework without built-in authentication, or login lives outside scanned paths.`,
+    confidence: 0.55,
+    sources: ['apis.json', 'flows.json', 'capabilities.json'],
+    relatedTopics: memory.domains.slice(0, 3).map((d) => d.name),
+    intent: 'auth',
+    hits: loginHits,
+  };
+}
+
+
+
+function answerImpactQuestion(
+  memory: MemoryModel,
+  question: string,
+  target: string | undefined,
+  hits: SearchHit[],
+  graph?: MnemosGraph,
+): CopilotAnswer {
+  const query = target ?? extractImpactTarget(question) ?? question;
+  const qLower = query.toLowerCase();
+
+  const service = findBestMatch(
+    memory.services,
+    query,
+    [
+      (s, terms) => (terms.some((t) => s.name.toLowerCase() === t) ? 5 : 0),
+      (s, terms) => (terms.some((t) => s.name.toLowerCase().includes(t)) ? 3 : 0),
+      (s, terms) => (terms.some((t) => s.path.toLowerCase().includes(t)) ? 2 : 0),
+    ],
+  );
+
+  if (graph) {
+    const impact = analyzeImpact(graph, query);
+    if (impact && impact.totalAffected > 0) {
+      const report = formatImpactReport(impact, graph);
+      const nodeName = graph.getNodeAttributes(impact.node).name;
+      return {
+        question,
+        answer: `Changing **${nodeName}** affects **${impact.totalAffected}** nodes.\n\n**Dependencies / blast radius:**\n• APIs affected: ${impact.affectedApis.length}\n• Files affected: ${impact.affectedFiles.length}\n• Domains affected: ${impact.affectedDomains.length}\n• Tests affected: ${impact.affectedTests.length}\n\n${impact.affectedFiles.slice(0, 8).map((f) => `• ${f}`).join('\n')}`,
+        confidence: 0.92,
+        sources: ['dependencies.json', 'graph.json', 'critical_paths.json'],
+        relatedTopics: impact.affectedApis.slice(0, 4),
+        intent: 'impact',
+        hits,
+      };
+    }
+  }
+
+  if (service) {
+    const depEntries = memory.dependencies.filter(
+      (d) => d.from.includes(service.name) || d.to.includes(service.name) || d.from.includes(service.path) || d.to.includes(service.path),
+    );
+    const relatedFlows = memory.flows.filter((f) =>
+      f.steps.some((s) => s.path?.includes(service.path) || s.name.toLowerCase().includes(qLower)),
+    );
+    const relatedApis = memory.apis.filter((a) => a.file.includes(service.path) || a.handler?.includes(service.name));
+
+    return {
+      question,
+      answer: `**Blast radius for ${service.name}:**\n\n**Dependents (${service.dependents.length}):** ${service.dependents.slice(0, 8).join(', ') || 'none'}\n**Dependencies (${service.dependencies.length}):** ${service.dependencies.slice(0, 8).join(', ') || 'none'}\n**APIs affected:** ${relatedApis.length ? relatedApis.slice(0, 5).map((a) => `${a.method} ${a.path}`).join(', ') : 'none mapped'}\n**Flows affected:** ${relatedFlows.length ? relatedFlows.slice(0, 3).map((f) => f.name).join(', ') : 'none mapped'}`,
+      confidence: 0.88,
+      sources: ['services.json', 'dependencies.json', 'flows.json'],
+      relatedTopics: service.dependents.slice(0, 4),
+      intent: 'impact',
+      hits,
+    };
+  }
+
+  const criticalMatch = memory.criticalPaths.find((c) =>
+    qLower.split(/\s+/).some((t) => t.length > 2 && c.name.toLowerCase().includes(t)),
+  );
+
+  if (criticalMatch) {
+    return {
+      question,
+      answer: `**${criticalMatch.name}** — ${criticalMatch.description}\nRisk: **${criticalMatch.risk}**\nAffected nodes in path: ${criticalMatch.nodes.slice(0, 8).join(', ')}`,
+      confidence: 0.84,
+      sources: ['critical_paths.json'],
+      relatedTopics: memory.criticalPaths.slice(0, 3).map((c) => c.name),
+      intent: 'impact',
+      hits,
+    };
+  }
+
+  const depHits = memory.dependencies.filter(
+    (d) => qLower.split(/\s+/).some((t) => t.length > 2 && (d.from.toLowerCase().includes(t) || d.to.toLowerCase().includes(t))),
+  );
+
+  if (depHits.length > 0) {
+    const unique = [...new Set(depHits.flatMap((d) => [d.from, d.to]))];
+    return {
+      question,
+      answer: `**Dependency blast radius** for "${query}":\n${depHits.slice(0, 10).map((d) => `• ${d.from} → ${d.to} (${d.kind})`).join('\n')}\n\n**Total connected nodes:** ${unique.length}`,
+      confidence: 0.8,
+      sources: ['dependencies.json'],
+      relatedTopics: unique.slice(0, 4),
+      intent: 'impact',
+      hits,
+    };
+  }
+
+  return answerFromSearch(memory, question, explainRepository(memory), hits, classifyIntent(question));
+}
+
+function extractImpactTarget(question: string): string | undefined {
+  const patterns = [
+    /what breaks if\s+(?:the\s+)?(.+?)\s+changes?/i,
+    /what happens if\s+(?:the\s+)?(.+?)\s+changes?/i,
+    /impact of\s+(?:changing\s+)?(.+?)(?:\s+changes?)?[?.!]*$/i,
+    /blast radius of\s+(.+?)[?.!]*$/i,
+  ];
+  for (const pattern of patterns) {
+    const match = question.match(pattern);
+    if (match?.[1]) return match[1].trim();
+  }
+  return undefined;
+}
+
+function isAuxiliaryPath(filePath?: string): boolean {
+  if (!filePath) return false;
+  return /(?:^|\/)(?:test|tests|__tests__|spec|e2e|examples?)(?:\/|$)/i.test(filePath.replace(/\\/g, '/'));
+}
+
+
+
 function answerDependencyQuestion(
 
   memory: MemoryModel,
@@ -379,33 +611,24 @@ function answerDependencyQuestion(
 
 
   if (domainMatch) {
-
     const services = memory.services.filter(
-
       (s) => s.domain === domainMatch.id || s.domain === domainMatch.name,
-
     );
-
     const dependents = [...new Set(services.flatMap((s) => s.dependents))];
+    const apis = memory.apis.filter((a) => a.domain === domainMatch.name);
+    const depCount = memory.dependencies.filter(
+      (d) => d.from.includes(domainMatch.name) || d.to.includes(domainMatch.name),
+    ).length;
 
     return {
-
       question,
-
-      answer: `**${domainMatch.name}** has ${services.length} services and ${memory.apis.filter((a) => a.domain === domainMatch.name).length} APIs.\nDependents: ${dependents.slice(0, 10).join(', ') || 'none detected'}`,
-
-      confidence: 0.82,
-
-      sources: ['services.json', 'dependencies.json'],
-
+      answer: `Changing **${domainMatch.name}** affects ${services.length} services, ${apis.length} APIs, and ${dependents.length} dependent modules.\nDependents: ${dependents.slice(0, 10).join(', ') || 'none detected'}\n${depCount} dependency edges reference this domain in dependencies.json`,
+      confidence: 0.84,
+      sources: ['services.json', 'dependencies.json', 'apis.json'],
       relatedTopics: services.slice(0, 4).map((s) => s.name),
-
       intent: 'dependency',
-
       hits,
-
     };
-
   }
 
 
@@ -429,25 +652,40 @@ function answerDependencyQuestion(
 
 
   if (service) {
+    const depEdges = memory.dependencies.filter(
+      (d) => d.from.includes(service.path) || d.to.includes(service.path) || d.from.includes(service.name),
+    );
+    const reverseDeps = memory.dependencies.filter((d) => d.to.includes(service.path) || d.to.includes(service.name));
+    const affectedApis = memory.apis.filter(
+      (a) => service.dependents.some((d) => a.handler?.includes(d) || a.file.includes(d)),
+    );
+    const affectedFlows = memory.flows.filter((f) =>
+      f.steps.some((s) => s.path?.includes(service.path) || service.dependents.some((d) => s.name.includes(d))),
+    );
+
+    const blastParts = [
+      `**${service.name}** is depended on by **${service.dependents.length}** service${service.dependents.length === 1 ? '' : 's'}.`,
+      service.dependents.length > 0
+        ? `Direct dependents: ${service.dependents.slice(0, 8).join(', ')}`
+        : 'No direct service dependents detected.',
+      service.dependencies.length > 0
+        ? `It depends on: ${service.dependencies.slice(0, 6).join(', ')}`
+        : null,
+      depEdges.length > 0 ? `${depEdges.length} dependency edge${depEdges.length === 1 ? '' : 's'} in dependencies.json` : null,
+      reverseDeps.length > 0 ? `${reverseDeps.length} module${reverseDeps.length === 1 ? '' : 's'} import this code` : null,
+      affectedApis.length > 0 ? `APIs that may break: ${affectedApis.slice(0, 4).map((a) => `${a.method} ${a.path}`).join(', ')}` : null,
+      affectedFlows.length > 0 ? `Flows affected: ${affectedFlows.slice(0, 3).map((f) => f.name).join(', ')}` : null,
+    ].filter(Boolean);
 
     return {
-
       question,
-
-      answer: `**${service.name}** has ${service.dependents.length} dependents and ${service.dependencies.length} dependencies.\nDependents: ${service.dependents.slice(0, 8).join(', ') || 'none'}\nDependencies: ${service.dependencies.slice(0, 8).join(', ') || 'none'}`,
-
-      confidence: 0.85,
-
-      sources: ['services.json', 'dependencies.json'],
-
+      answer: blastParts.join('\n'),
+      confidence: 0.88,
+      sources: ['services.json', 'dependencies.json', 'apis.json', 'flows.json'],
       relatedTopics: service.dependents.slice(0, 4),
-
       intent: 'impact',
-
       hits,
-
     };
-
   }
 
 
@@ -480,7 +718,7 @@ function answerCriticalQuestion(
 
     memory.domains.find((d) => target && d.name.toLowerCase().includes(target)) ??
 
-    memory.domains.find((d) => q.includes(d.name.toLowerCase()));
+    memory.domains.find((d) => q.includes(d.name.toLowerCase()) && !/^(test|tests|examples?|acceptance)$/i.test(d.name));
 
 
 
@@ -520,7 +758,7 @@ function answerCriticalQuestion(
 
     question,
 
-    answer: `**${domainName}** is architecturally central. ${heat ? `Risk score: ${heat.riskScore}/100. Issues: ${heat.problems.join(', ') || 'stable'}.` : ''} ${domainMatch?.description ?? ''}`,
+    answer: `**${domainName}** is the most critical subsystem (centrality-based analysis). ${heat ? `Risk score: ${heat.riskScore}/100. Issues: ${heat.problems.join(', ') || 'stable'}.` : ''} ${domainMatch?.description ?? ''}`,
 
     confidence: 0.85,
 

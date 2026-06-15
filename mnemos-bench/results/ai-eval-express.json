@@ -1,0 +1,223 @@
+{
+  "$schema": "mnemos-bench/ai-eval/v1",
+  "repo": "express",
+  "generated_at": "2026-06-15T13:07:13.716Z",
+  "purpose": "Evaluate AI models: give model the Mnemos context package, then ask tasks. Score against ground_truth keywords.",
+  "protocol": {
+    "step1": "Provide model with project.dna.json + agent_context.json only (no raw repo)",
+    "step2": "Ask each task question verbatim",
+    "step3": "Score response with mnemos-bench/scorer/run.mjs keyword scorer",
+    "step4": "Compare model score vs mnemos baseline in this file"
+  },
+  "context_for_ai": {
+    "dna_path": ".mnemos/project.dna.json",
+    "agent_path": ".mnemos/agent_context.json",
+    "repository": "express",
+    "one_liner": "express (single package) centered on http framework & middleware.",
+    "token_estimate": 566
+  },
+  "tasks": [
+    {
+      "id": "task1_login_start",
+      "question": "Where does login start?",
+      "intent": "auth_entry",
+      "expected_dimensions": [
+        "route",
+        "controller",
+        "service",
+        "entry",
+        "handler"
+      ]
+    },
+    {
+      "id": "task2_impact",
+      "question": "What breaks if application changes?",
+      "intent": "impact",
+      "expected_dimensions": [
+        "dependencies",
+        "apis",
+        "flows",
+        "blast",
+        "dependents"
+      ]
+    },
+    {
+      "id": "task3_explain",
+      "question": "Explain the repository in under 300 words.",
+      "intent": "overview",
+      "expected_dimensions": [
+        "architecture",
+        "capabilities",
+        "framework",
+        "layers",
+        "modules"
+      ]
+    },
+    {
+      "id": "task4_critical",
+      "question": "Find the most critical subsystem.",
+      "intent": "critical",
+      "expected_dimensions": [
+        "centrality",
+        "critical",
+        "domain",
+        "core",
+        "hub"
+      ]
+    },
+    {
+      "id": "task5_capabilities",
+      "question": "List business capabilities.",
+      "intent": "list_capabilities",
+      "expected_dimensions": [
+        "capability",
+        "authentication",
+        "payments",
+        "notifications"
+      ]
+    },
+    {
+      "id": "task6_context",
+      "question": "Generate AI context package.",
+      "intent": "context_export",
+      "expected_dimensions": [
+        "dna",
+        "context",
+        "agent",
+        "architecture"
+      ]
+    }
+  ],
+  "ground_truth": {
+    "task1_login_start": {
+      "has_production_login": false,
+      "example_entry": "examples/auth/index.js",
+      "example_route": "GET/POST /login",
+      "required_keywords": [
+        "login",
+        "route",
+        "examples/auth"
+      ],
+      "acceptable_answers": [
+        "no production login",
+        "examples/auth",
+        "/login"
+      ]
+    },
+    "task2_impact": {
+      "required_keywords": [
+        "application",
+        "request",
+        "response",
+        "depend",
+        "dependents",
+        "blast"
+      ],
+      "critical_files": [
+        "lib/application.js"
+      ]
+    },
+    "task3_explain": {
+      "required_keywords": [
+        "http",
+        "middleware",
+        "routing",
+        "framework",
+        "express",
+        "javascript"
+      ],
+      "forbidden_keywords": [
+        "school",
+        "attendance",
+        "bus"
+      ]
+    },
+    "task4_critical": {
+      "required_keywords": [
+        "lib",
+        "application",
+        "core",
+        "general"
+      ],
+      "forbidden_domains": [
+        "test",
+        "tests",
+        "mvc"
+      ]
+    },
+    "task5_capabilities": {
+      "required_any": [
+        "http framework",
+        "middleware",
+        "routing",
+        "request",
+        "response"
+      ],
+      "forbidden_any": [
+        "school administration",
+        "attendance",
+        "transport & routing"
+      ]
+    }
+  },
+  "mnemos_baseline": [
+    {
+      "task": "task1_login_start",
+      "tool": "mnemos",
+      "ok": true,
+      "answer": "Confidence: 78%\n\nNo production login in core framework. Example implementation: `examples/auth/index.js` (see GET/POST /login routes).",
+      "latency_ms": 0
+    },
+    {
+      "task": "task2_impact",
+      "tool": "mnemos",
+      "ok": true,
+      "answer": "Confidence: 92%\n\nChanging **lib/application.js** affects **6** nodes.\n\n**Dependencies / blast radius:**\n• APIs affected: 0\n• Files affected: 6\n• Domains affected: 0\n• Tests affected: 0\n\n• index.js\n• lib/view.js\n• lib/utils.js\n• lib/express.js\n• lib/request.js\n• lib/response.js",
+      "latency_ms": 0
+    },
+    {
+      "task": "task3_explain",
+      "tool": "mnemos",
+      "ok": true,
+      "answer": "This repository is single package with 141 source files across javascript.\n\nPrimary Capabilities:\n• HTTP Framework & Middleware\n\nArchitecture Style:\n\nSingle Package\n\nMost Critical Domain:\n\nGeneral\n\nHighest Risk Domain:\n\nGeneral\n\nMain User Journeys:\n\nRepository Health Score\nOverall: 68\nArchitecture: 40\nMaintainability: 100\nComplexity: 54\nDocumentation: 100\nCoupling: 100\nAI Readiness: 59\n\nAI Readiness Recommendations:\n• Assign domain labels to services like test, examples.\n• Extract shared interfaces or introduce dependency inversion to break the cycle\n• Split into focused modules with single responsibilities"
+    },
+    {
+      "task": "task4_critical",
+      "tool": "mnemos",
+      "ok": true,
+      "answer": "Confidence: 85%\n\n**General** is the most critical subsystem (centrality-based analysis). Risk score: 100/100. Issues: 6 circular dependencies, 4 high-severity smells. \n\nRelated: High-traffic: index.js, High-traffic: use, High-traffic: engine",
+      "latency_ms": 0
+    },
+    {
+      "task": "task5_capabilities",
+      "tool": "mnemos",
+      "ok": true,
+      "answer": "Confidence: 90%\n\n1 capabilities:\n• **HTTP Framework & Middleware** — Provides HTTP server, routing pipeline, middleware chain, and request/response handling.\n\nRelated: HTTP Framework & Middleware",
+      "latency_ms": 0
+    },
+    {
+      "task": "task6_context",
+      "tool": "mnemos",
+      "ok": true,
+      "answer": "DNA: D:\\Mnemos\\mnemos-bench\\repos\\express\\.mnemos\\project.dna.json\nAgent: D:\\Mnemos\\mnemos-bench\\repos\\express\\.mnemos\\agent_context.json",
+      "context_files": [
+        "project.dna.json",
+        "agent_context.json",
+        "context/architecture.md"
+      ]
+    }
+  ],
+  "scoring": {
+    "method": "keyword_coverage",
+    "metrics": [
+      "accuracy",
+      "coverage",
+      "latency_ms",
+      "token_count"
+    ],
+    "pass_threshold": {
+      "express": 70,
+      "nestjs": 55
+    }
+  }
+}

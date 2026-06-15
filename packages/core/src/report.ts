@@ -194,7 +194,7 @@ function _computeMemoryScore(memory: MemoryModel): MemoryScore {
 
   const highSmells = memory.smells.filter((s) => s.severity === 'high').length;
   const medSmells = memory.smells.filter((s) => s.severity === 'medium').length;
-  const smellPenalty = highSmells * 8 + medSmells * 3;
+  const smellPenalty = Math.min(60, highSmells * 6 + medSmells * 2);
   const architectureClarity = Math.max(0, Math.min(100, 100 - smellPenalty));
 
   const avgDeps = memory.services.length > 0

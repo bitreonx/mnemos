@@ -3,13 +3,128 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Mnemos - A Software Memory Engine that analyzes and visualizes codebase architecture, domains, dependencies, and health metrics" />
+    <meta name="keywords" content="code analysis, architecture visualization, software memory, codebase intelligence, dependency graph" />
+    <meta name="author" content="Mnemos Team" />
+    
+    <!-- Open Graph / Social Media Meta Tags -->
+    <meta property="og:title" content="Mnemos — Software Memory Engine" />
+    <meta property="og:description" content="Intelligent codebase analysis and visualization platform" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/banner.svg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="/banner.svg" />
+    
     <title>Mnemos — Software Memory Engine</title>
+    
+    <!-- Favicon (Add your own favicon files) -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#1f2937" />
+    
+    <style>
+      /* Prevent flash of unstyled content */
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+          'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        background-color: #1f2937;
+        color: #fff;
+      }
+      
+      #root {
+        min-height: 100vh;
+      }
+      
+      /* Noscript Warning */
+      .noscript-warning {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background: #dc2626;
+        color: white;
+        padding: 1rem;
+        text-align: center;
+        font-family: 'Inter', sans-serif;
+        z-index: 10000;
+      }
+    </style>
   </head>
   <body>
+    <!-- No JavaScript Warning -->
+    <noscript>
+      <div class="noscript-warning">
+        <strong>JavaScript Required:</strong> Mnemos requires JavaScript to be enabled. 
+        Please enable JavaScript in your browser settings to use this application.
+      </div>
+    </noscript>
+    
+    <!-- React Application Root -->
     <div id="root"></div>
+    
+    <!-- Main Application Script -->
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- 
+      Mnemos UI Application
+      =====================
+      
+      This is the main entry point for the Mnemos web interface, a Software Memory Engine
+      that provides intelligent analysis and visualization of codebases.
+      
+      Key Features:
+      - Architecture Visualization: Interactive graph view of system architecture
+      - Domain Analysis: Understand domain boundaries and responsibilities
+      - Dependency Mapping: Visualize dependencies and relationships
+      - Code Health: Track technical debt, smells, and health metrics
+      - AI Copilot: Context-aware assistance for codebase navigation
+      - Heatmap View: Identify hotspots and frequently changed files
+      - Journey Maps: Trace user flows and critical paths through code
+      
+      Technology Stack:
+      - React 19 with TypeScript
+      - Vite for build tooling
+      - Tailwind CSS 4 for styling
+      - XYFlow for graph visualization
+      - Custom Mnemos Core analysis engine
+      
+      Components:
+      - Overview: Dashboard with key metrics and insights
+      - GraphView: Interactive dependency and architecture graphs
+      - DomainsView: Domain-driven design analysis
+      - SmellsView: Code quality and technical debt tracking
+      - HeatmapView: File change frequency visualization
+      - ArchitectureCanvas: Visual system architecture editor
+      - CopilotView: AI-powered code navigation assistant
+      - JourneyMapView: User journey and flow visualization
+      - CapabilitiesView: System capabilities overview
+      
+      Configuration:
+      - Port: 5173 (default Vite dev server)
+      - Build Output: dist/
+      - Source: src/
+      - Mnemos Data: Loaded from /.mnemos/ directory
+      
+      Environment Variables:
+      - MNEMOS_ROOT: Root directory for Mnemos analysis data
+      
+      Development:
+      - npm run dev: Start development server
+      - npm run build: Build for production
+      - npm run preview: Preview production build
+      
+      For more information, visit the Mnemos documentation.
+    -->
   </body>
 </html>

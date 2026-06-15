@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="g" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#c8f542"/>
+      <stop offset="1" stop-color="#8b5cf6"/>
+    </linearGradient>
+    <style>
+      @keyframes pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .75; transform: scale(.94); } }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .core { animation: pulse 2.4s ease-in-out infinite; transform-origin: 32px 32px; }
+      .orbit { animation: spin 8s linear infinite; transform-origin: 32px 32px; }
+    </style>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="#0c0c0f"/>
+  <circle class="orbit" cx="32" cy="32" r="22" stroke="url(#g)" stroke-width="1.5" stroke-dasharray="4 6" opacity=".5"/>
+  <path class="core" d="M32 14 L46 32 L32 50 L18 32 Z" fill="url(#g)"/>
+  <circle cx="32" cy="32" r="4" fill="#0c0c0f"/>
+</svg>

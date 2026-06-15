@@ -119,6 +119,23 @@ export function toSerializable(graph: MnemosGraph): { nodes: GraphNode[]; edges:
   return { nodes, edges };
 }
 
+export function fromSerializable(data: { nodes: GraphNode[]; edges: GraphEdge[] }): MnemosGraph {
+  const graph = createGraph();
+  for (const node of data.nodes) {
+    if (!graph.hasNode(node.id)) {
+      graph.addNode(node.id, { ...node });
+    }
+  }
+  for (const edge of data.edges) {
+    if (!graph.hasNode(edge.source) || !graph.hasNode(edge.target)) continue;
+    const edgeId = edge.id || `${edge.source}->${edge.target}:${edge.kind}`;
+    if (!graph.hasEdge(edgeId)) {
+      graph.addEdgeWithKey(edgeId, edge.source, edge.target, { ...edge, id: edgeId });
+    }
+  }
+  return graph;
+}
+
 export function fanIn(graph: MnemosGraph, nodeId: string): number {
   return graph.inDegree(nodeId);
 }

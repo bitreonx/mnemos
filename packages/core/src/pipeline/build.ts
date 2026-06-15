@@ -28,6 +28,8 @@ import { compileContext, writeMemoryModel } from '../context/compiler.js';
 
 import { buildAgentExports } from '../agent-mode.js';
 import { writeAgentExports } from '../agent-mode-io.js';
+import { buildAiToolkit } from '../ai-toolkit.js';
+import { writeAiToolkit } from '../ai-toolkit-io.js';
 
 import { computeMemoryScore } from '../report.js';
 
@@ -313,6 +315,10 @@ export async function build(options: BuildOptions): Promise<BuildResult> {
 
 
 
+  enrichArchitectureSummary(memory);
+
+
+
   if (options.verbose) {
 
     console.log('Writing memory model...');
@@ -342,6 +348,9 @@ export async function build(options: BuildOptions): Promise<BuildResult> {
   });
 
   await writeAgentExports(agentExports, outputDir);
+
+  const aiToolkit = buildAiToolkit(memory, capabilities, journeys, agentExports.context);
+  await writeAiToolkit(aiToolkit, outputDir);
 
 
 
@@ -379,6 +388,32 @@ export async function build(options: BuildOptions): Promise<BuildResult> {
 
   return { memory, outputDir };
 
+}
+
+
+
+function enrichArchitectureSummary(memory: MemoryModel): void {
+  const caps = (memory.capabilities ?? []).filter((c) => c.confidence >= 0.15);
+  const capNames = caps.slice(0, 4).map((c) => c.signature.name.toLowerCase());
+  const hints: string[] = [];
+
+  if (capNames.some((n) => n.includes('http framework') || n.includes('middleware'))) {
+    hints.push('HTTP middleware and routing framework');
+  }
+  if (memory.flows.length > 0) {
+    hints.push(`${memory.flows.length} execution flows`);
+  }
+  if (memory.domains.length > 0) {
+    const coreDomains = memory.domains
+      .filter((d) => !/^(test|tests|acceptance|examples?)$/i.test(d.name))
+      .slice(0, 3)
+      .map((d) => d.name);
+    if (coreDomains.length > 0) hints.push(`core domains: ${coreDomains.join(', ')}`);
+  }
+
+  if (hints.length > 0) {
+    memory.architecture.summary = `${memory.architecture.summary} ${hints.join('; ')}.`;
+  }
 }
 
 

@@ -6,6 +6,7 @@ import ora from 'ora';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import {
   build,
   loadMemoryModel,
@@ -34,6 +35,9 @@ import {
   formatArchitectureStory,
   generateSnapshots,
   computeAiReadiness,
+  buildAiToolkit,
+  installAiIntegrations,
+  fromSerializable,
 } from '@mnemos/core';
 
 const program = new Command();
@@ -588,7 +592,16 @@ program
       process.exit(1);
     }
 
-    const answer = askCopilot(loaded.memory, question);
+    const { readFile } = await import('node:fs/promises');
+    let graph;
+    try {
+      const raw = await readFile(path.join(loaded.outputDir, 'graph.json'), 'utf-8');
+      graph = fromSerializable(JSON.parse(raw));
+    } catch {
+      graph = undefined;
+    }
+
+    const answer = askCopilot(loaded.memory, question, { graph });
     console.log('');
     console.log(chalk.bold('Mnemos Copilot'));
     console.log(chalk.dim(`Confidence: ${(answer.confidence * 100).toFixed(0)}%`));
@@ -598,6 +611,89 @@ program
       console.log('');
       console.log(chalk.dim(`Related: ${answer.relatedTopics.join(', ')}`));
     }
+  });
+
+program
+  .command('setup [path]')
+  .description('Install AGENTS.md and Cursor rules for Claude/Cursor/Codex')
+  .option('-p, --path <path>', 'Repository path (alias of positional)', '.')
+  .option('-f, --force', 'Overwrite existing integration files')
+  .action(async (targetPath = '.', options) => {
+    const root = path.resolve(options.path && options.path !== '.' ? options.path : targetPath);
+    const loaded = await loadMemoryModel(root);
+
+    if (!loaded) {
+      console.log(chalk.yellow('No memory model found. Run `npx mnemos .` first.'));
+      process.exit(1);
+    }
+
+    const memoryScore = computeMemoryScore(loaded.memory).overall;
+    const exports = buildAgentExports({
+      memory: loaded.memory,
+      capabilities: loaded.memory.capabilities ?? [],
+      journeys: loaded.memory.journeys ?? [],
+      memoryScore,
+    });
+    const toolkit = buildAiToolkit(
+      loaded.memory,
+      loaded.memory.capabilities ?? [],
+      loaded.memory.journeys ?? [],
+      exports.context,
+    );
+
+    const result = await installAiIntegrations({
+      root,
+      outputDir: loaded.outputDir,
+      toolkit,
+      force: options.force,
+    });
+
+    console.log('');
+    console.log(chalk.bold('AI integrations installed'));
+    for (const f of result.written) {
+      console.log(chalk.green('  ✓') + ' ' + f);
+    }
+    for (const f of result.skipped) {
+      console.log(chalk.dim('  · skipped (exists): ') + f);
+    }
+    console.log('');
+    console.log(chalk.bold('Next steps'));
+    console.log('  1. In Cursor: rules auto-load from .cursor/rules/mnemos-architecture.mdc');
+    console.log('  2. In Claude: add .mnemos/project.dna.json to project knowledge');
+    console.log('  3. Run ' + chalk.cyan('mnemos serve') + ' for live agent queries at :4000');
+    console.log('  4. Copy a starter prompt: ' + chalk.cyan('mnemos prompt'));
+    console.log('');
+  });
+
+program
+  .command('prompt [path]')
+  .description('Print a copy-paste AI prompt with repository context')
+  .option('-p, --path <path>', 'Repository path (alias of positional)', '.')
+  .option('--claude', 'Output Claude project instructions instead')
+  .action(async (targetPath = '.', options) => {
+    const root = path.resolve(options.path && options.path !== '.' ? options.path : targetPath);
+    const loaded = await loadMemoryModel(root);
+
+    if (!loaded) {
+      console.log(chalk.yellow('No memory model found. Run `npx mnemos .` first.'));
+      process.exit(1);
+    }
+
+    const memoryScore = computeMemoryScore(loaded.memory).overall;
+    const exports = buildAgentExports({
+      memory: loaded.memory,
+      capabilities: loaded.memory.capabilities ?? [],
+      journeys: loaded.memory.journeys ?? [],
+      memoryScore,
+    });
+    const toolkit = buildAiToolkit(
+      loaded.memory,
+      loaded.memory.capabilities ?? [],
+      loaded.memory.journeys ?? [],
+      exports.context,
+    );
+
+    console.log(options.claude ? toolkit.claudeProjectInstructions : toolkit.aiPrompt);
   });
 
 program
@@ -628,6 +724,7 @@ program
     console.log(`    GET  /dna          — repository DNA`);
     console.log(`    GET  /explain       — human summary`);
     console.log(`    GET  /copilot?q=    — ask questions`);
+    console.log(`    GET  /prompts       — vibe-coder starter prompts`);
     console.log(`    GET  /impact/:node  — blast radius`);
     console.log(`    GET  /search?q=     — search domains/services`);
     console.log(`    GET  /heatmap       — technical debt heatmap`);
@@ -689,19 +786,34 @@ program
   .command('ui')
   .description('Launch the Mnemos visualization UI')
   .option('-p, --path <path>', 'Repository path', '.')
+  .option('-w, --workspace <file>', 'Multi-repo workspace config (e.g. dabt.workspace.json)')
   .option('--port <port>', 'Port number', '5173')
   .action(async (options) => {
     const root = path.resolve(options.path);
     const uiDir = path.join(import.meta.dirname, '..', '..', 'ui');
+    const workspaceFile = options.workspace
+      ? path.resolve(options.workspace)
+      : path.join(uiDir, 'dabt.workspace.json');
 
     console.log(chalk.bold('Starting Mnemos UI...'));
-    console.log(chalk.dim(`Serving memory from: ${path.join(root, '.mnemos')}`));
+    if (options.workspace || existsSync(workspaceFile)) {
+      console.log(chalk.dim(`Workspace mode: ${workspaceFile}`));
+    } else {
+      console.log(chalk.dim(`Serving memory from: ${path.join(root, '.mnemos')}`));
+    }
+
+    const env: Record<string, string> = { ...process.env as Record<string, string> };
+    if (options.workspace || existsSync(workspaceFile)) {
+      env.MNEMOS_WORKSPACE = workspaceFile;
+    } else {
+      env.MNEMOS_ROOT = root;
+    }
 
     const child = spawn('npx', ['vite', '--port', options.port, '--host'], {
       cwd: uiDir,
       stdio: 'inherit',
       shell: true,
-      env: { ...process.env, MNEMOS_ROOT: root },
+      env,
     });
 
     child.on('error', (err) => {
@@ -741,6 +853,7 @@ async function runDefaultExperience(
   printCheck(`${memory.flows.length} flows discovered`);
   printCheck(`${memory.apis.length} APIs discovered`);
   printCheck('Repository DNA generated');
+  printCheck('AI integrations ready (Cursor + Claude)');
   printCheck('Screenshot-ready SVG cards rendered');
 
   // Generate the polished report and snapshots
@@ -770,8 +883,15 @@ async function runDefaultExperience(
 
   console.log(chalk.bold('Artifacts'));
   console.log(`  ${chalk.cyan('project.dna.json')}    ${chalk.dim(path.join(outputDir, 'project.dna.json'))}`);
+  console.log(`  ${chalk.cyan('integrations/')}       ${chalk.dim(path.join(outputDir, 'integrations'))}`);
   console.log(`  ${chalk.cyan('report/index.html')}  ${chalk.dim(indexPath)}`);
   console.log(`  ${chalk.cyan('snapshots/*.svg')}    ${chalk.dim(snapResult.outputDir)}`);
+  console.log('');
+
+  console.log(chalk.bold('For Cursor / Claude / vibe-coders'));
+  console.log(`  ${chalk.cyan('mnemos setup')}       ${chalk.dim('— install AGENTS.md + Cursor rules')}`);
+  console.log(`  ${chalk.cyan('mnemos prompt')}      ${chalk.dim('— copy-paste starter prompt')}`);
+  console.log(`  ${chalk.cyan('mnemos serve')}       ${chalk.dim('— live memory server for agents')}`);
   console.log('');
 
   if (options.open !== false) {
@@ -785,6 +905,8 @@ async function runDefaultExperience(
   console.log(chalk.cyan('  mnemos explain') + chalk.dim('    — plain-language description'));
   console.log(chalk.cyan('  mnemos story') + chalk.dim('      — architecture narrative'));
   console.log(chalk.cyan('  mnemos snapshot') + chalk.dim('  — screenshot-ready SVG cards'));
+  console.log(chalk.cyan('  mnemos setup') + chalk.dim('      — Cursor rules + AGENTS.md'));
+  console.log(chalk.cyan('  mnemos prompt') + chalk.dim('     — copy-paste AI prompt'));
   console.log(chalk.cyan('  mnemos serve') + chalk.dim('     — memory server for AI agents'));
   console.log('');
 }

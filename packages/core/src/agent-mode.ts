@@ -3,6 +3,7 @@ import type { Capability } from './analysis/capabilities.js';
 import type { DiscoveredJourney } from './analysis/journeys.js';
 import { computeMemoryScore } from './report.js';
 import { computeAiReadiness } from './ai-readiness.js';
+import { buildSuggestedPrompts, buildContextFiles } from './ai-toolkit.js';
 
 export interface RepositoryDna {
   $schema: 'mnemos/dna/v3';
@@ -87,6 +88,15 @@ export interface AgentContext {
   domains: Array<{ name: string; description: string; services: string[]; apis: string[]; key_files: string[] }>;
   journeys: Array<{ name: string; entry: string; steps: string[]; actors: string[]; data: string[]; outcomes: string[] }>;
   search_hints: Record<string, string[]>;
+  suggested_prompts: string[];
+  context_files: string[];
+  integrations: {
+    dna: string;
+    agent_context: string;
+    agents_md: string;
+    cursor_rule: string;
+    memory_server: string;
+  };
 }
 
 export interface ArchitectureJson {
@@ -296,6 +306,15 @@ function buildAgentContext(
       outcomes: j.outcomes,
     })),
     search_hints: buildSearchHints(memory, capabilities),
+    suggested_prompts: buildSuggestedPrompts(memory),
+    context_files: buildContextFiles(memory),
+    integrations: {
+      dna: '.mnemos/project.dna.json',
+      agent_context: '.mnemos/agent_context.json',
+      agents_md: '.mnemos/integrations/AGENTS.md',
+      cursor_rule: '.cursor/rules/mnemos-architecture.mdc',
+      memory_server: 'http://localhost:4000',
+    },
   };
 }
 

@@ -9,7 +9,13 @@
   "scripts": {
     "build": "npm run build --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
-    "mnemos": "node packages/cli/dist/index.js"
+    "mnemos": "node packages/cli/dist/index.js",
+    "bench": "node mnemos-bench/scorer/run.mjs",
+    "bench:express": "node mnemos-bench/scorer/run.mjs express",
+    "bench:nestjs": "node mnemos-bench/scorer/run.mjs nestjs",
+    "bench:regression": "node mnemos-bench/scorer/regression.mjs",
+    "bench:ai-eval": "node mnemos-bench/scorer/ai-eval.mjs",
+    "dabt:ui": "node packages/cli/dist/index.js ui --workspace packages/ui/dabt.workspace.json"
   },
   "engines": {
     "node": ">=20"

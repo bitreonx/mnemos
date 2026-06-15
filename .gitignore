@@ -2,8 +2,10 @@ node_modules/
 dist/
 .mnemos/
 test-repos/
-next.js/
 benchmark/
+mnemos-bench/repos/*/
+!mnemos-bench/repos/manifest.json
+mnemos-bench/results/*.txt
 *.log
 .DS_Store
 .env

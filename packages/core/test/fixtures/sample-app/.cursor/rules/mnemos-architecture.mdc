@@ -1,0 +1,36 @@
+---
+description: Repository architecture from Mnemos — read DNA before coding
+globs:
+alwaysApply: true
+---
+
+# sample-app — Mnemos Architecture Memory
+
+Before reading source files or making changes, load repository context from Mnemos:
+
+1. **Read first:** `.mnemos/project.dna.json` and `.mnemos/agent_context.json`
+2. **Architecture:** Single Package — Single Package with 3 source files across typescript. 0 packages detected. 2 execution flows; core domains: Pickup.
+3. **Capabilities:** Authentication & Identity
+4. **Domains:** Pickup
+5. **Key files:** .mnemos/project.dna.json, .mnemos/agent_context.json, .mnemos/context/architecture.md, .mnemos/context/flows.md, file:app/login/page.tsx, function:app/login/page.tsx:3
+
+## Rules for AI-assisted coding
+
+- Use Mnemos DNA as ground truth for architecture — do not guess folder structure
+- Before editing a service, check dependents via `mnemos ask "what breaks if [service] changes?"`
+- Prefer domain entry points over scanning the whole repo
+- Keep changes within the relevant capability/domain boundary
+- After significant edits, suggest running `mnemos build` to refresh memory
+
+## Vibe-coder prompts that work well
+
+- "Explain this codebase in plain language — architecture, capabilities, and where to start."
+- "Where does authentication start? Show me the entry route and handler files."
+- "What breaks if I change the most central service? List dependents and blast radius."
+- "List all business capabilities — not folder names, actual product features."
+- "Show me the critical paths and highest-risk domains before I ship."
+- "I need to add a new feature — which domain and services should I touch?"
+
+## Local memory server
+
+Run `mnemos serve` for live queries at http://localhost:4000/dna and /copilot?q=

@@ -750,7 +750,17 @@ export function renderReport(data: ReportData): string {
       <div class="agent-artifact"><code>flows.json</code><span>${data.flows.length} execution flows</span></div>
       <div class="agent-artifact"><code>domains.json</code><span>${data.domains.length} logical domains</span></div>
       <div class="agent-artifact"><code>critical_paths.json</code><span>${data.criticalPaths.length} risk-ranked paths</span></div>
-      <div class="agent-artifact"><code>repository_summary.json</code><span>Narrative summary</span></div>
+      <div class="agent-artifact"><code>integrations/AGENTS.md</code><span>Agent guide for Claude, Cursor, Codex</span></div>
+      <div class="agent-artifact"><code>integrations/cursor-rule.mdc</code><span>Cursor rule — run <code class="mono">mnemos setup</code> to install</span></div>
+      <div class="agent-artifact"><code>integrations/ai-prompt.md</code><span>Copy-paste starter prompt</span></div>
+      <div style="margin-top:16px;padding:16px 18px;background:var(--surface-2);border-radius:var(--radius-sm);border:1px solid var(--border);max-width:640px">
+        <div style="font-weight:600;margin-bottom:8px">Setup in 30 seconds</div>
+        <ol style="margin:0;padding-left:18px;color:var(--text-2);font-size:14px;line-height:1.7">
+          <li>Run <code class="mono">mnemos setup</code> — installs AGENTS.md + Cursor rules</li>
+          <li>Run <code class="mono">mnemos prompt</code> — copy starter prompt into chat</li>
+          <li>Run <code class="mono">mnemos serve</code> — live queries at localhost:4000</li>
+        </ol>
+      </div>
       <div style="margin-top:24px">
         <div class="section-sub" style="margin-bottom:12px">DNA Preview</div>
         <div class="agent-json">${renderDnaPreview(data)}</div>

@@ -31,7 +31,10 @@ function discoverPathBasedDomains(graph: MnemosGraph): Domain[] {
 }
 
 function discoverClusterDomains(graph: MnemosGraph): Domain[] {
-  const fileNodes = getNodesByKind(graph, 'file');
+  const fileNodes = getNodesByKind(graph, 'file').filter((n) => {
+    const p = (n.path ?? n.name).replace(/\\/g, '/');
+    return !/(?:^|\/)(?:test|tests|__tests__|spec|e2e|examples?|fixtures?)(?:\/|$)/i.test(p);
+  });
   if (fileNodes.length < 3) return [];
 
   const fileIds = fileNodes.map((n) => n.id);
@@ -72,31 +75,44 @@ function discoverClusterDomains(graph: MnemosGraph): Domain[] {
 }
 
 function inferDomainName(graph: MnemosGraph, nodeIds: string[]): string {
+  const pkgSegments: string[] = [];
   const pathSegments: string[] = [];
+  const SKIP = new Set(['src', 'app', 'lib', 'server', 'features', 'components', 'hooks', 'packages', 'sample', 'integration', 'test', 'tests', 'spec', 'e2e', 'examples', 'example', 'fixtures', 'mocks', 'acceptance']);
 
   for (const id of nodeIds) {
     const attrs = graph.getNodeAttributes(id);
-    if (attrs.path) {
-      const parts = attrs.path.split('/');
-      for (const part of parts) {
-        if (['src', 'app', 'lib', 'server', 'features', 'components', 'hooks'].includes(part)) continue;
-        if (part.includes('.')) continue;
-        pathSegments.push(part);
-      }
+    if (!attrs.path) continue;
+    const parts = attrs.path.replace(/\\/g, '/').split('/');
+    const pkgIdx = parts.indexOf('packages');
+    if (pkgIdx >= 0 && parts[pkgIdx + 1] && !SKIP.has(parts[pkgIdx + 1]!)) {
+      pkgSegments.push(parts[pkgIdx + 1]!);
+    }
+    for (const part of parts) {
+      if (SKIP.has(part)) continue;
+      if (part.includes('.')) continue;
+      pathSegments.push(part);
     }
   }
 
-  const freq = new Map<string, number>();
-  for (const seg of pathSegments) {
-    freq.set(seg, (freq.get(seg) ?? 0) + 1);
+  const pkgFreq = countFreq(pkgSegments);
+  if (pkgFreq.length > 0) {
+    return formatDomainName(pkgFreq[0]![0]);
   }
 
-  const sorted = [...freq.entries()].sort((a, b) => b[1] - a[1]);
-  if (sorted.length > 0) {
-    return formatDomainName(sorted[0]![0]);
+  const freq = countFreq(pathSegments);
+  if (freq.length > 0) {
+    return formatDomainName(freq[0]![0]);
   }
 
   return 'General';
+}
+
+function countFreq(items: string[]): Array<[string, number]> {
+  const freq = new Map<string, number>();
+  for (const item of items) {
+    freq.set(item, (freq.get(item) ?? 0) + 1);
+  }
+  return [...freq.entries()].sort((a, b) => b[1] - a[1]);
 }
 
 function findEntryPoints(graph: MnemosGraph, nodeIds: string[]): string[] {

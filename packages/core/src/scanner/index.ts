@@ -142,13 +142,21 @@ export function inferDomainFromPath(relativePath: string): string | undefined {
     /(?:^|\/)modules\/([^/]+)/,
     /(?:^|\/)server\/([^/]+)/,
     /(?:^|\/)src\/features\/([^/]+)/,
+    /(?:^|\/)lib\/([^/]+)/,
+    /(?:^|\/)packages\/([^/]+)/,
   ];
 
   for (const pattern of patterns) {
     const match = normalized.match(pattern);
     if (match) {
-      return formatDomainName(match[1]!);
+      const segment = match[1]!;
+      if (['test', 'tests', 'spec', 'e2e', 'examples', 'example'].includes(segment)) continue;
+      return formatDomainName(segment);
     }
+  }
+
+  if (/^(?:lib|src)\//.test(normalized)) {
+    return formatDomainName(normalized.startsWith('lib/') ? 'Core Library' : 'Source');
   }
 
   return undefined;

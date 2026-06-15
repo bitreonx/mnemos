@@ -1,0 +1,163 @@
+{
+  "repo": "nestjs",
+  "measured_at": "2026-06-15T13:06:53.173Z",
+  "raw_repo": {
+    "fileCount": 1944,
+    "totalChars": 4098885,
+    "tokens": 1024722
+  },
+  "tools": {
+    "mnemos": {
+      "tool": "mnemos",
+      "build_latency_ms": 35700,
+      "ask_latency_ms": 1791,
+      "total_latency_ms": 37774,
+      "tokens": 36424,
+      "context_bytes": 145696,
+      "compression_ratio": 28.1,
+      "accuracy": 72.4,
+      "coverage": 13,
+      "tasks": [
+        {
+          "task": "task1",
+          "question": "Where does login start?",
+          "accuracy": 75,
+          "coverage": 3,
+          "required_total": 4,
+          "required_hits": [
+            "auth",
+            "jwt",
+            "sample"
+          ],
+          "forbidden_hits": [],
+          "latency_ms": 463,
+          "answer_preview": "\nConfidence: 90%\n\nLogin flow **/app.e2e-spec** starts at **sample/19-auth-jwt/e2e/app/app.e2e-spec.ts**.\nHTTP request: 33 steps through file → api → class → route → function → interface\n"
+        },
+        {
+          "task": "task2",
+          "question": "What breaks if NestApplication changes?",
+          "accuracy": 100,
+          "coverage": 5,
+          "required_total": 5,
+          "required_hits": [
+            "depend",
+            "affect",
+            "nestapplication",
+            "blast",
+            "files"
+          ],
+          "forbidden_hits": [],
+          "latency_ms": 469,
+          "answer_preview": "\nConfidence: 92%\n\nChanging **NestApplication** affects **4** nodes.\n\n**Dependencies / blast radius:**\n• APIs affected: 0\n• Files affected: 4\n• Domains affected: 0\n• Tests affected: 0\n\n• packages/core/nest-application.ts\n• packages/core/nest-factory.ts\n• packages/testing/testing-module.ts\n• packages/core/test/nest-application.spec.ts\n"
+        },
+        {
+          "task": "task4",
+          "question": "Find the most critical subsystem",
+          "accuracy": 67,
+          "coverage": 2,
+          "required_total": 3,
+          "required_hits": [
+            "core",
+            "common"
+          ],
+          "forbidden_hits": [],
+          "latency_ms": 447,
+          "answer_preview": "\nConfidence: 85%\n\n**Core** is the most critical subsystem (centrality-based analysis). Risk score: 100/100. Issues: 6 circular dependencies, 200 dead modules, 33 high-severity smells. \n\nRelated: High-traffic: run, High-traffic: packages/common/constants.ts, High-traffic: packages/common/index.ts\n"
+        },
+        {
+          "task": "task5",
+          "question": "List business capabilities",
+          "accuracy": 60,
+          "coverage": 3,
+          "required_total": 5,
+          "required_hits": [
+            "authentication",
+            "http",
+            "api"
+          ],
+          "forbidden_hits": [],
+          "latency_ms": 412,
+          "answer_preview": "\nConfidence: 90%\n\n12 capabilities:\n• **HTTP Framework & Middleware** — Provides HTTP server, routing pipeline, middleware chain, and request/response handling.\n• **Background Jobs & Queues** — Schedules and runs asynchronous, deferred, or heavy work.\n• **Data Layer & Persistence** — Manages database access, ORM, migrations, schemas, and repositories.\n• **API & Routing** — Exposes HTTP and RPC endp"
+        }
+      ],
+      "explain": {
+        "accuracy": 60,
+        "coverage": 3,
+        "required_total": 5,
+        "required_hits": [
+          "typescript",
+          "framework",
+          "dependency"
+        ],
+        "forbidden_hits": [],
+        "latency_ms": 283
+      },
+      "context_sizes": {
+        "project.dna.json": 9828,
+        "agent_context.json": 13694,
+        "repository_summary.json": 5637,
+        "health-score.json": 155,
+        "context/apis.md": 288,
+        "context/architecture.md": 4450,
+        "context/critical_paths.md": 3891,
+        "context/dependencies.md": 2824,
+        "context/domains.md": 10352,
+        "context/flows.md": 73972,
+        "context/repository_summary.md": 2300,
+        "context/services.md": 7432,
+        "context/smells.md": 10873
+      },
+      "ttu_seconds_with_tool": 158,
+      "ttu_note": "120s added for human reading project.dna.json (~4k tokens at 200 wpm)"
+    },
+    "gitingest": {
+      "ok": true,
+      "latencyMs": 300286,
+      "tokens": 5200000,
+      "bytes": 21719253,
+      "stdout": "Analysis complete! Output written to: D:\\Mnemos\\mnemos-bench\\results\\nestjs-gitingest.txt\r\n\r\nSummary:\r\nDirectory: D:\\Mnemos\\mnemos-bench\\repos\\nestjs\r\nFiles analyzed: 1866\r\n\r\nEstimated tokens: 5.2M\r\n",
+      "stderr": "Analyzing source, output will be written to 'D:\\Mnemos\\mnemos-bench\\results\\nestjs-gitingest.txt'...\r\n\u001b[32m2026-06-15 17:01:48.440\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mgitingest.entrypoint\u001b[0m:\u001b[36mingest_async\u001b[0m:\u001b[36m89\u001b[0m | Starting ingestion process | {\"source\":\"D:\\\\Mnemos\\\\mnemos-bench\\\\repos\\\\nestjs\"}\r\n\u001b[32m2026-06-15 17:01:48.440\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mgitingest.entrypoint\u001b[0m:\u001b[36mingest_async\u001b[0m:\u001b[36m105\u001b[0m | Processing local directory | {\"source\":\"D:\\\\Mnemos\\\\mnemos-bench\\\\repos\\\\nestjs\"}\r\n\u001b[32m2026-06-15 17:01:48.441\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mgitingest.entrypoint\u001b[0m:\u001b[36mingest_async\u001b[0m:\u001b[36m134\u001b[0m | Starting local directory processing\r\n\u001b[32m2026-06-15 17:01:48.549\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mgitingest.entrypoint\u001b[0m:\u001b[36mingest_async\u001b[0m:\u001b[36m140\u001b[0m | Processing files and generating output\r\n\u001b[32m2026-06-15 17:01:48.549\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mgitingest.ingestion\u001b[0m:\u001b[36mingest_query\u001b[0m:\u001b[36m44\u001b[0m | Starting file ingestion | {\"slug\":\"D:\\\\Mnemos\\\\mnemos-bench\\\\repos\\\\nestjs\",\"subpath\":\"/\",\"local_path\":\"D:\\\\Mnemos\\\\mnemos-bench\\\\repos\\\\nestjs\",\"max_file_size\":10485760}\r\n\u001b[32m2026-06-15 17:01:48.549\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mgitingest.ingestion\u001b[0m:\u001b[36mingest_query\u001b[0m:\u001b[36m96\u001b[0m | Processing directory | {\"directory_path\":\"D:\\\\Mnemos\\\\mnemos-bench\\\\repos\\\\nestjs\"}\r\n\u001b[32m2026-06-15 17:06:40.572\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mgitingest.ingestion\u001b[0m:\u001b[36mingest_query\u001b[0m:\u001b[36m109\u001b[0m | Directory processing completed | {\"total_files\":1866,\"total_directories\":563,\"total_size_bytes\":20895484,\"stats_total_files\":1866,\"stats_total_size\":20895484}\r\n\u001b[32m2026-06-15 17:06:47.682\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mgitingest.entrypoint\u001b[0m:\u001b[36mingest_async\u001b[0m:\u001b[36m147\u001b[0m | Ingestion completed successfully\r\n",
+      "compression_ratio": 0.2,
+      "accuracy": 0,
+      "note": "Gitingest produces raw file dump — no structured task answers"
+    },
+    "graphify": {
+      "ok": false,
+      "latencyMs": 2570,
+      "graphChars": 0,
+      "tokens": 0,
+      "note": "Code-only extract on packages/core/ — full repo requires LLM API key for docs",
+      "queries": [
+        {
+          "question": "Where does login start?",
+          "answer": "",
+          "ok": false
+        },
+        {
+          "question": "List business capabilities",
+          "answer": "",
+          "ok": false
+        },
+        {
+          "question": "Find the most critical subsystem",
+          "answer": "",
+          "ok": false
+        }
+      ],
+      "stderr": "error: no LLM API key found (2 doc/paper/image file(s) need semantic extraction). Set GEMINI_API_KEY or GOOGLE_API_KEY (gemini), MOONSHOT_API_KEY (kimi), ANTHROPIC_API_KEY (claude), OPENAI_API_KEY (openai), DEEPSEEK_API_KEY (deepseek), or pass --backend. A code-only corpus needs no key.\r\n",
+      "compression_ratio": 0,
+      "accuracy": 0
+    }
+  },
+  "ttu": {
+    "without_tool_seconds": 8775,
+    "with_mnemos_seconds": 158,
+    "savings_percent": 98,
+    "methodology": "NestJS framework onboarding: packages/core, common, sample modules, DI graph, guards. 90s/file + 45s/search."
+  },
+  "winner": {
+    "accuracy": "mnemos",
+    "compression": "mnemos",
+    "latency": "mnemos"
+  }
+}

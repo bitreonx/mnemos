@@ -28,7 +28,20 @@ export interface Capability {
   reasons: string[];
 }
 
+const PRODUCTION_PATH_RE = /(?:^|[/\\])(?:test|tests|__tests__|spec|e2e|examples?|fixtures?|mocks?|stubs?|__mocks__)(?:[/\\]|$)/i;
+
 const SIGNATURES: CapabilitySignature[] = [
+  {
+    id: 'web_framework',
+    name: 'HTTP Framework & Middleware',
+    purpose: 'Provides HTTP server, routing pipeline, middleware chain, and request/response handling.',
+    keywords: ['middleware', 'router', 'application', 'request', 'response', 'express', 'handler', 'dispatch'],
+    actors: ['Developer', 'HTTP client'],
+    data: ['HTTP request', 'HTTP response', 'Route path'],
+    outcomes: ['Request handled', 'Response sent'],
+    category: 'platform',
+    weight: 1.4,
+  },
   {
     id: 'authentication',
     name: 'Authentication & Identity',
@@ -85,7 +98,7 @@ const SIGNATURES: CapabilitySignature[] = [
     id: 'transport',
     name: 'Transport & Routing',
     purpose: 'Manages routes, trips, vehicles, and live tracking for transportation operations.',
-    keywords: ['transport', 'bus', 'route', 'trip', 'vehicle', 'gps', 'stop', 'pickup', 'drop', 'driver', 'tracking', 'eta'],
+    keywords: ['transport', 'bus', 'trip', 'vehicle', 'gps', 'stop', 'pickup', 'drop', 'driver', 'tracking', 'eta', 'fleet'],
     actors: ['Driver', 'Guardian', 'Student'],
     data: ['Route', 'Vehicle', 'Timestamp', 'GPS'],
     outcomes: ['Trip planned', 'Live status visible', 'Trip completed'],
@@ -115,7 +128,7 @@ const SIGNATURES: CapabilitySignature[] = [
     id: 'school_admin',
     name: 'School Administration',
     purpose: 'Configures school-level settings, classes, sessions, and organizational data.',
-    keywords: ['school', 'admin', 'config', 'class', 'section', 'session', 'academic-year', 'timetable'],
+    keywords: ['school', 'admin', 'academic-year', 'timetable', 'class-section', 'roll-call'],
     actors: ['Administrator'],
     data: ['School config', 'Class config'],
     outcomes: ['School configuration updated'],
@@ -255,20 +268,30 @@ export function discoverCapabilities(
     }
 
     for (const file of filePaths) {
+      if (isTestOrExamplePath(file.path)) continue;
       if (matchesAny(file.path, sig.keywords) || matchesAny(file.name, sig.keywords)) {
         evidenceFiles.push(file);
       }
     }
 
-    if (evidenceServices.length === 0 && evidenceApis.length === 0 && evidenceFiles.length === 0) {
+    const productionFiles = evidenceFiles.filter((f) => !isTestOrExamplePath(f.path));
+    const coreFiles = productionFiles.filter((f) => /[/\\](?:lib|src)[/\\]/i.test(f.path));
+    const hasStrongEvidence =
+      evidenceServices.length > 0 ||
+      evidenceApis.length > 0 ||
+      productionFiles.length >= 2 ||
+      coreFiles.length >= 1;
+
+    if (!hasStrongEvidence) {
       continue;
     }
 
-    // Score: services count more, then apis, then files
+    // Score: services count more, then apis, then production files
     const serviceScore = evidenceServices.length * 0.4;
     const apiScore = Math.min(evidenceApis.length, 5) * 0.15;
-    const fileScore = Math.min(evidenceFiles.length, 10) * 0.04;
-    const raw = serviceScore + apiScore + fileScore;
+    const fileScore = Math.min(productionFiles.length, 10) * (sig.category === 'platform' ? 0.12 : 0.04);
+    const coreBoost = coreFiles.length > 0 && sig.category === 'platform' ? 0.15 : 0;
+    const raw = serviceScore + apiScore + fileScore + coreBoost;
     const weight = sig.weight ?? 1;
     const confidence = Math.min(1, raw * 0.6 * weight);
 
@@ -300,18 +323,35 @@ export function discoverCapabilities(
       evidence: [
         ...topServices.map((s) => `service: ${s}`),
         ...topApis.map((a) => `endpoint: ${a}`),
-        ...evidenceFiles.slice(0, 3).map((f) => `file: ${f.path}`),
+        ...productionFiles.slice(0, 3).map((f) => `file: ${f.path}`),
       ],
       reasons: dedupe(reasons).slice(0, 4),
     });
   }
 
-  return hits.sort((a, b) => b.confidence - a.confidence);
+  return hits
+    .filter((h) => h.confidence >= 0.12)
+    .sort((a, b) => b.confidence - a.confidence);
+}
+
+function isTestOrExamplePath(filePath: string): boolean {
+  return PRODUCTION_PATH_RE.test(filePath.replace(/\\/g, '/'));
 }
 
 function matchesAny(text: string, keywords: string[]): boolean {
   const norm = text.toLowerCase();
-  return keywords.some((kw) => norm.includes(kw.toLowerCase()));
+  return keywords.some((kw) => {
+    const k = kw.toLowerCase();
+    if (k.length <= 4) {
+      const re = new RegExp(`(?:^|[^a-z0-9])${escapeRegExp(k)}(?:[^a-z0-9]|$)`);
+      return re.test(norm);
+    }
+    return norm.includes(k);
+  });
+}
+
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 function dedupe<T>(arr: T[]): T[] {

@@ -6,12 +6,31 @@ import { getNodesByKind } from '../graph/graph.js';
 export function discoverFlows(graph: MnemosGraph, parsedFiles: ParsedFile[]): Flow[] {
   const flows: Flow[] = [];
 
+  flows.push(...discoverMiddlewareFlows(graph, parsedFiles));
   flows.push(...discoverRequestFlows(graph, parsedFiles));
   flows.push(...discoverEventFlows(graph, parsedFiles));
   flows.push(...discoverDependencyFlows(graph));
   flows.push(...discoverUserJourneyFlows(graph, parsedFiles));
 
   return flows.sort((a, b) => b.confidence - a.confidence);
+}
+
+function discoverMiddlewareFlows(graph: MnemosGraph, parsedFiles: ParsedFile[]): Flow[] {
+  const appFile = parsedFiles.find((f) => /(?:^|\/)lib[/\\]application\.(js|ts|mjs|cjs)$/.test(f.relativePath));
+  if (!appFile) return [];
+
+  const steps = traceFlowFromFile(graph, appFile, 8);
+  if (steps.length < 2) return [];
+
+  return [{
+    id: 'flow:middleware:pipeline',
+    name: 'HTTP Middleware Pipeline',
+    type: 'request',
+    confidence: 0.92,
+    steps,
+    entryPoint: appFile.relativePath,
+    description: 'HTTP request enters the middleware chain via Application dispatch (route → handler → response)',
+  }];
 }
 
 function discoverRequestFlows(graph: MnemosGraph, parsedFiles: ParsedFile[]): Flow[] {
@@ -125,7 +144,10 @@ function discoverUserJourneyFlows(graph: MnemosGraph, parsedFiles: ParsedFile[])
 
   for (const journey of journeys) {
     const matching = parsedFiles.filter(
-      (f) => journey.pattern.test(f.relativePath) && (f.isRoute || f.hasUseServer),
+      (f) =>
+        journey.pattern.test(f.relativePath) &&
+        (f.isRoute || f.hasUseServer) &&
+        !/(?:^|\/)(?:test|tests|__tests__|spec|e2e|examples?)(?:\/|$)/i.test(f.relativePath),
     );
 
     if (matching.length === 0) continue;

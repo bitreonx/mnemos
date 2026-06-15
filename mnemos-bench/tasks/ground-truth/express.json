@@ -1,0 +1,36 @@
+{
+  "$schema": "mnemos-bench/ground-truth/v1",
+  "repo": "express",
+  "verified_at": "2026-06-15",
+  "verification_method": "Manual grep + Mnemos build on expressjs/express @ depth 1",
+  "impact_target": "application",
+  "task1_login_start": {
+    "has_production_login": false,
+    "example_entry": "examples/auth/index.js",
+    "example_route": "GET/POST /login",
+    "required_keywords": ["login", "route", "examples/auth"],
+    "acceptable_answers": ["no production login", "examples/auth", "/login"]
+  },
+  "task2_impact": {
+    "required_keywords": ["application", "request", "response", "depend", "dependents", "blast"],
+    "critical_files": ["lib/application.js"]
+  },
+  "task3_explain": {
+    "required_keywords": ["http", "middleware", "routing", "framework", "express", "javascript"],
+    "forbidden_keywords": ["school", "attendance", "bus"]
+  },
+  "task4_critical": {
+    "required_keywords": ["lib", "application", "core", "general"],
+    "forbidden_domains": ["test", "tests", "mvc"]
+  },
+  "task5_capabilities": {
+    "required_any": ["http framework", "middleware", "routing", "request", "response"],
+    "forbidden_any": ["school administration", "attendance", "transport & routing"]
+  },
+  "manual_baseline": {
+    "files_to_read_estimate": 28,
+    "grep_searches_estimate": 12,
+    "ttu_minutes_estimate": 42,
+    "methodology": "Senior engineer onboarding: read lib/*.js (6), index.js, key test/app.js patterns, grep login/auth/route/middleware across repo. 90s per file + 45s per search."
+  }
+}

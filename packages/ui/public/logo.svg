@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 48" fill="none">
+  <defs>
+    <linearGradient id="mark" x1="4" y1="4" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#c8f542"/>
+      <stop offset="1" stop-color="#8b5cf6"/>
+    </linearGradient>
+    <style>
+      @keyframes glow { 0%,100% { filter: drop-shadow(0 0 2px rgba(200,245,66,.4)); } 50% { filter: drop-shadow(0 0 8px rgba(139,92,246,.6)); } }
+      .mark { animation: glow 3s ease-in-out infinite; }
+    </style>
+  </defs>
+  <g class="mark">
+    <rect x="0" y="0" width="48" height="48" rx="12" fill="#141416"/>
+    <path d="M24 10 L36 24 L24 38 L12 24 Z" fill="url(#mark)"/>
+    <circle cx="24" cy="24" r="3" fill="#141416"/>
+  </g>
+  <text x="60" y="32" font-family="Inter,system-ui,sans-serif" font-size="26" font-weight="700" fill="#fafafa" letter-spacing="-0.03em">Mnemos</text>
+</svg>

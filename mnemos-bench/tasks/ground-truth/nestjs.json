@@ -1,0 +1,33 @@
+{
+  "$schema": "mnemos-bench/ground-truth/v1",
+  "repo": "nestjs",
+  "verified_at": "2026-06-15",
+  "verification_method": "Mnemos build on nestjs/nest @ depth 1 — framework with DI, modules, guards",
+  "impact_target": "NestApplication",
+  "task1_login_start": {
+    "required_keywords": ["guard", "auth", "jwt", "sample"],
+    "acceptable_answers": ["guard", "authentication", "passport", "sample"]
+  },
+  "task2_impact": {
+    "required_keywords": ["depend", "affect", "nestapplication", "blast", "files"],
+    "critical_files": []
+  },
+  "task3_explain": {
+    "required_keywords": ["typescript", "framework", "module", "nestjs", "dependency"],
+    "forbidden_keywords": []
+  },
+  "task4_critical": {
+    "required_keywords": ["core", "common", "platform"],
+    "forbidden_domains": ["test", "tests"]
+  },
+  "task5_capabilities": {
+    "required_any": ["authentication", "http", "dependency", "module", "api"],
+    "forbidden_any": []
+  },
+  "manual_baseline": {
+    "files_to_read_estimate": 85,
+    "grep_searches_estimate": 25,
+    "ttu_minutes_estimate": 145,
+    "methodology": "NestJS framework onboarding: packages/core, common, sample modules, DI graph, guards. 90s/file + 45s/search."
+  }
+}

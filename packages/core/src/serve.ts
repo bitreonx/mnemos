@@ -14,6 +14,8 @@ import { askCopilot } from './copilot.js';
 import { computeDomainHeatmap } from './analysis/heatmap.js';
 import { computeMemoryScore } from './report.js';
 import { buildSearchIndex, searchMemory } from './search/index.js';
+import { buildAiToolkit } from './ai-toolkit.js';
+import { buildAgentExports } from './agent-mode.js';
 
 export interface ServeOptions {
   root: string;
@@ -152,6 +154,26 @@ export async function startMemoryServer(options: ServeOptions): Promise<ServeHan
         return json(res, reviewDiff(memory, diff));
       }
 
+      if (pathname === '/prompts') {
+        const exports = buildAgentExports({
+          memory,
+          capabilities: memory.capabilities ?? [],
+          journeys: memory.journeys ?? [],
+          memoryScore: computeMemoryScore(memory).overall,
+        });
+        const toolkit = buildAiToolkit(
+          memory,
+          memory.capabilities ?? [],
+          memory.journeys ?? [],
+          exports.context,
+        );
+        return json(res, {
+          suggested: toolkit.suggestedPrompts,
+          contextFiles: toolkit.contextFiles,
+          starterPrompt: toolkit.aiPrompt,
+        });
+      }
+
       if (pathname === '/context') {
         const contextDir = path.join(outputDir, 'context');
         return json(res, {
@@ -176,6 +198,7 @@ export async function startMemoryServer(options: ServeOptions): Promise<ServeHan
           'GET /heatmap',
           'GET /onboard',
           'GET /copilot?q=...',
+          'GET /prompts',
           'GET /search?q=...',
           'GET /impact/:node',
           'POST /review { diff }',

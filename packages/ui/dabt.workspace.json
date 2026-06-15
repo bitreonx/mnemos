@@ -1,0 +1,30 @@
+{
+  "name": "Dabt Platform",
+  "root": "D:/Dabt",
+  "repos": [
+    {
+      "id": "wali",
+      "name": "WALI",
+      "label": "Parent App",
+      "path": "D:/Dabt/WALI",
+      "description": "Guardian & parent mobile experience",
+      "accent": "#c8f542"
+    },
+    {
+      "id": "dabt",
+      "name": "Dabt",
+      "label": "School Admin",
+      "path": "D:/Dabt/Dabt",
+      "description": "School administration web platform",
+      "accent": "#8b5cf6"
+    },
+    {
+      "id": "dabtdriver",
+      "name": "DabtDriver",
+      "label": "Driver App",
+      "path": "D:/Dabt/DabtDriver",
+      "description": "Driver operations & transport",
+      "accent": "#38bdf8"
+    }
+  ]
+}

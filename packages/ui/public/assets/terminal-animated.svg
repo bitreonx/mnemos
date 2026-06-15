@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 320" fill="none">
+  <defs>
+    <linearGradient id="term-accent" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#6366f1"/>
+      <stop offset="1" stop-color="#8b5cf6"/>
+    </linearGradient>
+    <style>
+      @keyframes blink { 0%,49% { opacity: 1; } 50%,100% { opacity: 0; } }
+      @keyframes scan { 0% { transform: translateY(0); opacity: 0; } 15%,85% { opacity: .5; } 100% { transform: translateY(260px); opacity: 0; } }
+      @keyframes line-in { 0% { opacity: 0; transform: translateX(-8px); } 100% { opacity: 1; transform: translateX(0); } }
+      @keyframes progress { from { stroke-dashoffset: 200; } to { stroke-dashoffset: 0; } }
+      .l1 { animation: line-in .4s ease-out .2s both; }
+      .l2 { animation: line-in .4s ease-out .8s both; }
+      .l3 { animation: line-in .4s ease-out 1.4s both; }
+      .l4 { animation: line-in .4s ease-out 2s both; }
+      .l5 { animation: line-in .4s ease-out 2.6s both; }
+      .l6 { animation: line-in .4s ease-out 3.2s both; }
+      .cursor { animation: blink 1s step-end infinite; }
+      .scan { animation: scan 4s linear infinite; }
+      .ring { animation: progress 3s ease-out infinite; stroke-dasharray: 200; stroke-dashoffset: 200; }
+    </style>
+  </defs>
+  <rect width="640" height="320" rx="20" fill="#0a0a0b"/>
+  <rect x="1" y="1" width="638" height="318" rx="19" stroke="rgba(255,255,255,.1)"/>
+  <!-- title bar -->
+  <rect width="640" height="44" rx="20" fill="#141416"/>
+  <rect y="22" width="640" height="22" fill="#141416"/>
+  <circle cx="24" cy="22" r="6" fill="#ef4444"/>
+  <circle cx="44" cy="22" r="6" fill="#f59e0b"/>
+  <circle cx="64" cy="22" r="6" fill="#22c55e"/>
+  <text x="320" y="26" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="12" fill="#71717a">Mnemos Terminal</text>
+  <line class="scan" x1="20" y1="52" x2="620" y2="52" stroke="url(#term-accent)" stroke-width="1"/>
+
+  <text class="l1" x="24" y="76" font-family="ui-monospace,monospace" font-size="14" fill="#a1a1aa">$ npx mnemos .</text>
+  <text class="l2" x="24" y="104" font-family="ui-monospace,monospace" font-size="13" fill="#818cf8">’ Scanning repository&</text>
+  <text class="l3" x="24" y="132" font-family="ui-monospace,monospace" font-size="13" fill="#22c55e"> 1,724 files · 446 nodes · 49 domains</text>
+  <text class="l4" x="24" y="160" font-family="ui-monospace,monospace" font-size="13" fill="#22c55e"> project.dna.json · agent_context.json</text>
+  <text class="l5" x="24" y="188" font-family="ui-monospace,monospace" font-size="13" fill="#22c55e"> snapshots/*.svg · report/index.html</text>
+  <text class="l6" x="24" y="216" font-family="ui-monospace,monospace" font-size="13" fill="#c8f542">Done in 2.6 min · AI readiness 83%</text>
+
+  <rect x="24" y="240" width="592" height="8" rx="4" fill="#27272a"/>
+  <rect x="24" y="240" width="480" height="8" rx="4" fill="url(#term-accent)" opacity=".6"/>
+  <rect x="200" y="210" width="2" height="18" fill="#c8f542" class="cursor"/>
+
+  <!-- mini ring -->
+  <circle cx="580" cy="244" r="28" fill="none" stroke="#27272a" stroke-width="4"/>
+  <circle class="ring" cx="580" cy="244" r="28" fill="none" stroke="url(#term-accent)" stroke-width="4" stroke-linecap="round" transform="rotate(-90 580 244)"/>
+  <text x="580" y="249" text-anchor="middle" font-family="Inter,sans-serif" font-size="14" font-weight="700" fill="#fafafa">83</text>
+</svg>

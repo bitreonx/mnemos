@@ -313,13 +313,13 @@ const INTENT_PATTERNS: Array<{ intent: CopilotIntent; patterns: RegExp[]; weight
   { intent: 'overview', patterns: [/what is this/, /what does this/, /overview/, /summary/, /about this repo/], weight: 0.95 },
   { intent: 'flow', patterns: [/how does .* work/, /how .* work/, /explain .* flow/, /show .* flow/, /^how\s+(does|do)\s+/], weight: 0.9 },
   { intent: 'health', patterns: [/health/, /score/, /risk/, /debt/, /quality/], weight: 0.92 },
-  { intent: 'auth', patterns: [/login/, /auth/, /sign.?in/, /authentication/, /identity/], weight: 0.88 },
+  { intent: 'impact', patterns: [/what breaks/, /what happens if/, /impact of/, /blast/, /affected by/, /dependents of/], weight: 0.97 },
+  { intent: 'auth', patterns: [/where.*login/, /where.*sign.?in/, /login start/, /sign.?in start/], weight: 0.88 },
   { intent: 'payment', patterns: [/payment/, /billing/, /checkout/, /invoice/, /subscription/], weight: 0.88 },
-  { intent: 'impact', patterns: [/what breaks/, /impact/, /blast/, /depends on/, /dependents/, /affect/], weight: 0.85 },
+  { intent: 'dependency', patterns: [/what depends/, /dependencies of/, /who uses/, /depend on/], weight: 0.82 },
   { intent: 'critical', patterns: [/critical/, /why is .* important/, /most critical/, /central hub/], weight: 0.85 },
   { intent: 'smell', patterns: [/smell/, /problem/, /issues/, /anti.?pattern/, /violation/], weight: 0.85 },
   { intent: 'list', patterns: [/^list/, /^show all/, /what are the/, /enumerate/], weight: 0.8 },
-  { intent: 'dependency', patterns: [/what depends/, /dependencies of/, /who uses/], weight: 0.82 },
 ];
 
 export function classifyIntent(query: string): IntentClassification {
@@ -348,7 +348,7 @@ function extractIntentTarget(q: string, intent: CopilotIntent): string | undefin
     health: [],
     auth: [],
     payment: [],
-    impact: [/what breaks if i change\s+/i, /impact of\s+/i, /what happens if i change\s+/i],
+    impact: [/what breaks if\s+/i, /what happens if\s+/i, /impact of\s+/i, /blast radius of\s+/i],
     list: [/^list\s+(all\s+)?/i, /^show\s+(all\s+)?/i, /^what are (the\s+)?/i],
     search: [/^find\s+/i, /^where is\s+/i, /^locate\s+/i, /^search\s+/i],
     critical: [/why is\s+/i, /why are\s+/i, /most critical\s+/i],
