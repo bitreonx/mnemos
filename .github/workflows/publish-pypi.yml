@@ -45,22 +45,22 @@ jobs:
       - name: Stage binary into PyPI package
         shell: bash
         run: |
-          mkdir -p packages/pypi/src/mnemos/_bundled
+          mkdir -p packages/pypi/src/mnemos_cli/_bundled
           if [ "${{ runner.os }}" = "Windows" ]; then
-            cp packages/cli/dist/mnemos-bin.exe   packages/pypi/src/mnemos/_bundled/mnemos-bin-windows-x64.exe
+            cp packages/cli/dist/mnemos-bin.exe   packages/pypi/src/mnemos_cli/_bundled/mnemos-bin-windows-x64.exe
           elif [ "${{ runner.os }}" = "macOS" ]; then
             ARCH=$(uname -m)
             if [ "$ARCH" = "arm64" ]; then
-              cp packages/cli/dist/mnemos-bin packages/pypi/src/mnemos/_bundled/mnemos-bin-macos-arm64
+              cp packages/cli/dist/mnemos-bin packages/pypi/src/mnemos_cli/_bundled/mnemos-bin-macos-arm64
             else
-              cp packages/cli/dist/mnemos-bin packages/pypi/src/mnemos/_bundled/mnemos-bin-macos-x64
+              cp packages/cli/dist/mnemos-bin packages/pypi/src/mnemos_cli/_bundled/mnemos-bin-macos-x64
             fi
           else
             ARCH=$(uname -m)
             if [ "$ARCH" = "aarch64" ]; then
-              cp packages/cli/dist/mnemos-bin packages/pypi/src/mnemos/_bundled/mnemos-bin-linux-arm64
+              cp packages/cli/dist/mnemos-bin packages/pypi/src/mnemos_cli/_bundled/mnemos-bin-linux-arm64
             else
-              cp packages/cli/dist/mnemos-bin packages/pypi/src/mnemos/_bundled/mnemos-bin-linux-x64
+              cp packages/cli/dist/mnemos-bin packages/pypi/src/mnemos_cli/_bundled/mnemos-bin-linux-x64
             fi
           fi
 
@@ -68,7 +68,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: binary-${{ runner.os }}
-          path: packages/pypi/src/mnemos/_bundled/
+          path: packages/pypi/src/mnemos_cli/_bundled/
 
   publish:
     name: publish to PyPI
@@ -90,9 +90,9 @@ jobs:
 
       - name: Stage binaries into package
         run: |
-          mkdir -p packages/pypi/src/mnemos/_bundled
-          cp -r dist-binaries/* packages/pypi/src/mnemos/_bundled/ || true
-          ls -la packages/pypi/src/mnemos/_bundled/
+          mkdir -p packages/pypi/src/mnemos_cli/_bundled
+          cp -r dist-binaries/* packages/pypi/src/mnemos_cli/_bundled/ || true
+          ls -la packages/pypi/src/mnemos_cli/_bundled/
 
       - name: Build wheel
         working-directory: packages/pypi
