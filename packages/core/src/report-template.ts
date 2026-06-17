@@ -141,26 +141,28 @@ const STYLES = REPORT_CSS + `
 
   .toggle {
     display: inline-flex;
-    padding: 3px;
-    background: var(--surface-2);
-    border-radius: 999px;
-    border: 1px solid var(--border);
+    padding: 2px;
+    background: var(--color-surface-2);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
   }
   .toggle button {
     appearance: none;
     border: 0;
     background: transparent;
     font: inherit;
-    color: var(--text-2);
-    padding: 5px 12px;
-    border-radius: 999px;
+    color: var(--color-fg-muted);
+    padding: 6px 12px;
+    border-radius: var(--radius-xs);
     cursor: pointer;
     font-size: 12.5px;
     font-weight: 500;
+    transition: color 0.15s var(--ease-out), background 0.15s var(--ease-out);
   }
+  .toggle button:hover { color: var(--color-fg); }
   .toggle button.active {
-    background: var(--surface);
-    color: var(--text);
+    background: var(--color-surface);
+    color: var(--color-fg);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
   }
 
@@ -245,9 +247,9 @@ const STYLES = REPORT_CSS + `
   }
 
   .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
     padding: 22px;
     box-shadow: var(--shadow);
   }

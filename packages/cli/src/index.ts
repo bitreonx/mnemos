@@ -360,6 +360,7 @@ program
       }
       spinner.succeed(chalk.green('Report generated'));
 
+      printMnemosBanner('Intelligence report — dashboard-aligned HTML');
       printArtifactLegend();
       printReaderModes();
       printReportPaths(indexPath, outputDir);
