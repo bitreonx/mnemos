@@ -105,10 +105,11 @@ export function buildDisciplineSkillMd(): string {
  * embeds the rules inline so it works as a true drop-in with no built repo.
  */
 export function buildFableMindsetSkillMd(): string {
-  const rules = buildAgentDisciplineRules()
-    // drop the leading "## Agent Discipline" heading; we add our own H1 + frontmatter
-    .slice(2)
-    .join('\n')
+  const allRules = buildAgentDisciplineRules()
+  // Drop the heading and the ethos preamble (we state our own intro above);
+  // keep from the decision loop onward so nothing is duplicated.
+  const loopStart = allRules.findIndex((l) => l.startsWith('### Decision loop'))
+  const rules = allRules.slice(loopStart >= 0 ? loopStart : 0).join('\n')
   return `---
 name: fable-mindset
 description: Adopt Fable-grade working discipline on every turn — reason before acting, ground in real state before editing, verify changes with the real test, recover from failures with method instead of retrying blind, and report outcomes honestly. Use to lift any model (Opus 4.8, Sonnet, etc.) toward the disciplined habits measured across 4,665 public Fable 5 traces. Not a capability transplant — it ports the habits, not the weights.

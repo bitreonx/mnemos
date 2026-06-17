@@ -26,6 +26,7 @@ import {
   printCompressStats,
   printSuccessLine,
   printInfoLine,
+  printWarnLine,
 } from './output/terminal.js';
 import {
   build,
@@ -93,10 +94,29 @@ async function loadGraphFromMemory(outputDir: string): Promise<MnemosGraph | und
   return graph;
 }
 
+/**
+ * Load the memory model or exit with a single, consistent, actionable message.
+ * Every command that reads a built model should funnel through here so the
+ * "not built yet" experience is identical everywhere.
+ */
+async function requireMemoryModel(root: string): Promise<NonNullable<Awaited<ReturnType<typeof loadMemoryModel>>>> {
+  const loaded = await loadMemoryModel(root);
+  if (!loaded) {
+    console.log('');
+    printWarnLine('No memory model found for this repository.');
+    printInfoLine(`Run ${chalk.cyan('mnemos build .')} first (or just ${chalk.cyan('npx mnemos .')} for the full experience).`);
+    process.exit(1);
+  }
+  return loaded;
+}
+
 program
   .name('mnemos')
-  .description('The memory layer for software')
-  .version('0.1.0');
+  .description('The memory layer for software — pure Node, no Python or other runtime required.')
+  .version(MNEMOS_VERSION, '-V, --version', 'Print the Mnemos version')
+  .showHelpAfterError('(run `mnemos --help` to see all commands)')
+  .showSuggestionAfterError(true)
+  .configureHelp({ sortSubcommands: true });
 
 program
   .command('build [path]')
@@ -187,12 +207,7 @@ program
   .option('-p, --path <path>', 'Repository path', '.')
   .action(async (query, options) => {
     const root = path.resolve(options.path);
-    const loaded = await loadMemoryModel(root);
-
-    if (!loaded) {
-      console.log(chalk.yellow('No memory model found. Run `mnemos build .` first.'));
-      process.exit(1);
-    }
+    const loaded = await requireMemoryModel(root);
 
     const { memory } = loaded;
     const domain = findDomain(memory.domains, query);
@@ -231,12 +246,7 @@ program
   .option('-t, --type <type>', 'Filter by type (request, event, dependency, user_journey)')
   .action(async (query, options) => {
     const root = path.resolve(options.path);
-    const loaded = await loadMemoryModel(root);
-
-    if (!loaded) {
-      console.log(chalk.yellow('No memory model found. Run `mnemos build .` first.'));
-      process.exit(1);
-    }
+    const loaded = await requireMemoryModel(root);
 
     let flows = loaded.memory.flows;
     if (options.type) flows = flows.filter((f) => f.type === options.type);
@@ -259,12 +269,7 @@ program
   .option('-p, --path <path>', 'Repository path', '.')
   .action(async (node, options) => {
     const root = path.resolve(options.path);
-    const loaded = await loadMemoryModel(root);
-
-    if (!loaded) {
-      console.log(chalk.yellow('No memory model found. Run `mnemos build .` first.'));
-      process.exit(1);
-    }
+    const loaded = await requireMemoryModel(root);
 
     const spinner = ora('Rebuilding graph for impact analysis...').start();
 
@@ -305,12 +310,7 @@ program
   .option('-p, --path <path>', 'Repository path', '.')
   .action(async (options) => {
     const root = path.resolve(options.path);
-    const loaded = await loadMemoryModel(root);
-
-    if (!loaded) {
-      console.log(chalk.yellow('No memory model found. Run `mnemos build .` first.'));
-      process.exit(1);
-    }
+    const loaded = await requireMemoryModel(root);
 
     const contextDir = path.join(loaded.outputDir, 'context');
     console.log(chalk.green('AI context package ready:'));
@@ -336,12 +336,7 @@ program
   .option('--open', 'Open the report in the default browser after generation', false)
   .action(async (targetPath = '.', options) => {
     const root = path.resolve(options.path && options.path !== '.' ? options.path : targetPath);
-    const loaded = await loadMemoryModel(root);
-
-    if (!loaded) {
-      console.log(chalk.yellow('No memory model found. Run `mnemos build .` first.'));
-      process.exit(1);
-    }
+    const loaded = await requireMemoryModel(root);
 
     const spinner = ora('Generating intelligence report...').start();
 
@@ -398,11 +393,7 @@ program
       }
     }
 
-    const loaded = await loadMemoryModel(root);
-    if (!loaded) {
-      console.log(chalk.yellow('No memory model found.'));
-      process.exit(1);
-    }
+    const loaded = await requireMemoryModel(root);
 
     const { outputDir } = loaded;
     console.log('');
@@ -434,12 +425,7 @@ program
 
     if (isRepoTarget) {
       const root = path.resolve(target && target !== '.' ? target : repoRoot);
-      const loaded = await loadMemoryModel(root);
-
-      if (!loaded) {
-        console.log(chalk.yellow('No memory model found. Run `mnemos build .` first.'));
-        process.exit(1);
-      }
+      const loaded = await requireMemoryModel(root);
 
       const result = explainRepository(loaded.memory);
       if (options.json) {
@@ -451,11 +437,7 @@ program
     }
 
     const root = repoRoot;
-    const loaded = await loadMemoryModel(root);
-    if (!loaded) {
-      console.log(chalk.yellow('No memory model found. Run `mnemos build .` first.'));
-      process.exit(1);
-    }
+    const loaded = await requireMemoryModel(root);
 
     const graph = await loadGraphFromMemory(loaded.outputDir);
     const result = explainNode(loaded.memory, target, graph);
@@ -473,12 +455,7 @@ program
   .option('--json', 'Output as JSON')
   .action(async (targetPath = '.', options) => {
     const root = path.resolve(options.path && options.path !== '.' ? options.path : targetPath);
-    const loaded = await loadMemoryModel(root);
-
-    if (!loaded) {
-      console.log(chalk.yellow('No memory model found. Run `npx mnemos .` first.'));
-      process.exit(1);
-    }
+    const loaded = await requireMemoryModel(root);
 
     const dna = buildDnaReport(loaded.memory);
     if (options.json) {
@@ -497,12 +474,7 @@ program
   .option('--json', 'Output as JSON')
   .action(async (targetPath = '.', options) => {
     const root = path.resolve(options.path && options.path !== '.' ? options.path : targetPath);
-    const loaded = await loadMemoryModel(root);
-
-    if (!loaded) {
-      console.log(chalk.yellow('No memory model found. Run `mnemos build .` first.'));
-      process.exit(1);
-    }
+    const loaded = await requireMemoryModel(root);
 
     const guide = buildOnboardGuide(loaded.memory);
     if (options.json) {
@@ -521,12 +493,7 @@ program
   .option('--json', 'Output as JSON')
   .action(async (diffArg, options) => {
     const root = path.resolve(options.path);
-    const loaded = await loadMemoryModel(root);
-
-    if (!loaded) {
-      console.log(chalk.yellow('No memory model found. Run `mnemos build .` first.'));
-      process.exit(1);
-    }
+    const loaded = await requireMemoryModel(root);
 
     let diffContent = diffArg;
     if (options.file) {
@@ -548,12 +515,7 @@ program
   .option('-p, --path <path>', 'Repository path (alias of positional)', '.')
   .action(async (targetPath = '.', options) => {
     const root = path.resolve(options.path && options.path !== '.' ? options.path : targetPath);
-    const loaded = await loadMemoryModel(root);
-
-    if (!loaded) {
-      console.log(chalk.yellow('No memory model found. Run `mnemos build .` first.'));
-      process.exit(1);
-    }
+    const loaded = await requireMemoryModel(root);
 
     const score = computeMemoryScore(loaded.memory);
 
@@ -582,12 +544,7 @@ program
   .option('--json', 'Output as JSON')
   .action(async (targetPath = '.', options) => {
     const root = path.resolve(options.path && options.path !== '.' ? options.path : targetPath);
-    const loaded = await loadMemoryModel(root);
-
-    if (!loaded) {
-      console.log(chalk.yellow('No memory model found. Run `npx mnemos .` first.'));
-      process.exit(1);
-    }
+    const loaded = await requireMemoryModel(root);
 
     if (options.json) {
       console.log(JSON.stringify(buildArchitectureNarrative(loaded.memory), null, 2));
@@ -605,12 +562,7 @@ program
   .option('-o, --output <dir>', 'Output directory', 'snapshots')
   .action(async (targetPath = '.', options) => {
     const root = path.resolve(options.path && options.path !== '.' ? options.path : targetPath);
-    const loaded = await loadMemoryModel(root);
-
-    if (!loaded) {
-      console.log(chalk.yellow('No memory model found. Run `npx mnemos .` first.'));
-      process.exit(1);
-    }
+    const loaded = await requireMemoryModel(root);
 
     const spinner = ora('Generating shareable snapshots...').start();
 
@@ -638,12 +590,7 @@ program
   .option('-p, --path <path>', 'Repository path', '.')
   .action(async (question, options) => {
     const root = path.resolve(options.path);
-    const loaded = await loadMemoryModel(root);
-
-    if (!loaded) {
-      console.log(chalk.yellow('No memory model found. Run `mnemos build .` first.'));
-      process.exit(1);
-    }
+    const loaded = await requireMemoryModel(root);
 
     const graph = await loadGraphFromMemory(loaded.outputDir);
     const result = queryGraph(loaded.memory, question, graph);
@@ -666,12 +613,7 @@ program
   .option('--json', 'Output as JSON')
   .action(async (from, to, options) => {
     const root = path.resolve(options.path);
-    const loaded = await loadMemoryModel(root);
-
-    if (!loaded) {
-      console.log(chalk.yellow('No memory model found. Run `mnemos build .` first.'));
-      process.exit(1);
-    }
+    const loaded = await requireMemoryModel(root);
 
     const graph = await loadGraphFromMemory(loaded.outputDir);
     if (!graph) {
@@ -695,12 +637,7 @@ program
   .option('-p, --path <path>', 'Repository path', '.')
   .action(async (question, options) => {
     const root = path.resolve(options.path);
-    const loaded = await loadMemoryModel(root);
-
-    if (!loaded) {
-      console.log(chalk.yellow('No memory model found. Run `mnemos build .` first.'));
-      process.exit(1);
-    }
+    const loaded = await requireMemoryModel(root);
 
     const [graph, searchIndex] = await Promise.all([
       loadGraphFromMemory(loaded.outputDir),
@@ -810,12 +747,7 @@ program
       return;
     }
 
-    const loaded = await loadMemoryModel(root);
-
-    if (!loaded) {
-      console.log(chalk.yellow('No memory model found. Run `npx mnemos .` first.'));
-      process.exit(1);
-    }
+    const loaded = await requireMemoryModel(root);
 
     const platform = options.platform as string;
     if (platform !== 'all' && !ALL_PLATFORMS.includes(platform as (typeof ALL_PLATFORMS)[number])) {
@@ -929,12 +861,7 @@ program
   .option('--claude', 'Output Claude project instructions instead')
   .action(async (targetPath = '.', options) => {
     const root = path.resolve(options.path && options.path !== '.' ? options.path : targetPath);
-    const loaded = await loadMemoryModel(root);
-
-    if (!loaded) {
-      console.log(chalk.yellow('No memory model found. Run `npx mnemos .` first.'));
-      process.exit(1);
-    }
+    const loaded = await requireMemoryModel(root);
 
     const memoryScore = computeMemoryScore(loaded.memory).overall;
     const exports = buildAgentExports({
@@ -962,12 +889,7 @@ program
   .option('--mcp', 'Start MCP stdio server instead of REST API')
   .action(async (targetPath = '.', options) => {
     const root = path.resolve(options.path && options.path !== '.' ? options.path : targetPath);
-    const loaded = await loadMemoryModel(root);
-
-    if (!loaded) {
-      console.log(chalk.yellow('No memory model found. Run `mnemos build .` first.'));
-      process.exit(1);
-    }
+    const loaded = await requireMemoryModel(root);
 
     if (options.mcp) {
       console.error(chalk.bold(`Mnemos MCP v${MNEMOS_VERSION} (stdio)`));
@@ -1019,12 +941,7 @@ program
       return;
     }
 
-    const loaded = await loadMemoryModel(root);
-
-    if (!loaded) {
-      console.error(chalk.yellow('No memory model found. Run `mnemos build .` first.'));
-      process.exit(1);
-    }
+    const loaded = await requireMemoryModel(root);
 
     console.error(chalk.bold(`Mnemos MCP v${MNEMOS_VERSION}`));
     console.error(chalk.dim(`Repository: ${loaded.memory.repository}`));
@@ -1136,12 +1053,7 @@ async function runExportCommand(
   options: { path?: string; output?: string },
 ): Promise<void> {
   const root = path.resolve(options.path && options.path !== '.' ? options.path : targetPath);
-  const loaded = await loadMemoryModel(root);
-
-  if (!loaded) {
-    console.log(chalk.yellow('No memory model found. Run `mnemos build .` first.'));
-    process.exit(1);
-  }
+  const loaded = await requireMemoryModel(root);
 
   const outputDir = options.output
     ? path.isAbsolute(options.output)
@@ -1218,12 +1130,7 @@ program
   .option('-o, --output <dir>', 'Output directory', 'agents')
   .action(async (targetPath = '.', options) => {
     const root = path.resolve(options.path && options.path !== '.' ? options.path : targetPath);
-    const loaded = await loadMemoryModel(root);
-
-    if (!loaded) {
-      console.log(chalk.yellow('No memory model found. Run `mnemos build .` first.'));
-      process.exit(1);
-    }
+    const loaded = await requireMemoryModel(root);
 
     const spinner = ora('Exporting agent artifacts...').start();
 
@@ -1470,6 +1377,47 @@ program
   });
 
 program
+  .command('doctor [path]')
+  .description('Check that the environment is ready to run Mnemos (no Python required)')
+  .option('-p, --path <path>', 'Repository path (alias of positional)', '.')
+  .action(async (targetPath = '.', options) => {
+    const root = path.resolve(options.path && options.path !== '.' ? options.path : targetPath);
+
+    printMnemosBanner('Doctor — environment readiness check');
+
+    const nodeMajor = Number(process.versions.node.split('.')[0]);
+    const nodeOk = nodeMajor >= 18;
+
+    printSection('Runtime');
+    console.log(
+      `  ${nodeOk ? chalk.green('✓') : chalk.red('✗')} Node.js ${process.versions.node}` +
+        chalk.dim(nodeOk ? '' : '  (Mnemos needs Node 18+)'),
+    );
+    printSuccessLine(`Mnemos v${MNEMOS_VERSION}`);
+    printSuccessLine('Analysis engine is pure TypeScript — no Python, JVM, or other runtime needed.');
+
+    printSection('Repository');
+    const loaded = await loadMemoryModel(root);
+    if (loaded) {
+      printSuccessLine(`Memory model found  ${chalk.dim(loaded.outputDir)}`);
+      printMetricRow('Files scanned', loaded.memory.stats.filesScanned.toLocaleString());
+      printMetricRow('Domains', loaded.memory.domains.length);
+      printMetricRow('Flows', loaded.memory.flows.length);
+    } else {
+      printWarnLine('No memory model built yet.');
+      printInfoLine(`Run ${chalk.cyan('mnemos build .')} to create one.`);
+    }
+
+    printSection('Optional');
+    console.log(
+      `  ${chalk.dim('·')} Python is ${chalk.bold('not')} required for analysis. ` +
+        chalk.dim('It is only used by the optional `mnemos discipline` research kit.'),
+    );
+
+    if (!nodeOk) process.exit(1);
+  });
+
+program
   .argument('[path]', 'Repository path', '.')
   .option('--no-open', 'Do not open browser after analysis')
   .option('-v, --verbose', 'Show detailed progress')
@@ -1477,4 +1425,4 @@ program
     await runDefaultExperience(targetPath, options);
   });
 
-program.parse();
+program.parseAsync();
