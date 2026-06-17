@@ -26,11 +26,14 @@ Mnemos is **pre-launch OSS** — we are polishing before growth, not pretending 
 | **CLI** | Stable | `npx mnemos .`, `sync`, `wrap`, `pack`, `serve`, `mcp` |
 | **HTML report** | Stable | Dashboard-aligned design, offline shareable |
 | **AI Pack v1 + MCP** | Stable | Built for Claude Code, Cursor, Codex |
+| **Fable Mindset (New Gen)** | Stable | `fable-mindset` skill + discipline rules; `mnemos discipline` measures the gap |
 | **Dashboard** | Preview | Cockpits work; layout & panels still refining — [help welcome](CONTRIBUTING.md) |
 
 We dogfood Mnemos on this repo. Creator marketing comes **after** dashboard polish — not before.
 
 **Claude Code first:** `mnemos setup --platform claude` → skill + `CLAUDE.md` context. See [Claude OSS application brief](docs/claude-oss-application.md) if you are evaluating ecosystem impact.
+
+**New Gen — the Fable Mindset:** Mnemos distills the *working discipline* observed across [4,665 public Fable 5 traces](https://huggingface.co/datasets/Glint-Research/Fable-5-traces) into an installable skill, so Opus 4.8, Sonnet — any agent — adopts Fable-grade habits: reason before acting, verify before claiming done, recover with method. It **ports the habits, not the weights** — no model retraining, no capability transplant. Measure your own gap with `mnemos discipline --opus`.
 
 ---
 

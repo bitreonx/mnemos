@@ -16,7 +16,9 @@ Public roadmap for Mnemos 1.x. Items may shift based on community feedback.
 - [x] FAANG-grade CLI terminal output (`packages/cli/src/output/`)
 - [x] Dashboard preview banner (report + CLI are stable surfaces)
 - [x] **Fable 5 agent discipline** — mindset rules in `mnemos setup`, dataset tools in `scripts/discipline/`
+- [x] **`fable-mindset` skill** — standalone Claude Code skill + `mnemos discipline` CLI research kit
 - [x] Claude OSS application brief (`docs/claude-oss-application.md`)
+- [x] Marketing site **New Gen** section (`MNEMOS-WEB/src/sections/FableMindset.tsx`)
 
 ## In progress
 

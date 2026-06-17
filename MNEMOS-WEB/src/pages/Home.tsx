@@ -4,6 +4,7 @@ import WhyMnemos from "../sections/WhyMnemos";
 import AiReadiness from "../sections/AiReadiness";
 import RepositoryDNA from "../sections/RepositoryDNA";
 import ThreeModes from "../sections/ThreeModes";
+import FableMindset from "../sections/FableMindset";
 import ArchitectureCanvas from "../sections/ArchitectureCanvas";
 import Benchmarks from "../sections/Benchmarks";
 import Comparison from "../sections/Comparison";
@@ -18,6 +19,7 @@ export default function Home() {
       <AiReadiness />
       <RepositoryDNA />
       <ThreeModes />
+      <FableMindset />
       <ArchitectureCanvas />
       <Benchmarks />
       <Comparison />

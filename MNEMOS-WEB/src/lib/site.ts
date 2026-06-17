@@ -16,6 +16,7 @@ export const SITE = {
 export const NAV_LINKS = [
   { label: "Why Mnemos", href: "#why" },
   { label: "Modes", href: "#modes" },
+  { label: "New Gen", href: "#newgen" },
   { label: "Benchmarks", href: "#benchmarks" },
   { label: "Compare", href: "#compare" },
   { label: "Docs", href: "/docs", route: true },
@@ -152,3 +153,41 @@ export const CHAT_LINES = [
   "Explore the memory layer for software.",
   "Don't let your code be forgotten.",
 ] as const;
+
+/**
+ * "New Gen" — the Fable Mindset layer.
+ * Honest, method-based framing: Mnemos ports Fable 5's working *discipline*
+ * into any agent. It does not retrain models or transplant raw capability.
+ * Numbers are distilled from 4,665 public Fable 5 traces (Glint-Research).
+ */
+export const FABLE = {
+  dataset: "https://huggingface.co/datasets/Glint-Research/Fable-5-traces",
+  datasetLabel: "4,665 public Fable 5 traces",
+  honesty:
+    "Mnemos ports Fable 5's working discipline into any agent — it does not retrain models or transplant raw capability. It makes a model *work* with Fable's habits, not become Fable.",
+  // The "secret sauce" revealed by the decrypt animation: the decision loop.
+  decisionLoop: [
+    { step: "GROUND", desc: "Establish real state — git status, targeted grep, read the file before touching it." },
+    { step: "REASON", desc: "State the goal, the hypothesis, and the plan before the first tool call." },
+    { step: "ACT", desc: "Take the next deliberate step; batch only what is truly independent." },
+    { step: "OBSERVE", desc: "Actually read what came back — never barrel through a pre-planned sequence." },
+    { step: "RE-EVALUATE", desc: "Update the plan from the evidence, not the other way around." },
+    { step: "VERIFY", desc: "Run the project's real test / build / lint on what you changed." },
+    { step: "NARRATE", desc: "Report outcomes faithfully — never claim success you did not verify." },
+  ],
+  // Measured habit gap — distilled from the dataset appendix. Evidence, not vibes.
+  habits: [
+    { habit: "Reasons before acting", source: 92, baseline: 40 },
+    { habit: "Re-evaluates after each result", source: 87, baseline: 39 },
+    { habit: "Reasons on nearly every turn", source: 86, baseline: 39 },
+    { habit: "Reads the file before editing", source: 88, baseline: 88 },
+  ],
+  // Token savings — all from real, shipping mechanisms.
+  savings: [
+    { value: 10, suffix: "×", label: "Session debloat", hint: "A 32 MB Claude log collapses to ~1.1 MB — the signal under the echo." },
+    { value: 94, suffix: "%", label: "Context vs raw dumps", hint: "Agents read the compact DNA pack instead of grepping the whole repo." },
+    { value: 0, suffix: "", label: "Cloud / API keys", hint: "Local-first. Nothing leaves your machine.", display: "Zero" },
+  ],
+  install: "npx mnemos . && mnemos setup --platform claude",
+  skillNote: "Installs the fable-mindset skill + CLAUDE.md context so Opus, Sonnet — any agent — adopts the discipline.",
+} as const;
