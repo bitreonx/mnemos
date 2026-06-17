@@ -9,6 +9,8 @@ import {
   buildClaudeMdSection,
   stripMnemosSection,
 } from './ai-toolkit.js';
+import { buildDisciplineCursorRule, buildFableMindsetSkillMd } from './discipline/agent-discipline.js';
+import { loadFableMindsetMd } from './discipline/fable-mindset.js';
 import { buildMcpServerConfig, formatMcpConfigJson } from './mcp-config.js';
 import type { MemoryModel } from './types.js';
 import type { AgentContext } from './agent-mode.js';
@@ -22,9 +24,13 @@ export async function writeAiToolkit(toolkit: AiToolkit, outputDir: string): Pro
   const integrationsDir = path.join(outputDir, 'integrations');
   await mkdir(integrationsDir, { recursive: true });
 
+  const mindsetMd = await loadFableMindsetMd();
+
   const files: Record<string, string> = {
     'AGENTS.md': toolkit.agentsMd,
     'cursor-rule.mdc': toolkit.cursorRule,
+    'discipline-rule.mdc': buildDisciplineCursorRule(),
+    'fable-mindset.md': mindsetMd,
     'ai-prompt.md': toolkit.aiPrompt,
     'claude-project.md': toolkit.claudeProjectInstructions,
     'suggested-prompts.json': JSON.stringify(
@@ -70,9 +76,9 @@ export const ALL_PLATFORMS: Platform[] = [
 
 /** Relative paths written by each platform (for uninstall). */
 export const PLATFORM_FILES: Record<Platform, string[]> = {
-  cursor: ['.cursor/rules/mnemos-architecture.mdc', '.cursor/mcp.json'],
+  cursor: ['.cursor/rules/mnemos-architecture.mdc', '.cursor/rules/mnemos-discipline.mdc', '.cursor/mcp.json'],
   kiro: ['.kiro/skills/mnemos/SKILL.md', '.kiro/steering/mnemos.md'],
-  claude: ['.claude/skills/mnemos/SKILL.md', 'CLAUDE.md'],
+  claude: ['.claude/skills/mnemos/SKILL.md', '.claude/skills/fable-mindset/SKILL.md', 'CLAUDE.md'],
   codex: ['.codex/skills/mnemos/SKILL.md', 'AGENTS.md'],
   vscode: ['.vscode/mnemos.instructions.md'],
   aider: ['AGENTS.md'],
@@ -132,6 +138,7 @@ async function installPlatform(
   const writers: Record<Platform, () => Promise<void>> = {
     cursor: async () => {
       await writeIfMissing(root, '.cursor/rules/mnemos-architecture.mdc', toolkit.cursorRule, force, written, skipped);
+      await writeIfMissing(root, '.cursor/rules/mnemos-discipline.mdc', buildDisciplineCursorRule(), force, written, skipped);
       await mergeMcpConfig(root, force, written, skipped);
     },
     kiro: async () => {
@@ -140,6 +147,7 @@ async function installPlatform(
     },
     claude: async () => {
       await writeIfMissing(root, '.claude/skills/mnemos/SKILL.md', skillMd, force, written, skipped);
+      await writeIfMissing(root, '.claude/skills/fable-mindset/SKILL.md', buildFableMindsetSkillMd(), force, written, skipped);
       await appendOrWriteSection(root, 'CLAUDE.md', buildClaudeMdSection(memory, context), force, written, skipped);
     },
     codex: async () => {

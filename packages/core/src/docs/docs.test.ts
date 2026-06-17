@@ -108,5 +108,7 @@ describe('documentation graphs', () => {
     assert.match(md, /Extractor routing/);
     assert.match(md, /Language families/);
     assert.match(md, new RegExp(String(SUPPORTED_LANGUAGE_COUNT)));
+    assert.match(md, /Agent Discipline/);
+    assert.match(md, /Re-evaluate/);
   });
 });

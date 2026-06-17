@@ -7,7 +7,7 @@
 [![AI Pack](https://img.shields.io/badge/AI%20Pack-v1.0.0-f59e0b.svg)](docs/ai-pack.md)
 [![Status](https://img.shields.io/badge/status-polishing%20core-6366f1.svg)](#project-status)
 
-[Documentation](docs/architecture.md) · [Graphs](docs/GRAPHS.md) · [Languages](docs/LANGUAGES.md) · [AI Pack v1](docs/ai-pack.md) · [Modes](docs/modes.md) · [Benchmarks](mnemos-bench/) · [Contributing](docs/contributing.md)
+[Documentation](docs/architecture.md) · [Graphs](docs/GRAPHS.md) · [Languages](docs/LANGUAGES.md) · [AI Pack v1](docs/ai-pack.md) · [Fable discipline](docs/fable-discipline.md) · [Modes](docs/modes.md) · [Benchmarks](mnemos-bench/) · [Contributing](docs/contributing.md)
 
 ```bash
 npx mnemos .
@@ -215,7 +215,7 @@ Details: [docs/architecture.md](docs/architecture.md)
 | `mnemos sync` | Auto-rebuild graph on file changes (local index) |
 | `mnemos wrap -- <cmd>` | Token-compressed command output for AI agents |
 | `mnemos ask "…"` | Architecture copilot |
-| `mnemos setup` | Install AGENTS.md, Cursor rules, **Claude Code skill** |
+| `mnemos setup` | Install AGENTS.md, Cursor rules, **Claude Code + Fable discipline skills** |
 | `mnemos explain` | Plain-language repo summary |
 | `mnemos score` | Health score breakdown |
 | `mnemos flows` | List execution flows |

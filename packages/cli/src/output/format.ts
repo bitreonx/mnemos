@@ -47,7 +47,8 @@ export function printPrimaryNextSteps(): void {
   console.log(chalk.bold('Recommended next steps'));
   console.log(`  ${chalk.cyan('mnemos report --open')}  ${chalk.dim('— open the polished HTML report (stable)')}`);
   console.log(`  ${chalk.cyan('mnemos pack')}           ${chalk.dim('— export AI Pack v1 JSON for agents')}`);
-  console.log(`  ${chalk.cyan('mnemos setup')}         ${chalk.dim('— install AGENTS.md + Cursor rules')}`);
+  console.log(`  ${chalk.cyan('mnemos setup')}         ${chalk.dim('— install AGENTS.md + Cursor rules + Fable discipline')}`);
+  console.log(`  ${chalk.cyan('mnemos discipline')}    ${chalk.dim('— study Fable 5 habits vs your Opus sessions')}`);
   console.log(`  ${chalk.cyan('mnemos ui')}            ${chalk.dim('— interactive dashboard (preview)')}`);
 }
 

@@ -1,6 +1,3 @@
-import { spawn } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
-import path from 'node:path';
 import type { ParsedCall, ParsedImport, ParsedSymbol } from '../types.js';
 
 export interface PythonAstExtraction {
@@ -8,61 +5,6 @@ export interface PythonAstExtraction {
   symbols: ParsedSymbol[];
   calls: ParsedCall[];
   exports: string[];
-}
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const PYTHON_PARSER_PATH = path.join(__dirname, 'python-ast-parser.py');
-
-/**
- * Use Python's native ast module for accurate parsing.
- * Falls back to regex-based parsing if Python is unavailable.
- */
-async function extractPythonAstNative(content: string): Promise<PythonAstExtraction | null> {
-  return new Promise((resolve) => {
-    const python = spawn('python3', [PYTHON_PARSER_PATH], {
-      timeout: 5000,
-      stdio: ['pipe', 'pipe', 'pipe'],
-    });
-
-    let stdout = '';
-    let stderr = '';
-
-    python.stdout.on('data', (data) => {
-      stdout += data.toString();
-    });
-
-    python.stderr.on('data', (data) => {
-      stderr += data.toString();
-    });
-
-    python.on('close', (code) => {
-      if (code === 0 && stdout) {
-        try {
-          const result = JSON.parse(stdout);
-          if (result.success) {
-            resolve({
-              imports: result.imports,
-              symbols: result.symbols,
-              calls: result.calls,
-              exports: result.exports,
-            });
-            return;
-          }
-        } catch {
-          // Fall through to null
-        }
-      }
-      resolve(null);
-    });
-
-    python.on('error', () => {
-      resolve(null);
-    });
-
-    // Send source code to Python parser
-    python.stdin.write(content);
-    python.stdin.end();
-  });
 }
 
 const CALL_SKIP = new Set([
@@ -92,9 +34,11 @@ function normalizeSource(module: string): string {
 }
 
 /**
- * Regex-based fallback parser for when Python ast module is unavailable.
+ * Pure-TypeScript Python source parser. Extracts imports, symbols, calls, and
+ * exports via regex — no Python runtime required, so Mnemos analyzes Python
+ * repositories without any external interpreter on PATH.
  */
-function extractPythonAstFallback(content: string): PythonAstExtraction | null {
+function parsePythonSource(content: string): PythonAstExtraction | null {
   try {
     const imports: ParsedImport[] = [];
     const symbols: ParsedSymbol[] = [];
@@ -203,5 +147,5 @@ function extractPythonAstFallback(content: string): PythonAstExtraction | null {
 }
 
 export function extractPythonAst(content: string): PythonAstExtraction | null {
-  return extractPythonAstFallback(content);
+  return parsePythonSource(content);
 }

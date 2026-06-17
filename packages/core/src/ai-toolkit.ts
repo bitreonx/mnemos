@@ -12,6 +12,7 @@ import {
   buildRepositoryLanguagePieMermaid,
 } from './languages/docs.js';
 import { buildDomainGraphMermaid } from './graph/mermaid.js';
+import { buildAgentDisciplineRules, buildDisciplineSkillSection } from './discipline/agent-discipline.js';
 
 export interface AiToolkit {
   agentsMd: string;
@@ -186,6 +187,7 @@ export function buildAgentsMd(
     '- Run `mnemos review <diff>` before opening a PR to catch blast-radius issues.',
     '- Point Cursor/Claude at `.mnemos/project.dna.json` via @-mention or project rules.',
     '',
+    ...buildAgentDisciplineRules(),
     '## Mnemos Commands',
     '',
     '```bash',
@@ -231,6 +233,8 @@ Before reading source files or making changes, load repository context from Mnem
 - Keep changes within the relevant capability/domain boundary
 - After significant edits, suggest running \`mnemos build\` to refresh memory
 
+${buildAgentDisciplineRules().join('\n')}
+
 ## Vibe-coder prompts that work well
 
 ${buildSuggestedPrompts(memory)
@@ -275,6 +279,7 @@ export function buildAiPrompt(memory: MemoryModel, context: AgentContext): strin
     '- Warn me about blast radius on central services',
     '- Keep suggestions aligned with existing domain boundaries',
     '',
+    ...buildAgentDisciplineRules().slice(2),
     'My question:',
   );
 
@@ -297,6 +302,8 @@ Central domains: ${context.mental_model.central_domains.join(', ')}
 
 When I ask architecture questions, answer from Mnemos DNA first.
 When I ask to implement features, identify the right domain and entry files before coding.
+
+${buildDisciplineSkillSection()}
 `;
 }
 
@@ -346,6 +353,8 @@ ${files}
 - Check blast radius before editing central services: \`mnemos ask "what breaks if [service] changes?"\`
 - Prefer domain entry points over whole-repo grepping
 - Run \`mnemos build\` after significant architectural changes
+
+${buildAgentDisciplineRules().join('\n')}
 
 ## Starter prompts
 

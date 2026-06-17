@@ -19,9 +19,9 @@
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && node -e \"const fs=require('fs');const p='dist/discipline';fs.mkdirSync(p,{recursive:true});fs.copyFileSync('src/discipline/fable-mindset.md',p+'/fable-mindset.md')\"",
     "build:test": "tsc -p tsconfig.test.json",
-    "test": "npm run build && npm run build:test && node --test dist/**/*.test.js"
+    "test": "npm run build && npm run build:test && node scripts/run-tests.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
