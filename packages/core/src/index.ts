@@ -198,4 +198,8 @@ export type { GraphSyncOptions, GraphSyncHandle } from './sync/graph-sync.js';
 export { compressCommandOutput, estimateTokens } from './proxy/compress-output.js';
 export type { CompressStats, CompressOptions } from './proxy/compress-output.js';
 export { compactJson, compactMarkdown } from './util/compact-json.js';
+export { routeQuery, buildRoutePlan } from './routing/route-query.js';
+export { optimizeContextWindow, extractSummary } from './routing/optimize-context.js';
+export { minimizeOverhead } from './routing/minimize-overhead.js';
+export type { RoutePlan, RouteQueryOptions, RoutedQueryResult, QueryBudget } from './routing/types.js';
 export { REPORT_CSS, REPORT_FONT_LINK, renderHealthRingHtml, healthRingTone } from './report/design-tokens.js';

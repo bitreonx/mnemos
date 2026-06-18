@@ -49,7 +49,6 @@ import {
   formatDnaReport,
   reviewDiff,
   formatReviewReport,
-  askCopilot,
   startMemoryServer,
   computeDomainHeatmap,
   buildArchitectureNarrative,
@@ -62,7 +61,7 @@ import {
   loadPersistedGraph,
   loadOrBuildSearchIndex,
   getNodeQueryIndex,
-  queryGraph,
+  routeQuery,
   findGraphPath,
   explainNode,
   formatPathResult,
@@ -85,6 +84,8 @@ import {
   type Mode as AiPackMode,
 } from '@mnemos/core';
 import type { MnemosGraph } from '@mnemos/core';
+import { readGlobalFlags, resolveRepoRoot } from './lib/context.js';
+import { renderQueryResult } from './lib/render.js';
 
 const program = new Command();
 
@@ -112,8 +113,8 @@ async function requireMemoryModel(root: string): Promise<NonNullable<Awaited<Ret
 
 program
   .name('mnemos')
-  .description('The memory layer for software — pure Node, no Python or other runtime required.')
-  .version(MNEMOS_VERSION, '-V, --version', 'Print the Mnemos version')
+  .description('Give AI a memory of your codebase — scan, compress, query.')
+  .version(MNEMOS_VERSION, '-V, --version', 'Print version')
   .showHelpAfterError('(run `mnemos --help` to see all commands)')
   .showSuggestionAfterError(true)
   .configureHelp({ sortSubcommands: true });
@@ -588,22 +589,26 @@ program
   .command('query <question>')
   .description('Graph-aware architecture query with traversal output')
   .option('-p, --path <path>', 'Repository path', '.')
+  .option('--json', 'Structured JSON output')
+  .option('-q, --quiet', 'Summary only')
+  .option('--compact', 'Aggressive token compression')
   .action(async (question, options) => {
-    const root = path.resolve(options.path);
+    const flags = readGlobalFlags(options);
+    const root = resolveRepoRoot(flags);
     const loaded = await requireMemoryModel(root);
 
-    const graph = await loadGraphFromMemory(loaded.outputDir);
-    const result = queryGraph(loaded.memory, question, graph);
+    const [graph, searchIndex] = await Promise.all([
+      loadGraphFromMemory(loaded.outputDir),
+      loadOrBuildSearchIndex(loaded.memory, loaded.outputDir),
+    ]);
 
-    console.log('');
-    console.log(chalk.bold('Mnemos Graph Query'));
-    console.log(chalk.dim(`Confidence: ${(result.confidence * 100).toFixed(0)}%`));
-    console.log('');
-    console.log(result.answer);
-    if (result.relatedNodes && result.relatedNodes.length > 0) {
-      console.log('');
-      console.log(chalk.dim(`Related nodes: ${result.relatedNodes.join(', ')}`));
-    }
+    const result = routeQuery(loaded.memory, question, {
+      graph,
+      searchIndex,
+      compact: flags.compact,
+    });
+
+    renderQueryResult(result, flags);
   });
 
 program
@@ -635,8 +640,12 @@ program
   .command('ask <question>')
   .description('Architecture copilot — ask questions about the repository')
   .option('-p, --path <path>', 'Repository path', '.')
+  .option('--json', 'Structured JSON output')
+  .option('-q, --quiet', 'Summary only')
+  .option('--compact', 'Aggressive token compression')
   .action(async (question, options) => {
-    const root = path.resolve(options.path);
+    const flags = readGlobalFlags(options);
+    const root = resolveRepoRoot(flags);
     const loaded = await requireMemoryModel(root);
 
     const [graph, searchIndex] = await Promise.all([
@@ -644,16 +653,13 @@ program
       loadOrBuildSearchIndex(loaded.memory, loaded.outputDir),
     ]);
 
-    const answer = askCopilot(loaded.memory, question, { graph, searchIndex });
-    console.log('');
-    console.log(chalk.bold('Mnemos Copilot'));
-    console.log(chalk.dim(`Confidence: ${(answer.confidence * 100).toFixed(0)}%${answer.tookMs != null ? ` · ${answer.tookMs}ms` : ''}`));
-    console.log('');
-    console.log(answer.answer);
-    if (answer.relatedTopics.length > 0) {
-      console.log('');
-      console.log(chalk.dim(`Related: ${answer.relatedTopics.join(', ')}`));
-    }
+    const result = routeQuery(loaded.memory, question, {
+      graph,
+      searchIndex,
+      compact: flags.compact,
+    });
+
+    renderQueryResult(result, flags);
   });
 
 program

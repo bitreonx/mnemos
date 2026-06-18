@@ -6,7 +6,8 @@ import { getNeighbors } from './graph/graph.js';
 import { resolveNodeQuery } from './graph/builder.js';
 import { loadMemoryModel, loadPersistedGraph } from './pipeline/build.js';
 import { loadOrBuildSearchIndex, searchMemory, type MemorySearchIndex } from './search/index.js';
-import { queryGraph, findGraphPath, explainNode, formatPathResult } from './graph-query.js';
+import { routeQuery } from './routing/route-query.js';
+import { findGraphPath, explainNode, formatPathResult } from './graph-query.js';
 import { analyzeImpact, formatImpactReport } from './analysis/impact.js';
 import { buildDnaReport, formatDnaReport } from './dna.js';
 import { explainRepository, formatExplainReport } from './explain.js';
@@ -339,33 +340,36 @@ export class MnemosRuntime {
     };
   }
 
-  async queryGraph(question: string): Promise<AgentEnvelope> {
+  async queryGraph(question: string, options: { compact?: boolean; tokenBudget?: number } = {}): Promise<AgentEnvelope> {
     const start = Date.now();
     const { memory, graph, searchIndex } = await this.load();
     if (!question.trim()) {
       throw new MnemosAgentError('INVALID_INPUT', 'Question cannot be empty.');
     }
 
-    const result = queryGraph(memory, question, graph, searchIndex);
-    const intent = classifyIntent(question).intent;
+    const result = routeQuery(memory, question, {
+      graph,
+      searchIndex,
+      compact: options.compact,
+      tokenBudget: options.tokenBudget,
+    });
 
     const markdown = [
-      `# Architecture Query`,
+      result.summary,
       '',
       result.answer,
       '',
-      result.relatedNodes?.length ? `**Graph nodes:** ${result.relatedNodes.join(' → ')}` : '',
-      result.paths?.length ? `**Paths found:** ${result.paths.length}` : '',
+      result.relatedTopics.length ? `Related: ${result.relatedTopics.slice(0, 5).join(' · ')}` : '',
       '',
-      `*Confidence: ${(result.confidence * 100).toFixed(0)}% · Intent: ${intent}*`,
+      `Confidence ${(result.confidence * 100).toFixed(0)}% · ${result.route} · ${result.tokensAfter} tokens`,
     ]
       .filter(Boolean)
       .join('\n');
 
-    return this.envelope('query_graph', result.answer.split('\n')[0] ?? result.answer, markdown, {
-      ...result,
-      intent,
-    }, { confidence: result.confidence, tookMs: Date.now() - start });
+    return this.envelope('query_graph', result.summary, markdown, result, {
+      confidence: result.confidence,
+      tookMs: Date.now() - start,
+    });
   }
 
   async getOnboard(): Promise<AgentEnvelope> {

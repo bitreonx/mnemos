@@ -1,14 +1,13 @@
 import chalk from 'chalk';
 import { COLORS } from './format.js';
 
-const WIDTH = 58;
+const WIDTH = 56;
 
-export function printMnemosBanner(subtitle = 'Memory layer for software'): void {
-  const accent = chalk.hex(COLORS.vibe);
+export function printMnemosBanner(subtitle = 'Give AI a memory of your codebase'): void {
+  const brand = chalk.hex('#863bff');
   console.log('');
-  console.log(accent('  ╭' + '─'.repeat(WIDTH) + '╮'));
-  console.log(accent('  │') + chalk.bold.white('  MNEMOS') + chalk.dim(`  ${subtitle}`));
-  console.log(accent('  ╰' + '─'.repeat(WIDTH) + '╯'));
+  console.log(`  ${brand('⚡')} ${chalk.bold.white('Mnemos')} ${chalk.dim('—')} ${chalk.dim(subtitle)}`);
+  console.log(chalk.dim('  ' + '─'.repeat(WIDTH)));
   console.log('');
 }
 

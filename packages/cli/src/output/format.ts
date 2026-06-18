@@ -2,10 +2,10 @@ import chalk from 'chalk';
 
 /** Mnemos CLI color tokens — keep in sync with report + dashboard accents. */
 export const COLORS = {
-  vibe: '#3ecf8e',
-  ai: '#6366f1',
-  coder: '#f59e0b',
-  accent: '#5e5ce6',
+  vibe: '#863bff',
+  ai: '#47bfff',
+  coder: '#6b1ad6',
+  accent: '#863bff',
 } as const;
 
 export function printCheck(label: string): void {
