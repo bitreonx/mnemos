@@ -29,6 +29,12 @@ export function buildImportMaps(
 
       if (!resolved) continue;
 
+      // Always remember the raw source → resolved file mapping. For named
+      // imports we also map each specifier. Side-effect / require / dynamic
+      // imports still need their source mapped so callers can wire file-to-file
+      // IMPORTS edges from CommonJS / barrel modules.
+      local.set(imp.source, resolved);
+
       if (imp.specifiers.length === 0 || imp.specifiers.includes('*side-effect*')) {
         local.set(imp.source, resolved);
       }

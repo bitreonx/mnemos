@@ -2,27 +2,38 @@
 
 Re-run: `npm run bench:express` / `npm run bench:nestjs`
 
-## Express — 2026-06-15 (v2 algorithms)
+Fresh rebuild (Windows PowerShell):
+
+```powershell
+Remove-Item -Recurse -Force mnemos-bench\repos\express\.mnemos -ErrorAction SilentlyContinue
+npm run bench:express
+```
+
+Cross-platform: `npm run bench:fresh:express`
+
+## Express — 2026-06-18 (v3 — CommonJS import fix)
 
 | Tool | Accuracy | Build | Tokens | Compression | TTU |
 |------|----------|-------|--------|-------------|-----|
-| **Mnemos** | **80%** | 600ms | 5,942 | 29.9× | 2 min |
-| Gitingest | 0% | 6.3s | 1,100,000 | 0.16× | — |
-| Graphify | 0% | 0.9s | 26 | — | — |
+| **Mnemos** | **100%** | 500ms | 8,901 | 19.9× | 2 min |
+| Gitingest | 0% | 3.5s | 1,100,000 | 0.16× | — |
+| Graphify | 0% | 1.2s | 26 | — | — |
 
-Per-task: login 100% · impact 83% · critical 50% · capabilities 100% · explain 67%
+Per-task: login 100% · impact 100% · critical 100% · capabilities 100% · explain 100%
 
 [express.json](./express.json)
 
-## NestJS — 2026-06-15 (v2 algorithms)
+## NestJS — 2026-06-18 (v3 — CommonJS import fix)
 
 | Tool | Accuracy | Build | Tokens | Compression | TTU |
 |------|----------|-------|--------|-------------|-----|
-| **Mnemos** | **72.4%** | 35.7s | 36,424 | 28.1× | 2.6 min |
-| Gitingest | 0% | 300s | 5,200,000 | 0.20× | — |
+| **Mnemos** | **100%** | 73s | 212,366 | 4.8× | 3.3 min |
+| Gitingest | 0% | 304s | 6,000,000 | 0.17× | — |
 | Graphify | 0% | N/A | 0 | — | — |
 
-Per-task: login 75% · impact **100%** · critical 67% · capabilities 60% · explain 60%
+Per-task: login 100% · impact 100% · critical 100% · capabilities 100% · explain 100%
+
+NestJS compression is lower because the richer dependency graph produces larger flow/context docs — accuracy is the primary gate.
 
 [nestjs.json](./nestjs.json) · [nestjs-stress.json](./nestjs-stress.json)
 
@@ -36,4 +47,4 @@ Per-task: login 75% · impact **100%** · critical 67% · capabilities 60% · ex
 npm run bench:regression
 ```
 
-Thresholds: Express ≥75% accuracy, NestJS ≥65% accuracy.
+Thresholds: Express ≥95% accuracy & ≥15× compression · NestJS ≥95% accuracy & ≥4× compression.

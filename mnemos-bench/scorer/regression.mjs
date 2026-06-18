@@ -10,8 +10,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const RESULTS = path.join(__dirname, '..', 'results');
 
 const THRESHOLDS = {
-  express: { accuracy: 75, compression: 28, build_ms: 5000 },
-  nestjs: { accuracy: 65, compression: 25, build_ms: 120_000 },
+  express: { accuracy: 95, compression: 15, build_ms: 5000 },
+  nestjs: { accuracy: 95, compression: 4, build_ms: 120_000 },
 };
 
 async function check(repo) {

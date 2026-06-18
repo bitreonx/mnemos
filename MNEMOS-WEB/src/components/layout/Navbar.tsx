@@ -51,13 +51,13 @@ export default function Navbar() {
           </Link>
 
           {/* center links */}
-          <div className="hidden items-center gap-1 lg:flex">
+          <div className="hidden items-center gap-0.5 rounded-full border border-[var(--border)] bg-[var(--surface)] px-1.5 py-1.5 lg:flex">
             {NAV_LINKS.map((l) =>
               "route" in l && l.route ? (
                 <Link
                   key={l.label}
                   to={l.href}
-                  className="focus-ring rounded-full px-3.5 py-2 text-sm font-medium text-[var(--text-dim)] transition-colors hover:text-[var(--text)]"
+                  className="focus-ring rounded-full px-3.5 py-1.5 text-[13px] font-medium text-[var(--text-dim)] transition-colors hover:text-[var(--text)]"
                 >
                   {l.label}
                 </Link>
@@ -65,7 +65,7 @@ export default function Navbar() {
                 <button
                   key={l.label}
                   onClick={() => goToAnchor(l.href)}
-                  className="focus-ring rounded-full px-3.5 py-2 text-sm font-medium text-[var(--text-dim)] transition-colors hover:text-[var(--text)]"
+                  className="focus-ring rounded-full px-3.5 py-1.5 text-[13px] font-medium text-[var(--text-dim)] transition-colors hover:text-[var(--text)]"
                 >
                   {l.label}
                 </button>
@@ -73,12 +73,12 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* right cluster */}
-          <div className="flex items-center gap-2.5">
+          {/* right cluster — all three controls share the same 36px height */}
+          <div className="flex items-center gap-2">
             <button
               onClick={() => navigate("/docs")}
               aria-label="Search documentation"
-              className="focus-ring hidden items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-xs text-[var(--text-dim)] transition-colors hover:text-[var(--text)] md:flex"
+              className="focus-ring hidden h-9 items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3.5 text-[13px] text-[var(--text-dim)] transition-colors hover:border-[var(--border-strong)] hover:text-[var(--text)] md:flex"
             >
               <Search size={14} />
               <span>Search docs</span>
@@ -87,13 +87,13 @@ export default function Navbar() {
               </kbd>
             </button>
 
-            <div className="hidden sm:block">
+            <div className="hidden sm:flex h-9 items-center">
               <ThemeToggle />
             </div>
 
-            <div className="hidden sm:block">
-              <MagneticButton href={SITE.github} variant="primary" className="!px-5 !py-2.5 !text-sm">
-                <GitHubIcon width={16} height={16} />
+            <div className="hidden sm:flex h-9 items-center">
+              <MagneticButton href={SITE.github} variant="primary" className="!h-9 !px-5 !py-0 !text-[13px]">
+                <GitHubIcon width={15} height={15} />
                 Star on GitHub
               </MagneticButton>
             </div>
@@ -102,7 +102,7 @@ export default function Navbar() {
               onClick={() => setOpen((o) => !o)}
               aria-label="Toggle menu"
               aria-expanded={open}
-              className="focus-ring grid h-9 w-9 place-items-center rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] lg:hidden"
+              className="focus-ring grid h-9 w-9 place-items-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] lg:hidden"
             >
               {open ? <X size={18} /> : <Menu size={18} />}
             </button>

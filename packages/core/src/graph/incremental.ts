@@ -169,6 +169,9 @@ export function wireGraphEdges(
           if (targetPath) break;
         }
       }
+      // Also fall back to the raw source. Required for CommonJS require(),
+      // dynamic import(), and side-effect imports where there are no named
+      // specifiers to map from.
       targetPath ??= localImports.get(imp.source);
       if (!targetPath) continue;
       const targetId = fileIndex.get(targetPath);

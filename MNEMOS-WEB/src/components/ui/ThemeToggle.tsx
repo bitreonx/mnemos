@@ -45,7 +45,7 @@ export default function ThemeToggle() {
       role="switch"
       aria-checked={isDark}
       aria-label={`Activate ${isDark ? "light" : "dark"} mode`}
-      className="focus-ring clickable relative h-8 w-[60px] rounded-full"
+      className="focus-ring clickable relative h-9 w-[64px] rounded-full"
       style={{
         background: isDark
           ? "linear-gradient(135deg, #1a1430, #0d0a18)"

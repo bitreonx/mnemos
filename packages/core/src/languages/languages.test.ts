@@ -7,7 +7,7 @@ import {
   getExtractorProfile,
 } from '../languages/index.js';
 import { parseContent } from '../parser/index.js';
-import { maskCommentsAndStrings, maskOutsideScriptRegions, prepareAnalyzableSource, isMatchInCode } from '../parser/source-mask.js';
+import { maskCommentsAndStrings, maskOutsideScriptRegions, prepareAnalyzableSource, isMatchInCode, isImportMatchInCode } from '../parser/source-mask.js';
 import { buildRepositoryLanguagesMarkdown } from './docs.js';
 
 describe('language support', () => {
@@ -226,5 +226,15 @@ describe('source masking', () => {
     assert.match(text, /import os/);
     assert.ok(isMatchInCode(codeMask, text, text.indexOf('import os'), 8));
     assert.equal(isMatchInCode(codeMask, text, text.indexOf('comment'), 7), false);
+  });
+
+  it('extracts CommonJS require() even when string literals are masked', () => {
+    const content = "var x = require('./application');\n";
+    const { text, codeMask } = prepareAnalyzableSource(content, 'javascript');
+    const match = /require\s*\(\s*['"]([^'"]+)['"]\s*\)/.exec(text)!;
+    assert.equal(isMatchInCode(codeMask, text, match.index, match[0].length), false);
+    assert.equal(isImportMatchInCode(codeMask, text, match.index, match[0].length), true);
+    const parsed = parseContent(content, '/abs', 'lib/express.js', 'javascript');
+    assert.ok(parsed.imports.some((imp) => imp.source === './application'));
   });
 });

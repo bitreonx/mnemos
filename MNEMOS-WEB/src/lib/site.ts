@@ -124,13 +124,35 @@ export const MODES = [
   },
 ] as const;
 
+/** Verified mnemos-bench scores — see mnemos-bench/results/VERIFIED.md */
+export const BENCHMARK_RESULTS = [
+  {
+    repo: "Express",
+    tier: "small",
+    accuracy: 100,
+    buildMs: 500,
+    tokens: 8901,
+    compression: 19.9,
+    measuredAt: "2026-06-18",
+  },
+  {
+    repo: "NestJS",
+    tier: "medium",
+    accuracy: 100,
+    buildMs: 73000,
+    tokens: 212366,
+    compression: 4.8,
+    measuredAt: "2026-06-18",
+  },
+] as const;
+
 export const BENCHMARKS = [
-  { label: "Files analyzed", value: 14213, suffix: "", hint: "per large-repo build" },
-  { label: "Flows discovered", value: 268, suffix: "", hint: "execution paths mapped" },
-  { label: "Domains", value: 31, suffix: "", hint: "business boundaries" },
-  { label: "APIs surfaced", value: 412, suffix: "", hint: "routes & handlers" },
-  { label: "Tokens saved", value: 94, suffix: "%", hint: "vs. raw file dumps" },
-  { label: "Time saved", value: 9.6, suffix: "h", hint: "onboarding per dev" },
+  { label: "Task accuracy", value: 100, suffix: "%", hint: "Express & NestJS ground-truth suite" },
+  { label: "Compression", value: 19.9, suffix: "×", hint: "Express — DNA vs raw repo tokens" },
+  { label: "Build time", value: 0.5, suffix: "s", hint: "Express — full memory model" },
+  { label: "Graph edges", value: 780, suffix: "", hint: "Express — import graph after CJS fix" },
+  { label: "Tokens saved", value: 95, suffix: "%", hint: "vs. raw file dumps (Express)" },
+  { label: "Time saved", value: 96, suffix: "%", hint: "onboarding TTU vs manual grep" },
 ] as const;
 
 export const COMPARISON = {

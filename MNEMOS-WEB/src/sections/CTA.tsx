@@ -45,7 +45,7 @@ export default function CTA() {
               >
                 view the repo →
               </a>
-              <GitHubProfile delay={1200} />
+              <GitHubProfile delay={0} />
             </div>
           </div>
         </div>

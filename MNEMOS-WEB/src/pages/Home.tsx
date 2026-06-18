@@ -3,6 +3,7 @@ import TrustedBy from "../sections/TrustedBy";
 import WhyMnemos from "../sections/WhyMnemos";
 import AiReadiness from "../sections/AiReadiness";
 import RepositoryDNA from "../sections/RepositoryDNA";
+import Pipeline from "../sections/Pipeline";
 import ThreeModes from "../sections/ThreeModes";
 import FableMindset from "../sections/FableMindset";
 import ArchitectureCanvas from "../sections/ArchitectureCanvas";
@@ -18,6 +19,7 @@ export default function Home() {
       <WhyMnemos />
       <AiReadiness />
       <RepositoryDNA />
+      <Pipeline />
       <ThreeModes />
       <FableMindset />
       <ArchitectureCanvas />

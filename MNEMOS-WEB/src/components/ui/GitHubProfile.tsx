@@ -1,40 +1,31 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
 import { SITE } from "../../lib/site";
 import DecryptText from "./DecryptText";
 import StarButton from "./StarButton";
-import { GitHubIcon } from "../../lib/logos";
-
-const DISMISS_KEY = "mnemos-bubble-dismissed";
 
 /**
- * "Made by" creator cluster: avatar enlarges on hover, the byline decrypts in
- * character-by-character, and a spring-loaded bubble floats in with an animated
- * "Star us on GitHub" button. Dismissal is remembered.
+ * "Made by" creator cluster. Avatar enlarges on hover, byline decrypts in
+ * character-by-character. A compact, solid-purple Star pill (not a clunky
+ * floating bubble) lives inline next to the profile so it appears immediately
+ * — no long delay, no bad tooltip, no misplaced card.
  */
-export default function GitHubProfile({ delay = 3500 }: { delay?: number }) {
+export default function GitHubProfile({ delay = 0 }: { delay?: number }) {
   const [hover, setHover] = useState(false);
-  const [showBubble, setShowBubble] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== "undefined" && localStorage.getItem(DISMISS_KEY)) return;
-    const t = setTimeout(() => setShowBubble(true), delay);
+    if (delay <= 0) {
+      setMounted(true);
+      return;
+    }
+    const t = setTimeout(() => setMounted(true), delay);
     return () => clearTimeout(t);
   }, [delay]);
 
-  const dismiss = () => {
-    setShowBubble(false);
-    try {
-      localStorage.setItem(DISMISS_KEY, "1");
-    } catch {
-      /* ignore */
-    }
-  };
-
   return (
     <div
-      className="relative flex items-center gap-2.5"
+      className="relative flex flex-wrap items-center justify-end gap-3"
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
     >
@@ -83,44 +74,17 @@ export default function GitHubProfile({ delay = 3500 }: { delay?: number }) {
         </AnimatePresence>
       </a>
 
+      {/* Inline solid-purple star pill — replaces the bad floating bubble.
+          Appears fast, lives in the natural flow, no tooltip drama. */}
       <AnimatePresence>
-        {showBubble && (
+        {mounted && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.7, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.78, y: 8, filter: "blur(4px)" }}
-            transition={{ type: "spring", stiffness: 240, damping: 18 }}
-            className="absolute bottom-full right-0 z-50 mb-3 w-[250px]"
+            initial={{ opacity: 0, scale: 0.85, x: 4 }}
+            animate={{ opacity: 1, scale: 1, x: 0 }}
+            exit={{ opacity: 0, scale: 0.9, x: 4 }}
+            transition={{ type: "spring", stiffness: 320, damping: 22, delay: 0.05 }}
           >
-            <div className="absolute -bottom-1.5 right-8 h-3 w-3 rotate-45 border-b border-r border-[var(--border)] bg-[var(--surface-solid)]" />
-            <div className="relative rounded-2xl border border-[var(--border)] bg-[var(--surface-solid)] p-3.5 shadow-[var(--shadow-glow)]">
-              <button
-                onClick={dismiss}
-                aria-label="Dismiss"
-                className="focus-ring absolute -right-2 -top-2 grid h-6 w-6 place-items-center rounded-full border border-[var(--border)] bg-[var(--surface-solid)] text-[var(--text-dim)] transition-colors hover:text-[var(--text)]"
-              >
-                <X size={12} />
-              </button>
-              <div className="flex items-start gap-3">
-                <span className="mt-0.5 shrink-0 text-[var(--text)]">
-                  <GitHubIcon width={20} height={20} />
-                </span>
-                <div>
-                  <p className="text-[0.86rem] font-semibold leading-snug text-[var(--text)]">
-                    Don't let your code be forgotten.
-                  </p>
-                  <p className="mt-1 text-[0.72rem] leading-snug text-[var(--text-dim)]">
-                    Keep its memory alive —
-                  </p>
-                  <div className="mt-2.5">
-                    <StarButton />
-                  </div>
-                  <p className="mt-2 font-serif text-[0.72rem] italic text-[var(--text-faint)]">
-                    — Bitreon
-                  </p>
-                </div>
-              </div>
-            </div>
+            <StarButton label="Star" />
           </motion.div>
         )}
       </AnimatePresence>

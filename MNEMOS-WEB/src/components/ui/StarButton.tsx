@@ -3,8 +3,9 @@ import { SITE } from "../../lib/site";
 import { cn } from "../../lib/utils";
 
 /**
- * Small, eye-catching "Star us on GitHub" pill with a looping rainbow gradient
- * and a popping star. Clicking opens the repo so the user can star it instantly.
+ * Solid-purple "Star us on GitHub" pill. Clicking opens the repo so the user
+ * can star it instantly. Pure brand color, no rainbow — looks intentional and
+ * on-system in both themes.
  */
 export default function StarButton({
   className,
@@ -20,16 +21,28 @@ export default function StarButton({
       rel="noopener noreferrer"
       aria-label="Star Mnemos on GitHub"
       className={cn(
-        "focus-ring animate-rainbow group inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold text-white shadow-[0_6px_20px_-6px_var(--glow)] transition-transform hover:scale-[1.04] active:scale-95",
+        "focus-ring group relative inline-flex items-center gap-1.5 overflow-hidden rounded-full px-3.5 py-2 text-[13px] font-semibold text-white transition-transform hover:scale-[1.04] active:scale-95",
         className
       )}
       style={{
-        background:
-          "linear-gradient(90deg, #9b5bff, #47bfff, #3ecf8e, #ffc450, #ff6b9d, #9b5bff)",
+        background: "var(--brand)",
+        boxShadow: "0 6px 20px -6px var(--glow), inset 0 1px 0 rgba(255,255,255,0.18)",
       }}
     >
-      <Star size={13} fill="currentColor" className="[animation:star-pop_1.8s_ease-in-out_infinite]" />
-      {label}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+        style={{
+          background:
+            "radial-gradient(80px circle at var(--mx, 50%) var(--my, 50%), rgba(255,255,255,0.35), transparent 60%)",
+        }}
+      />
+      <Star
+        size={13}
+        fill="currentColor"
+        className="relative z-10 transition-transform duration-300 group-hover:rotate-[12deg]"
+      />
+      <span className="relative z-10">{label}</span>
     </a>
   );
 }

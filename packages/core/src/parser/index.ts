@@ -103,7 +103,10 @@ export function parseContent(
   if (language === 'typescript' || language === 'javascript') {
     const ast = extractTsAst(content, relativePath, language);
     if (ast) {
-      imports = ast.imports;
+      // The TS AST extractor misses CommonJS `require(...)` calls.
+      // Run the regex-based extractor and merge so CommonJS projects
+      // (express, koa, nest, etc.) still get file-to-file IMPORTS edges.
+      imports = dedupeImports([...ast.imports, ...extractJsImports(text, codeMask)]);
       symbols = ast.symbols;
       calls = ast.calls;
       exports = ast.exports;
@@ -288,6 +291,11 @@ function extractImports(content: string, language: string, codeMask?: Uint8Array
 
 
 
+function matchImportLine(codeMask: Uint8Array | undefined, content: string, match: RegExpExecArray): boolean {
+  if (!codeMask) return true;
+  return isImportMatchInCode(codeMask, content, match.index, match[0].length);
+}
+
 function extractJsImports(content: string, codeMask?: Uint8Array): ParsedImport[] {
 
   const imports: ParsedImport[] = [];
@@ -299,28 +307,28 @@ function extractJsImports(content: string, codeMask?: Uint8Array): ParsedImport[
   let match: RegExpExecArray | null;
 
   while ((match = esmRegex.exec(content)) !== null) {
-    if (codeMask && !isMatchInCode(codeMask, content, match.index, match[0].length)) continue;
+    if (!matchImportLine(codeMask, content, match)) continue;
     imports.push(parseImportBlock(match[0], match[2]!, !!match[1]));
   }
 
   const dynamicRegex = /import\s*\(\s*['"]([^'"]+)['"]\s*\)/g;
 
   while ((match = dynamicRegex.exec(content)) !== null) {
-    if (codeMask && !isMatchInCode(codeMask, content, match.index, match[0].length)) continue;
+    if (!matchImportLine(codeMask, content, match)) continue;
     imports.push({ source: match[1]!, specifiers: ['*dynamic*'], isTypeOnly: false });
   }
 
   const requireRegex = /require\s*\(\s*['"]([^'"]+)['"]\s*\)/g;
 
   while ((match = requireRegex.exec(content)) !== null) {
-    if (codeMask && !isMatchInCode(codeMask, content, match.index, match[0].length)) continue;
+    if (!matchImportLine(codeMask, content, match)) continue;
     imports.push({ source: match[1]!, specifiers: ['*require*'], isTypeOnly: false });
   }
 
   const reExportRegex = /export\s+(?:type\s+)?(?:\{[^}]+\}|\*\s+as\s+\w+)\s+from\s+['"]([^'"]+)['"]/g;
 
   while ((match = reExportRegex.exec(content)) !== null) {
-    if (codeMask && !isMatchInCode(codeMask, content, match.index, match[0].length)) continue;
+    if (!matchImportLine(codeMask, content, match)) continue;
 
     imports.push({ source: match[1]!, specifiers: ['*reexport*'], isTypeOnly: false });
 

@@ -21,10 +21,10 @@ export type DocGroup = { title: string; pages: DocPage[] };
 
 export const DOCS: DocGroup[] = [
   // ============================================================
-  // GETTING STARTED
+  // INTRODUCTION
   // ============================================================
   {
-    title: "Getting Started",
+    title: "Introduction",
     pages: [
       {
         slug: "introduction",
@@ -148,10 +148,10 @@ export const DOCS: DocGroup[] = [
   },
 
   // ============================================================
-  // USING THE APP
+  // GUIDES
   // ============================================================
   {
-    title: "Using the App",
+    title: "Guides",
     pages: [
       {
         slug: "dashboard-tour",
@@ -997,10 +997,10 @@ export const DOCS: DocGroup[] = [
   },
 
   // ============================================================
-  // PROOF
+  // BENCHMARKS & PROOF
   // ============================================================
   {
-    title: "Proof",
+    title: "Benchmarks & Proof",
     pages: [
       {
         slug: "benchmarks",
@@ -1029,25 +1029,28 @@ export const DOCS: DocGroup[] = [
           { type: "h2", text: "Run it locally" },
           { type: "h3", text: "Setup" },
           { type: "code", lang: "bash", code: "# build the CLI once\nnpm install\nnpm run build\n\n# clone a benchmark repo (first time only)\ngit clone --depth 1 https://github.com/expressjs/express.git mnemos-bench/repos/express" },
+          { type: "code", lang: "powershell", code: "# Windows — clean stale .mnemos before re-benchmarking\nRemove-Item -Recurse -Force mnemos-bench\\repos\\express\\.mnemos -ErrorAction SilentlyContinue\nnpm run bench:express\n\n# cross-platform fresh run\nnpm run bench:fresh:express" },
           { type: "h3", text: "Scripts" },
           { type: "p", text: "Verified against the root `package.json`." },
           { type: "table", head: ["Script", "What it does"], rows: [
             ["`npm run bench`", "Run the default benchmark (alias for `bench:express`)"],
             ["`npm run bench:express`", "Build + score the Express fixture (`node mnemos-bench/scorer/run.mjs express`)"],
             ["`npm run bench:nestjs`", "Build + score the NestJS fixture"],
-            ["`npm run bench:regression`", "Regression gate — fails CI if Express accuracy <75% or NestJS <65%"],
+            ["`npm run bench:fresh:express`", "Delete `.mnemos` cache + rebuild + score Express"],
+            ["`npm run bench:fresh:nestjs`", "Delete `.mnemos` cache + rebuild + score NestJS"],
+            ["`npm run bench:regression`", "Regression gate — fails CI if accuracy/compression drops below verified thresholds"],
             ["`npm run bench:ai-eval`", "Build the AI golden Q&A pack (`mnemos-bench/scorer/ai-eval.mjs`)"],
           ]},
           { type: "h2", text: "Verified results" },
-          { type: "p", text: "From `mnemos-bench/results/VERIFIED.md` (v2 algorithms, re-run anytime with `npm run bench:express`)." },
+          { type: "p", text: "From `mnemos-bench/results/VERIFIED.md` (v3 — CommonJS import resolution, re-run anytime with `npm run bench:express`)." },
           { type: "table", head: ["Repo", "Mnemos accuracy", "Build", "Tokens", "Compression"], rows: [
-            ["Express (small)", "**80%**", "600 ms", "5,942", "29.9×"],
-            ["NestJS (medium)", "**72.4%**", "35.7 s", "36,424", "28.1×"],
+            ["Express (small)", "**100%**", "500 ms", "8,901", "19.9×"],
+            ["NestJS (medium)", "**100%**", "73 s", "212,366", "4.8×"],
           ]},
           { type: "callout", tone: "warn", title: "Numbers are reproducible, not marketing", text: "Exact figures depend on the version of the benchmark repos and the Mnemos engine. Re-run the suite to confirm — `mnemos-bench/results/*.json` includes the `measured_at` ISO timestamp on every record." },
           { type: "h2", text: "Regression gate" },
           { type: "p", text: "`npm run bench:regression` is the line of defense for shipping quality. Thresholds are stored in `mnemos-bench/scorer/regression.mjs`:" },
-          { type: "code", lang: "text", code: "THRESHOLDS = {\n  express: { accuracy: 75, compression: 28, build_ms: 5_000 },\n  nestjs:  { accuracy: 65, compression: 25, build_ms: 120_000 },\n}" },
+          { type: "code", lang: "text", code: "THRESHOLDS = {\n  express: { accuracy: 95, compression: 15, build_ms: 5_000 },\n  nestjs:  { accuracy: 95, compression: 4, build_ms: 120_000 },\n}" },
         ],
       },
       {

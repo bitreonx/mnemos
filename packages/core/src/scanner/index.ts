@@ -151,6 +151,12 @@ export function inferDomainFromPath(relativePath: string): string | undefined {
     if (match) {
       const segment = match[1]!;
       if (['test', 'tests', 'spec', 'e2e', 'examples', 'example'].includes(segment)) continue;
+      // If the captured segment is a file (has an extension), the parent
+      // directory is the real domain. e.g. lib/application.js → "lib"
+      // (rather than a one-file "Application.js" pseudo-domain).
+      if (/\.[a-z0-9]{1,5}$/i.test(segment)) {
+        return formatDomainName(extractParentDomain(normalized, pattern));
+      }
       return formatDomainName(segment);
     }
   }
@@ -160,6 +166,16 @@ export function inferDomainFromPath(relativePath: string): string | undefined {
   }
 
   return undefined;
+}
+
+function extractParentDomain(normalized: string, pattern: RegExp): string {
+  // Pull the directory immediately before the pattern's anchor segment.
+  // For /lib/(application\.js)/ on "lib/application.js" this returns "lib".
+  const m = normalized.match(pattern);
+  if (!m) return 'General';
+  const before = normalized.slice(0, m.index! + m[0].indexOf(m[1]!));
+  const parts = before.replace(/[\/\\]+$/, '').split('/').filter(Boolean);
+  return parts[parts.length - 1] ?? 'General';
 }
 
 export function formatDomainName(raw: string): string {

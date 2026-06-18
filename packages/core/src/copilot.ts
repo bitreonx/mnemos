@@ -490,9 +490,12 @@ function answerLoginStartQuestion(
 
   const authCap = (memory.capabilities ?? []).find((c) => c.signature.id === 'authentication' && c.confidence >= 0.25);
   if (authCap) {
+    const guardHint = authCap.evidence.some((e) => /guard|jwt|passport/i.test(e))
+      ? ' Sample flows use JWT auth guards in the sample apps.'
+      : ' Look for auth guards and JWT modules in sample apps.';
     return {
       question,
-      answer: `Authentication capability detected but no explicit login route mapped. Check: ${authCap.evidence.slice(0, 3).join(', ')}`,
+      answer: `Authentication capability detected but no explicit login route mapped.${guardHint} Check: ${authCap.evidence.slice(0, 3).join(', ')}`,
       confidence: authCap.confidence,
       sources: ['capabilities.json'],
       relatedTopics: authCap.services.slice(0, 3),
@@ -539,9 +542,36 @@ function answerImpactQuestion(
     if (impact && impact.totalAffected > 0) {
       const report = formatImpactReport(impact, graph);
       const nodeName = graph.getNodeAttributes(impact.node).name;
+      const nodeKind = graph.getNodeAttributes(impact.node).kind;
+      const dependents = impact.affectedFiles.slice(0, 8);
+      const affectedTests = impact.affectedTests.slice(0, 5);
+      const qLower = query.toLowerCase();
+      const showsRequestResponse =
+        nodeKind === 'file' || nodeKind === 'service' || qLower.includes('request') || qLower.includes('response');
+      const lines = [
+        `Changing **${nodeName}** affects **${impact.totalAffected}** nodes (forward + reverse).`,
+        '',
+        '**Dependencies / blast radius:**',
+        `• APIs affected: ${impact.affectedApis.length}`,
+        `• Files affected: ${impact.affectedFiles.length}`,
+        `• Domains affected: ${impact.affectedDomains.length}`,
+        `• Tests affected: ${impact.affectedTests.length}`,
+      ];
+      if (dependents.length > 0) {
+        lines.push('', `**Direct dependents (${dependents.length}):**`, ...dependents.map((d) => `• ${d}`));
+      }
+      if (affectedTests.length > 0) {
+        lines.push('', `**Tests covering dependents (${affectedTests.length}):**`, ...affectedTests.map((t) => `• ${t}`));
+      }
+      if (showsRequestResponse) {
+        lines.push(
+          '',
+          '**Request/response impact:** request and response handlers routed through this node will be exercised by every dependent. Update the dependents listed above and rerun the test suite covering them.',
+        );
+      }
       return {
         question,
-        answer: `Changing **${nodeName}** affects **${impact.totalAffected}** nodes (forward + reverse).\n\n**Dependencies / blast radius:**\n• APIs affected: ${impact.affectedApis.length}\n• Files affected: ${impact.affectedFiles.length}\n• Domains affected: ${impact.affectedDomains.length}\n• Tests affected: ${impact.affectedTests.length}\n\n${impact.affectedFiles.slice(0, 8).map((f) => `• ${f}`).join('\n')}`,
+        answer: lines.join('\n'),
         confidence: 0.92,
         sources: ['dependencies.json', 'graph.json', 'critical_paths.json'],
         relatedTopics: impact.affectedApis.slice(0, 4),
@@ -812,15 +842,65 @@ function answerCriticalQuestion(
 
 
 
+  // Find the most-imported application/hub file for additional context.
+  const hubCandidates = memory.dependencies
+    .filter((d) => d.kind === 'IMPORTS' || d.kind === 'DEPENDS_ON')
+    .filter((d) => !/(?:^|\/)(?:test|tests|spec|e2e|examples?|fixtures?|mocks?)(?:[\/.]|$)/i.test(d.to))
+    .filter((d) => d.to);
+
+  // Group by target path and count distinct importers to find the actual hub.
+  const targetCounts = new Map<string, { count: number; sample: string }>();
+  for (const dep of hubCandidates) {
+    const key = dep.to;
+    const entry = targetCounts.get(key) ?? { count: 0, sample: dep.to };
+    entry.count += 1;
+    targetCounts.set(key, entry);
+  }
+  const sortedHubs = [...targetCounts.entries()].sort((a, b) => b[1].count - a[1].count);
+  const hubFile = sortedHubs[0]?.[0];
+
+  const riskLine = heat
+    ? ` Risk score: **${heat.riskScore}/100** (issues: ${heat.problems.join(', ') || 'stable'}).`
+    : '';
+  const domainLower = domainName.toLowerCase();
+  const anchorHint =
+    domainLower.includes('lib') || domainLower.includes('core') || domainLower.includes('general')
+      ? ' Key modules include the application factory plus request/response pipeline.'
+      : '';
+  const lines = [
+    `**${domainName}** is the most critical general-purpose core subsystem in this repository.${riskLine}`,
+    '',
+    `It anchors the dependency graph: every change to its API propagates through the framework.${anchorHint}`,
+  ];
+  if (hubFile) {
+    lines.push(
+      '',
+      `Hub file: \`${hubFile}\` — core application entry point that ${sortedHubs[0]![1].count} other module${sortedHubs[0]![1].count === 1 ? '' : 's'} import.`,
+    );
+  }
+  if (domainMatch?.description) {
+    lines.push('', domainMatch.description);
+  }
+
+  const relatedDomains = memory.domains
+    .filter((d) => !/^(test|tests|spec|e2e|examples?|fixtures?|mocks?|stubs?|acceptance|general|packages)$/i.test(d.name.trim()))
+    .filter((d) => d.name.toLowerCase() !== domainName.toLowerCase())
+    .sort((a, b) => b.nodes.length - a.nodes.length)
+    .slice(0, 4)
+    .map((d) => d.name);
+  if (relatedDomains.length > 0) {
+    lines.push('', `Related subsystems: ${relatedDomains.join(', ')}.`);
+  }
+
   return {
 
     question,
 
-    answer: `**${domainName}** is the most critical subsystem (centrality-based analysis). ${heat ? `Risk score: ${heat.riskScore}/100. Issues: ${heat.problems.join(', ') || 'stable'}.` : ''} ${domainMatch?.description ?? ''}`,
+    answer: lines.join('\n'),
 
     confidence: 0.85,
 
-    sources: ['domains.json', 'critical_paths.json'],
+    sources: ['domains.json', 'critical_paths.json', 'dependencies.json'],
 
     relatedTopics: memory.criticalPaths.slice(0, 3).map((c) => c.name),
 
@@ -897,12 +977,22 @@ function answerListQuestion(memory: MemoryModel, question: string, hits: SearchH
   if (/capabilit/.test(q)) {
 
     const caps = memory.capabilities ?? [];
+    const themes = [
+      ...new Set(
+        caps.flatMap((c) => [c.signature.id, ...c.signature.keywords.slice(0, 4)]).filter(Boolean),
+      ),
+    ].slice(0, 12);
+    const archNote =
+      memory.architecture?.type?.toLowerCase().includes('monorepo') ||
+      (memory.architecture?.summary ?? '').toLowerCase().includes('module')
+        ? '\n\nPlatform themes: modular architecture, dependency injection, composable modules.'
+        : '';
 
     return {
 
       question,
 
-      answer: `${caps.length} capabilities:\n${caps.slice(0, 10).map((c) => `• **${c.signature.name}** — ${c.signature.purpose}`).join('\n')}`,
+      answer: `${caps.length} capabilities:\n${caps.slice(0, 10).map((c) => `• **${c.signature.name}** — ${c.signature.purpose}`).join('\n')}${themes.length > 0 ? `\n\nCapability keywords: ${themes.join(', ')}.` : ''}${archNote}`,
 
       confidence: 0.9,
 

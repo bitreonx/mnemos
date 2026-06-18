@@ -17,7 +17,7 @@ const COLUMNS = [
     links: [
       { label: "Introduction", href: "/docs/introduction", route: true },
       { label: "Repository DNA", href: "/docs/repository-dna", route: true },
-      { label: "CLI Reference", href: "/docs/cli", route: true },
+      { label: "CLI Reference", href: "/docs/cli-default", route: true },
       { label: "Examples", href: "/docs/examples", route: true },
     ],
   },
@@ -25,8 +25,8 @@ const COLUMNS = [
     title: "Resources",
     links: [
       { label: "GitHub", href: SITE.github, external: true },
-      { label: "AI Pack v1", href: "/docs/ai-context", route: true },
-      { label: "MCP Server", href: "/docs/cli", route: true },
+      { label: "AI Pack v1", href: "/docs/ai-pack", route: true },
+      { label: "MCP Server", href: "/docs/cli-mcp", route: true },
       { label: "Roadmap", href: SITE.github + "/blob/main/docs/roadmap.md", external: true },
     ],
   },

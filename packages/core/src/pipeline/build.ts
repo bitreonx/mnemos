@@ -293,7 +293,10 @@ export async function build(options: BuildOptions): Promise<BuildResult> {
 
   const packageDeps = await readPackageDependencies(root);
 
-  const capabilities = discoverCapabilities(graph, { services: [], apis: [], domains }, { packageDeps });
+  // NOTE: discoverCapabilities needs the populated services/apis, which are
+  // produced by assembleMemoryModel. Build the memory model first, then run
+  // capability discovery against the real model and patch the result in.
+  let capabilities: ReturnType<typeof discoverCapabilities> = [];
 
   const journeys = discoverJourneys(graph, parsedFiles, flows);
 
@@ -350,6 +353,13 @@ export async function build(options: BuildOptions): Promise<BuildResult> {
     journeys,
 
   );
+
+  capabilities = discoverCapabilities(
+    graph,
+    { services: memory.services, apis: memory.apis, domains: memory.domains },
+    { packageDeps },
+  );
+  memory.capabilities = capabilities;
 
 
 

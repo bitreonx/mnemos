@@ -55,10 +55,20 @@ npm run build
 git clone --depth 1 https://github.com/expressjs/express.git mnemos-bench/repos/express
 
 # Run measured benchmark
-node mnemos-bench/scorer/run.mjs express
+npm run bench:express
+
+# Fresh rebuild (clears stale .mnemos cache)
+npm run bench:fresh:express
 ```
 
-Results are written to `mnemos-bench/results/express.json`.
+Windows PowerShell:
+
+```powershell
+Remove-Item -Recurse -Force mnemos-bench\repos\express\.mnemos -ErrorAction SilentlyContinue
+npm run bench:express
+```
+
+Results are written to `mnemos-bench/results/express.json`. Latest verified scores: **100%** on Express and NestJS — see [results/VERIFIED.md](./results/VERIFIED.md).
 
 ## Competitors
 

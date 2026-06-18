@@ -59,7 +59,7 @@ Every `npx mnemos .` run produces the same intelligence in four shapes. The lege
     </td>
     <td width="50%" align="center">
       <img src="packages/ui/public/assets/results-animated.svg" alt="Benchmark results — Mnemos vs Graphify and Gitingest" width="100%" />
-      <br /><sub><b>Verified results</b> · 80% task accuracy and 29× compression on real repos — not marketing slides</sub>
+      <br /><sub><b>Verified results</b> · 100% task accuracy on Express & NestJS — reproducible via mnemos-bench</sub>
     </td>
   </tr>
 </table>
@@ -170,12 +170,25 @@ Full spec: [docs/ai-pack.md](docs/ai-pack.md)
 
 ## Verified benchmarks
 
-Headline numbers from [mnemos-bench/](mnemos-bench/) — reproducible locally:
+Headline numbers from [mnemos-bench/results/VERIFIED.md](mnemos-bench/results/VERIFIED.md) — reproducible locally:
+
+| Repo | Accuracy | Build | Tokens | Compression |
+|------|----------|-------|--------|-------------|
+| Express (small) | **100%** | 500 ms | 8,901 | 19.9× |
+| NestJS (medium) | **100%** | 73 s | 212,366 | 4.8× |
 
 ```bash
-npm run bench:regression   # fixture regression
-npm run bench:express      # Express app fixture
+npm run bench:regression   # fixture regression gate
+npm run bench:express      # Express fixture
+npm run bench:fresh:express  # clean .mnemos + re-score
 npm run bench:ai-eval      # AI blind eval
+```
+
+Windows PowerShell — clean cache before re-benchmarking:
+
+```powershell
+Remove-Item -Recurse -Force mnemos-bench\repos\express\.mnemos -ErrorAction SilentlyContinue
+npm run bench:express
 ```
 
 ---
