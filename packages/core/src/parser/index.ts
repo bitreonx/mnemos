@@ -16,6 +16,7 @@ import {
 
 } from '../scanner/index.js';
 
+import { getLanguageTier, parseConfidenceForLanguage } from '../languages/tiers.js';
 import { getExtractorProfile, usesLegacyExtractor } from '../languages/index.js';
 
 import {
@@ -99,10 +100,12 @@ export function parseContent(
   let symbols: ParsedSymbol[];
   let calls: ParsedCall[];
   let exports: string[];
+  let usedAst = false;
 
   if (language === 'typescript' || language === 'javascript') {
     const ast = extractTsAst(content, relativePath, language);
     if (ast) {
+      usedAst = true;
       // The TS AST extractor misses CommonJS `require(...)` calls.
       // Run the regex-based extractor and merge so CommonJS projects
       // (express, koa, nest, etc.) still get file-to-file IMPORTS edges.
@@ -119,6 +122,7 @@ export function parseContent(
   } else if (language === 'python') {
     const ast = extractPythonAst(content);
     if (ast) {
+      usedAst = true;
       imports = ast.imports;
       symbols = ast.symbols;
       calls = ast.calls;
@@ -132,6 +136,7 @@ export function parseContent(
   } else if (language === 'go') {
     const ast = extractGoAst(content);
     if (ast) {
+      usedAst = true;
       imports = ast.imports;
       symbols = ast.symbols;
       calls = ast.calls;
@@ -206,6 +211,12 @@ export function parseContent(
       domainHint: inferDomainFromPath(relativePath),
 
       lineCount: lines.length,
+
+      parseTier: getLanguageTier(language),
+
+      parseConfidence: parseConfidenceForLanguage(language, usedAst),
+
+      usedAst,
 
     },
 

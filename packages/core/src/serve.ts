@@ -24,6 +24,8 @@ export interface ServeOptions {
   root: string;
   port?: number;
   host?: string;
+  /** Allow CORS from these origins. Default: same-origin only (no header). */
+  corsOrigins?: string[];
 }
 
 export interface ServeHandle {
@@ -46,8 +48,15 @@ export async function startMemoryServer(options: ServeOptions): Promise<ServeHan
     return set;
   };
 
+  const corsOrigins = options.corsOrigins ?? [];
   const server = http.createServer(async (req, res) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    const origin = req.headers.origin;
+    if (origin && corsOrigins.includes(origin)) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Vary', 'Origin');
+    } else if (corsOrigins.includes('*')) {
+      res.setHeader('Access-Control-Allow-Origin', '*');
+    }
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     res.setHeader('X-Mnemos-Version', MNEMOS_VERSION);
@@ -247,6 +256,45 @@ export async function startMemoryServer(options: ServeOptions): Promise<ServeHan
         const q = url.searchParams.get('q') ?? '';
         if (!q.trim()) return json(res, { error: 'Missing query param: q' }, 400);
         envelope = await runtime.search(q, Number(url.searchParams.get('limit') ?? 25));
+        return json(res, envelope);
+      }
+
+      // -------- Memory Engine (local hybrid retrieval) --------
+      if (pathname === '/engine/status' || pathname === '/memory/engine') {
+        envelope = await runtime.getMemoryEngineStatus();
+        return json(res, envelope);
+      }
+
+      if (pathname === '/engine/trust' || pathname === '/trust') {
+        envelope = await runtime.getTrustManifest();
+        return json(res, envelope);
+      }
+
+      if (pathname === '/engine/query' || pathname === '/memory/query') {
+        const q = url.searchParams.get('q') ?? url.searchParams.get('question') ?? '';
+        if (!q.trim()) return json(res, { error: 'Missing query param: q' }, 400);
+        envelope = await runtime.memoryQuery(q, Number(url.searchParams.get('limit') ?? 12));
+        return json(res, envelope);
+      }
+
+      if (pathname === '/engine/context' || pathname === '/memory/context') {
+        const task = url.searchParams.get('task') ?? url.searchParams.get('q') ?? '';
+        if (!task.trim()) return json(res, { error: 'Missing query param: task' }, 400);
+        envelope = await runtime.compileFocus(task, Number(url.searchParams.get('budget') ?? 8000));
+        return json(res, envelope);
+      }
+
+      if (pathname === '/engine/remember' && req.method === 'POST') {
+        let body = '';
+        for await (const chunk of req) body += chunk;
+        let parsed: { content?: string; tags?: string[] };
+        try {
+          parsed = JSON.parse(body || '{}') as { content?: string; tags?: string[] };
+        } catch {
+          return json(res, { error: 'Invalid JSON body' }, 400);
+        }
+        if (!parsed.content?.trim()) return json(res, { error: 'Missing content field' }, 400);
+        envelope = await runtime.memoryRemember(parsed.content, parsed.tags ?? []);
         return json(res, envelope);
       }
 

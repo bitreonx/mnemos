@@ -424,6 +424,17 @@ export async function build(options: BuildOptions): Promise<BuildResult> {
 
   );
 
+  if (options.verbose) {
+    console.log('Building local memory engine (hybrid index)…');
+  }
+  const { buildMemoryEngine } = await import('../memory-engine/engine.js');
+  const engineManifest = await buildMemoryEngine(root, memory, outputDir, searchIndex);
+  if (options.verbose) {
+    console.log(
+      `Memory engine: ${engineManifest.documentCount} docs · ${engineManifest.contradictionCount} contradictions · ${engineManifest.stats.buildDurationMs}ms`,
+    );
+  }
+
   const { appendBuildSnapshot } = await import('../snapshot/dna-diff.js');
   const dnaDiff = await appendBuildSnapshot(memory, outputDir);
   if (options.verbose && dnaDiff.changes.length > 0) {

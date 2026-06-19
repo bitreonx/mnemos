@@ -3,6 +3,7 @@ import TrustedBy from "../sections/TrustedBy";
 import WhyMnemos from "../sections/WhyMnemos";
 import AiReadiness from "../sections/AiReadiness";
 import SharedAgentMemory from "../sections/SharedAgentMemory";
+import { MemoryEngine } from "../sections/MemoryEngine";
 import RepositoryDNA from "../sections/RepositoryDNA";
 import Pipeline from "../sections/Pipeline";
 import ThreeModes from "../sections/ThreeModes";
@@ -20,6 +21,7 @@ export default function Home() {
       <WhyMnemos />
       <AiReadiness />
       <SharedAgentMemory />
+      <MemoryEngine />
       <RepositoryDNA />
       <Pipeline />
       <ThreeModes />

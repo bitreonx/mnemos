@@ -4,8 +4,9 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mnemos-cli"
-version = "0.1.0"
+version = "0.3.0"
 description = "The memory layer for software — AI-ready codebase analysis."
+readme = "README.md"
 requires-python = ">=3.8"
 license = "MIT"
 authors = [{ name = "Mnemos" }]

@@ -81,12 +81,12 @@ export const DOCS: DocGroup[] = [
           { type: "code", lang: "bash", code: "npx mnemos .          # analyze the current repo\nnpx mnemos ui         # launch the dashboard\nnpx mnemos doctor     # check the environment" },
           { type: "h2", text: "Install globally" },
           { type: "p", text: "If you use Mnemos daily, install it once and skip the `npx` cache hop." },
-          { type: "code", lang: "bash", code: "npm install -g mnemos\nmnemos --version       # → 0.2.0\nmnemos ." },
+          { type: "code", lang: "bash", code: "npm install -g mnemos\nmnemos --version       # → 0.3.0\nmnemos ." },
           { type: "h2", text: "Install as a dev dependency" },
           { type: "p", text: "For CI or for sharing a pinned version across a team, add it to `devDependencies` so the version is locked per repo." },
           { type: "code", lang: "bash", code: "npm install --save-dev mnemos\n# package.json → scripts\n# \"memory:build\": \"mnemos build .\"\n# \"memory:serve\": \"mnemos serve\"" },
           { type: "h2", text: "Verify the install" },
-          { type: "code", lang: "bash", code: "mnemos --version\n# 0.2.0\n\nmnemos --help\n# Usage: mnemos [options] [command]\n#\n# Commands:\n#   build [path]            Build a complete mental model of a repository\n#   ui                      Launch the Mnemos visualization UI\n#   ...\n#   . [path]                (default) Analyze, build report, open in browser" },
+          { type: "code", lang: "bash", code: "mnemos --version\n# 0.3.0\n\nmnemos --help\n# Usage: mnemos [options] [command]\n#\n# Commands:\n#   build [path]            Build a complete mental model of a repository\n#   ui                      Launch the Mnemos visualization UI\n#   ...\n#   . [path]                (default) Analyze, build report, open in browser" },
           { type: "callout", tone: "warn", title: "Watch your shell on Windows", text: "On Windows, run Mnemos from PowerShell or Git Bash. The `wrap` and `hook install` commands use platform-specific scripts (`.cmd` on Windows, `sh` elsewhere) — the CLI picks the right one automatically." },
         ],
       },
@@ -654,6 +654,63 @@ export const DOCS: DocGroup[] = [
   },
 
   // ============================================================
+  // MEMORY ENGINE V2
+  // ============================================================
+  {
+    title: "Memory Engine",
+    pages: [
+      {
+        slug: "memory-engine-overview",
+        title: "Labyrinth — Local AI Memory",
+        description: "Hybrid retrieval, episodic memory, contradictions — 100% on-device.",
+        blocks: [
+          { type: "p", text: "**Labyrinth** is Mnemos's local-first memory engine (release codename, not a version number). Every embedding, index, and query runs on your machine. Product release: **Mneme 0.3.0**." },
+          { type: "callout", tone: "info", title: "Privacy-first", text: "Unlike cloud memory services, Mnemos never sends repository content or agent observations to external servers. Hybrid retrieval uses BM25 + deterministic local embeddings (384-dim feature hashing)." },
+          { type: "h2", text: "What ships" },
+          { type: "list", items: [
+            "**Hybrid retrieval** — BM25 + local embeddings fused with Reciprocal Rank Fusion",
+            "**Episodic memory** — `memory remember` persists agent observations with temporal decay",
+            "**Contradiction detection** — flags conflicting architecture facts across builds",
+            "**Task context compiler** — minimal token packs scoped to an agent task",
+            "**`@mnemos/sdk`** — programmatic client for Cursor, Claude Code, and custom agents",
+            "**MCP tools** — `memory_query`, `memory_remember`, `memory_engine_status`",
+          ]},
+          { type: "h2", text: "Trust manifest" },
+          { type: "p", text: "Run `mnemos memory trust` for an honest list of verified claims and known limitations — we disclose weaknesses before critics do." },
+          { type: "code", lang: "bash", code: "npx mnemos memory trust\nnpx mnemos doctor" },
+        ],
+      },
+      {
+        slug: "memory-engine-sdk",
+        title: "SDK & Cursor Integration",
+        description: "Integrate Mnemos as your agent's local memory layer.",
+        blocks: [
+          { type: "h2", text: "TypeScript SDK" },
+          { type: "code", lang: "typescript", code: "import { MnemosClient } from '@mnemos/sdk';\n\nconst client = new MnemosClient('.');\nawait client.build();\n\nconst ctx = await client.context('fix auth redirect', 8000);\nawait client.remember('OAuth callback at /auth/callback', ['auth']);\nconst hits = await client.query('UserService dependencies');\n\nawait client.sessionStart();\nawait client.exportSync('team-passphrase', './team.mnemos-sync');" },
+          { type: "h2", text: "Cursor MCP" },
+          { type: "code", lang: "json", code: "{\n  \"mcpServers\": {\n    \"mnemos\": {\n      \"command\": \"npx\",\n      \"args\": [\"mnemos\", \"mcp\", \".\"]\n    }\n  }\n}" },
+          { type: "p", text: "Agent workflow: `memory_engine_status` → `memory_session_start` → `memory_query` / `compile_focus` → `memory_remember` → `memory_session_end`." },
+        ],
+      },
+      {
+        slug: "memory-engine-roadmap",
+        title: "M2–M6 Capabilities",
+        description: "SQLite store, edge confidence, ONNX embeddings, sessions, encrypted sync.",
+        blocks: [
+          { type: "table", head: ["Month", "Feature", "CLI"], rows: [
+            ["M2", "SQLite incremental store", "Automatic on `mnemos build`"],
+            ["M3", "Graph edge confidence scores", "Exposed in graph.json edges"],
+            ["M4", "Optional ONNX embeddings (local)", "Auto when @xenova/transformers installed"],
+            ["M5", "Session trace ingest", "`mnemos memory session start|end|list`"],
+            ["M6", "Encrypted team sync (no cloud)", "`mnemos memory export-sync` / `import-sync`"],
+          ]},
+          { type: "callout", tone: "tip", title: "100% on-device", text: "M6 sync uses AES-256-GCM encrypted files you transfer manually (USB, git LFS, Slack file). No Mnemos server required." },
+        ],
+      },
+    ],
+  },
+
+  // ============================================================
   // CLI REFERENCE
   // ============================================================
   {
@@ -1007,7 +1064,7 @@ export const DOCS: DocGroup[] = [
         blocks: [
           { type: "p", text: "The rest of the CLI, in alphabetical order. Every command is verified against `packages/cli/src/index.ts`." },
           { type: "h2", text: "mnemos doctor" },
-          { type: "code", lang: "bash", code: "npx mnemos doctor\n# Mnemos v0.2.0\n# ✓ Node.js 20.x\n# ✓ Memory model found /path/to/repo/.mnemos\n# · 184 files scanned · 6 domains · 24 flows" },
+          { type: "code", lang: "bash", code: "npx mnemos doctor\n# Mnemos v0.3.0\n# ✓ Node.js 20.x\n# ✓ Memory model found /path/to/repo/.mnemos\n# · 184 files scanned · 6 domains · 24 flows" },
           { type: "h2", text: "mnemos sync" },
           { type: "p", text: "Watches the repo and rebuilds the graph on every change. Codegraph-style local index." },
           { type: "code", lang: "bash", code: "mnemos sync [path]\n  [-o, --output <dir>]           # output directory                (default .mnemos)\n  [-v, --verbose]                # show detailed progress\n  [--no-incremental]             # force full rebuild on each change" },
@@ -1084,7 +1141,7 @@ export const DOCS: DocGroup[] = [
             ["**Stability**", "v1 is frozen for the entire Mnemos 1.x line. Additive fields may appear in minor releases; breaking changes require v2."],
           ]},
           { type: "h2", text: "Top-level shape" },
-          { type: "code", lang: "json", code: "{\n  \"$schema\": \"https://mnemos.dev/schemas/ai-pack/v1.json\",\n  \"version\": \"1.0.0\",\n  \"generatedAt\": \"2026-06-18T10:00:00Z\",\n  \"mnemosVersion\": \"0.2.0\",\n  \"mode\": \"ai\",\n  \"repository\": { \"id\": \"...\", \"name\": \"...\", \"fingerprint\": \"fnv1a:...\" },\n  \"summary\":   { \"architecture\": {...}, \"stats\": {...}, \"topCapabilities\": [...], \"topJourneys\": [...] },\n  \"score\":     { \"overall\": 84, \"aiReadinessOverall\": 78, \"tone\": \"good\", \"narrative\": \"...\", \"health\": {...}, \"aiReadiness\": {...}, \"strongest\": {...}, \"weakest\": {...}, \"factors\": [...] },\n  \"issues\":    [ { \"id\": \"...\", \"type\": \"smell\", \"severity\": \"high\", \"title\": \"...\", \"summary\": \"...\", \"whyItMatters\": \"...\", \"files\": [...], \"recommendation\": \"...\", \"evidence\": {...} } ],\n  \"flows\":     [ { \"id\": \"...\", \"name\": \"...\", \"type\": \"...\", \"confidence\": 0.92, \"entryPoint\": \"...\", \"stepCount\": 5 } ],\n  \"journeys\":  [ { \"id\": \"...\", \"name\": \"...\", \"confidence\": 0.88, \"actors\": [...], \"outcomes\": [...], \"entryPoint\": \"...\", \"stepCount\": 6 } ],\n  \"domains\":   [ { \"id\": \"...\", \"name\": \"...\", \"services\": 5, \"apis\": 4, \"confidence\": 0.9, \"risk\": \"medium\" } ],\n  \"smells\":    [ { \"id\": \"...\", \"type\": \"circular_dependency\", \"severity\": \"high\", \"nodes\": [...], \"description\": \"...\", \"recommendation\": \"...\" } ],\n  \"graph\":     { \"nodes\": [...], \"edges\": [...] } | null,\n  \"dna\":       { ... } | null,\n  \"prompts\":   { \"fix\": \"...\", \"review\": \"...\", \"onboard\": \"...\", \"issue\": \"...\" },\n  \"suggestedPrompts\": [...],\n  \"buildHistory\": [...]\n}" },
+          { type: "code", lang: "json", code: "{\n  \"$schema\": \"https://mnemos.dev/schemas/ai-pack/v1.json\",\n  \"version\": \"1.0.0\",\n  \"generatedAt\": \"2026-06-18T10:00:00Z\",\n  \"mnemosVersion\": \"0.3.0\",\n  \"mode\": \"ai\",\n  \"repository\": { \"id\": \"...\", \"name\": \"...\", \"fingerprint\": \"fnv1a:...\" },\n  \"summary\":   { \"architecture\": {...}, \"stats\": {...}, \"topCapabilities\": [...], \"topJourneys\": [...] },\n  \"score\":     { \"overall\": 84, \"aiReadinessOverall\": 78, \"tone\": \"good\", \"narrative\": \"...\", \"health\": {...}, \"aiReadiness\": {...}, \"strongest\": {...}, \"weakest\": {...}, \"factors\": [...] },\n  \"issues\":    [ { \"id\": \"...\", \"type\": \"smell\", \"severity\": \"high\", \"title\": \"...\", \"summary\": \"...\", \"whyItMatters\": \"...\", \"files\": [...], \"recommendation\": \"...\", \"evidence\": {...} } ],\n  \"flows\":     [ { \"id\": \"...\", \"name\": \"...\", \"type\": \"...\", \"confidence\": 0.92, \"entryPoint\": \"...\", \"stepCount\": 5 } ],\n  \"journeys\":  [ { \"id\": \"...\", \"name\": \"...\", \"confidence\": 0.88, \"actors\": [...], \"outcomes\": [...], \"entryPoint\": \"...\", \"stepCount\": 6 } ],\n  \"domains\":   [ { \"id\": \"...\", \"name\": \"...\", \"services\": 5, \"apis\": 4, \"confidence\": 0.9, \"risk\": \"medium\" } ],\n  \"smells\":    [ { \"id\": \"...\", \"type\": \"circular_dependency\", \"severity\": \"high\", \"nodes\": [...], \"description\": \"...\", \"recommendation\": \"...\" } ],\n  \"graph\":     { \"nodes\": [...], \"edges\": [...] } | null,\n  \"dna\":       { ... } | null,\n  \"prompts\":   { \"fix\": \"...\", \"review\": \"...\", \"onboard\": \"...\", \"issue\": \"...\" },\n  \"suggestedPrompts\": [...],\n  \"buildHistory\": [...]\n}" },
           { type: "h2", text: "Three delivery channels" },
           { type: "h3", text: "A · CLI — stdout or file" },
           { type: "code", lang: "bash", code: "# paste a summary into any chat\nnpx mnemos pack --section=summary --mode=ai\n\n# save the full pack for a batch workflow\nnpx mnemos pack --section=issues -o .mnemos/ai-pack.json\n\n# pretty-print the score section\nnpx mnemos pack --section=score --json | jq .score.health" },
@@ -1093,7 +1150,7 @@ export const DOCS: DocGroup[] = [
           { type: "h3", text: "C · Dashboard — `?section=` viewer" },
           { type: "code", lang: "text", code: "http://localhost:5173/json/local?section=summary\nhttp://localhost:5173/json/local?section=issues\nhttp://localhost:5173/json/local?section=score&mode=ai" },
           { type: "h2", text: "HTTP headers" },
-          { type: "code", lang: "text", code: "X-Mnemos-AiPack-Version: 1.0.0\nX-Mnemos-AiPack-Schema: https://mnemos.dev/schemas/ai-pack/v1.json\nX-Mnemos-Version: 0.2.0" },
+          { type: "code", lang: "text", code: "X-Mnemos-AiPack-Version: 1.0.0\nX-Mnemos-AiPack-Schema: https://mnemos.dev/schemas/ai-pack/v1.json\nX-Mnemos-Version: 0.3.0" },
           { type: "h2", text: "Why v1 matters" },
           { type: "p", text: "The v1 contract means an agent integration written today will keep working when the engine learns new tricks. Additive fields appear in minor releases; breaking changes wait for v2." },
           { type: "callout", tone: "tip", title: "Issue-driven repair workflow", text: "Use `--section=issues` to get a JSON array of repair cards. Each card has a `recommendation`, a `files` list, and a `prompts.issue` template pre-filled with the issue JSON. Copy the card, paste the prompt, ship the fix." },
@@ -1106,7 +1163,7 @@ export const DOCS: DocGroup[] = [
         blocks: [
           { type: "p", text: "`mnemos mcp` is a Model Context Protocol server on stdio. The same `MnemosRuntime` that powers `mnemos serve` and the dashboard is exposed as **20 tools** and **14 resources** — no extra moving parts." },
           { type: "h2", text: "Start the server" },
-          { type: "code", lang: "bash", code: "npx mnemos mcp\n# stderr: Mnemos MCP v0.2.0 (stdio)\n# stderr: Repository: /path/to/repo\n# stderr: Run `mnemos mcp --setup` to print MCP client config" },
+          { type: "code", lang: "bash", code: "npx mnemos mcp\n# stderr: Mnemos MCP v0.3.0 (stdio)\n# stderr: Repository: /path/to/repo\n# stderr: Run `mnemos mcp --setup` to print MCP client config" },
           { type: "p", text: "The server reads `.mnemos/` from the current directory (or the path you pass). It will not start a memory model for you — run `npx mnemos .` first." },
           { type: "h2", text: "Get the config block" },
           { type: "code", lang: "bash", code: "npx mnemos mcp --setup\n# → prints a markdown block with a ready-to-paste JSON snippet for Cursor, Claude Desktop, and VS Code" },

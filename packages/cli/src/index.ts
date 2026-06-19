@@ -88,6 +88,13 @@ import {
   findDomainShard,
   findFlowShard,
   analyzeShardImpact,
+  MnemosMemoryEngine,
+  engineExists,
+  loadEngineIndex,
+  buildTrustManifest,
+  formatTrustMarkdown,
+  formatProductLabel,
+  MEMORY_ENGINE,
   type AiPackSection,
   type Mode as AiPackMode,
 } from '@mnemos/core';
@@ -1265,6 +1272,193 @@ memoryCmd
     console.log(chalk.dim('  ' + result.reason));
   });
 
+memoryCmd
+  .command('query <question> [path]')
+  .description('Hybrid local memory search — BM25 + on-device embeddings (no cloud)')
+  .option('-p, --path <path>', 'Repository path', '.')
+  .option('-l, --limit <n>', 'Max results', '12')
+  .option('--json', 'Output as JSON')
+  .action(async (question, targetPath = '.', options) => {
+    const root = path.resolve(options.path && options.path !== '.' ? options.path : targetPath);
+    const outputDir = path.join(root, '.mnemos');
+    if (!(await engineExists(outputDir))) {
+      console.log(chalk.yellow(`Memory engine not built. Run ${chalk.cyan('mnemos build .')} first.`));
+      process.exit(1);
+    }
+    const engine = new MnemosMemoryEngine(root, outputDir);
+    const result = await engine.query(question, { limit: parseInt(options.limit, 10) });
+    if (options.json) {
+      console.log(JSON.stringify(result, null, 2));
+      return;
+    }
+    console.log('');
+    console.log(chalk.bold(`Memory Query · ${result.tookMs}ms · fully local`));
+    console.log(chalk.dim(`  BM25: ${result.retrievers.bm25} · Vector: ${result.retrievers.vector} · Fused: ${result.retrievers.fused}`));
+    console.log('');
+    for (const h of result.hits) {
+      console.log(`  ${chalk.cyan(h.title)} ${chalk.dim(`(${h.kind}, ${h.score.toFixed(3)})`)}`);
+      console.log(chalk.dim(`    ${h.snippet}`));
+    }
+    if (result.contradictions.length) {
+      console.log('');
+      console.log(chalk.yellow(`  ⚠ ${result.contradictions.length} contradiction(s) detected`));
+    }
+  });
+
+memoryCmd
+  .command('remember <content> [path]')
+  .description('Store episodic memory locally — persists with temporal decay')
+  .option('-p, --path <path>', 'Repository path', '.')
+  .option('-t, --tag <tag>', 'Tag (repeatable)', collectTags, [] as string[])
+  .action(async (content, targetPath = '.', options) => {
+    const root = path.resolve(options.path && options.path !== '.' ? options.path : targetPath);
+    const outputDir = path.join(root, '.mnemos');
+    const engine = new MnemosMemoryEngine(root, outputDir);
+    const episode = await engine.remember({ content, tags: options.tag, source: 'user' });
+    console.log(chalk.green(`Remembered · ${episode.id}`));
+    console.log(chalk.dim(`  Tags: ${options.tag.join(', ') || 'none'}`));
+  });
+
+memoryCmd
+  .command('context <task> [path]')
+  .description('Compile task-scoped context pack within a token budget')
+  .option('-p, --path <path>', 'Repository path', '.')
+  .option('-b, --budget <tokens>', 'Token budget', '8000')
+  .option('--json', 'Output as JSON')
+  .action(async (task, targetPath = '.', options) => {
+    const root = path.resolve(options.path && options.path !== '.' ? options.path : targetPath);
+    const outputDir = path.join(root, '.mnemos');
+    if (!(await engineExists(outputDir))) {
+      console.log(chalk.yellow(`Memory engine not built. Run ${chalk.cyan('mnemos build .')} first.`));
+      process.exit(1);
+    }
+    const engine = new MnemosMemoryEngine(root, outputDir);
+    const ctx = await engine.compileContext(task, parseInt(options.budget, 10));
+    if (options.json) {
+      console.log(JSON.stringify(ctx, null, 2));
+      return;
+    }
+    console.log(ctx.markdown);
+  });
+
+memoryCmd
+  .command('engine [path]')
+  .description('Memory engine status — Labyrinth hybrid index')
+  .option('-p, --path <path>', 'Repository path', '.')
+  .option('--json', 'Output as JSON')
+  .action(async (targetPath = '.', options) => {
+    const root = path.resolve(options.path && options.path !== '.' ? options.path : targetPath);
+    const outputDir = path.join(root, '.mnemos');
+    const index = await loadEngineIndex(outputDir);
+    if (!index) {
+      console.log(chalk.yellow(`Memory engine not built. Run ${chalk.cyan('mnemos build .')} first.`));
+      process.exit(1);
+    }
+    const m = index.manifest;
+    if (options.json) {
+      console.log(JSON.stringify(m, null, 2));
+      return;
+    }
+    console.log('');
+    console.log(chalk.bold(`Mnemos Memory Engine · ${MEMORY_ENGINE.codename}`));
+    console.log(chalk.dim('  100% local · SQLite + hybrid BM25 + embeddings'));
+    console.log('');
+    printMetricRow('Documents', String(m.documentCount));
+    printMetricRow('Episodes', String(m.episodeCount));
+    printMetricRow('Facts', String(m.factCount));
+    printMetricRow('Contradictions', String(m.contradictionCount));
+    printMetricRow('Store backend', m.stats.storeBackend ?? 'json');
+    printMetricRow('Embedding backend', m.stats.embeddingBackend ?? 'hash');
+    printMetricRow('Build time', `${m.stats.buildDurationMs}ms`);
+    if (m.stats.incrementalUpserted !== undefined) {
+      printMetricRow('Incremental', `${m.stats.incrementalUpserted} upserted · ${m.stats.incrementalSkipped} skipped`);
+    }
+    console.log('');
+    console.log(chalk.dim(`  Store: ${path.join(outputDir, 'engine')}`));
+  });
+
+memoryCmd
+  .command('trust [path]')
+  .description('Trust manifest — honest claims and known limitations')
+  .option('-p, --path <path>', 'Repository path', '.')
+  .option('--json', 'Output as JSON')
+  .action(async (targetPath = '.', options) => {
+    const root = path.resolve(options.path && options.path !== '.' ? options.path : targetPath);
+    const engine = new MnemosMemoryEngine(root, path.join(root, '.mnemos'));
+    const trust = await engine.getTrustManifest();
+    if (options.json) console.log(JSON.stringify(trust, null, 2));
+    else console.log(formatTrustMarkdown(trust));
+  });
+
+memoryCmd
+  .command('session <action> [path]')
+  .description('Session traces — start | end | list (M5 local agent observability)')
+  .option('-p, --path <path>', 'Repository path', '.')
+  .option('--json', 'Output as JSON')
+  .action(async (action, targetPath = '.', options) => {
+    const root = path.resolve(options.path && options.path !== '.' ? options.path : targetPath);
+    const engine = new MnemosMemoryEngine(root, path.join(root, '.mnemos'));
+    if (action === 'start') {
+      const id = await engine.sessionStart({ source: 'cli' });
+      console.log(chalk.green(`Session started: ${id}`));
+      return;
+    }
+    if (action === 'end') {
+      const summary = await engine.sessionEnd();
+      if (options.json) console.log(JSON.stringify(summary, null, 2));
+      else console.log(summary ? chalk.green(`Session ended · ${summary.eventCount} events`) : chalk.yellow('No active session'));
+      return;
+    }
+    if (action === 'list') {
+      const sessions = await engine.listSessions();
+      if (options.json) console.log(JSON.stringify(sessions, null, 2));
+      else for (const s of sessions) console.log(`${s.sessionId} · ${s.eventCount} events · ${s.startedAt}`);
+      return;
+    }
+    console.log(chalk.yellow('Use: start | end | list'));
+    process.exit(1);
+  });
+
+memoryCmd
+  .command('export-sync [path]')
+  .description('Export encrypted memory bundle for offline team sync (M6 — no cloud)')
+  .option('-p, --path <path>', 'Repository path', '.')
+  .option('-o, --output <file>', 'Output bundle path')
+  .option('--password <pwd>', 'Encryption passphrase (required)')
+  .action(async (targetPath = '.', options) => {
+    if (!options.password) {
+      console.log(chalk.red('--password is required'));
+      process.exit(1);
+    }
+    const root = path.resolve(options.path && options.path !== '.' ? options.path : targetPath);
+    const engine = new MnemosMemoryEngine(root, path.join(root, '.mnemos'));
+    const out = options.output ?? path.join(root, `${path.basename(root)}.mnemos-sync`);
+    const manifest = await engine.exportSync(options.password, out);
+    console.log(chalk.green(`Exported encrypted bundle → ${out}`));
+    console.log(chalk.dim(`  ${manifest.documentCount} docs · ${manifest.episodeCount} episodes · ${manifest.sessionCount} sessions`));
+  });
+
+memoryCmd
+  .command('import-sync <bundle> [path]')
+  .description('Import encrypted memory bundle (M6 — merge episodes/sessions locally)')
+  .option('-p, --path <path>', 'Repository path', '.')
+  .option('--password <pwd>', 'Decryption passphrase (required)')
+  .option('--replace', 'Replace store instead of merge')
+  .action(async (bundle, targetPath = '.', options) => {
+    if (!options.password) {
+      console.log(chalk.red('--password is required'));
+      process.exit(1);
+    }
+    const root = path.resolve(options.path && options.path !== '.' ? options.path : targetPath);
+    const engine = new MnemosMemoryEngine(root, path.join(root, '.mnemos'));
+    const manifest = await engine.importSync(path.resolve(bundle), options.password, !options.replace);
+    console.log(chalk.green(`Imported from ${manifest.repository} (${manifest.exportedAt})`));
+  });
+
+function collectTags(value: string, previous: string[]): string[] {
+  return previous.concat([value]);
+}
+
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
@@ -1736,7 +1930,7 @@ program
       `  ${nodeOk ? chalk.green('✓') : chalk.red('✗')} Node.js ${process.versions.node}` +
         chalk.dim(nodeOk ? '' : '  (Mnemos needs Node 18+)'),
     );
-    printSuccessLine(`Mnemos v${MNEMOS_VERSION}`);
+    printSuccessLine(`Mnemos · ${formatProductLabel()}`);
     printSuccessLine('Analysis engine is pure TypeScript — no Python, JVM, or other runtime needed.');
 
     printSection('Repository');
@@ -1746,6 +1940,19 @@ program
       printMetricRow('Files scanned', loaded.memory.stats.filesScanned.toLocaleString());
       printMetricRow('Domains', loaded.memory.domains.length);
       printMetricRow('Flows', loaded.memory.flows.length);
+      const outputDir = loaded.outputDir;
+      if (await engineExists(outputDir)) {
+        const idx = await loadEngineIndex(outputDir);
+        const trust = buildTrustManifest(idx?.manifest ?? null);
+        printSection('Memory Engine · Labyrinth');
+        printMetricRow('Codename', MEMORY_ENGINE.codename);
+        printMetricRow('Honesty score', `${trust.honestyScore}/100`);
+        printMetricRow('Store', idx?.manifest.stats.storeBackend ?? 'unknown');
+        printMetricRow('Embeddings', idx?.manifest.stats.embeddingBackend ?? 'hash');
+        if (trust.limitations.length) {
+          printWarnLine(`${trust.limitations.length} known limitation(s) — run ${chalk.cyan('mnemos memory trust')}`);
+        }
+      }
     } else {
       printWarnLine('No memory model built yet.');
       printInfoLine(`Run ${chalk.cyan('mnemos build .')} to create one.`);

@@ -94,3 +94,10 @@ export {
   buildArchitectureLanguageSection,
   buildLanguageSummaryLine,
 } from './docs.js';
+
+export {
+  getLanguageTier,
+  parseConfidenceForLanguage,
+  tierLabel,
+  type LanguageTier,
+} from './tiers.js';

@@ -22,6 +22,7 @@ export { getNodeQueryIndex, buildNodeQueryIndex, resolveNodeQueryFast } from './
 export type { MnemosGraph } from './graph/graph.js';
 export { buildGraph, buildGraphAsync, resolveNodeQuery } from './graph/builder.js';
 export { patchGraph, shouldPatchGraph, buildEmptyGraph } from './graph/incremental.js';
+export { computeEdgeConfidence, confidenceLabel } from './graph/edge-confidence.js';
 export { loadPathAliases, resolveAliasImport, resolveRelativeImport } from './graph/paths.js';
 export { discoverDomains, findDomain } from './analysis/domains.js';
 export { discoverFlows, findFlow } from './analysis/flows.js';
@@ -227,3 +228,37 @@ export type {
 } from './memory-shards/index.js';
 export { analyzeShardImpact } from './memory-shards/impact.js';
 export type { ShardImpactResult } from './memory-shards/impact.js';
+export {
+  MnemosMemoryEngine,
+  buildMemoryEngine,
+  engineExists,
+  loadEngineIndex,
+  engineDirFor,
+  MEMORY_ENGINE_SCHEMA,
+  MEMORY_ENGINE_CODENAME,
+  EMBEDDING_DIMS,
+} from './memory-engine/index.js';
+export {
+  PRODUCT,
+  MEMORY_ENGINE,
+  SHARD_PACK,
+  AI_PACK,
+  formatProductLabel,
+  formatEngineLabel,
+} from './release/codenames.js';
+export { buildTrustManifest, formatTrustMarkdown } from './release/trust-manifest.js';
+export type { TrustManifest, TrustClaim, TrustLimitation } from './release/trust-manifest.js';
+export { redactSecrets } from './memory-engine/redaction.js';
+export type {
+  MemoryDocument,
+  MemoryDocumentKind,
+  MemoryEpisode,
+  MemoryFact,
+  MemoryContradiction,
+  EngineManifest,
+  HybridQueryHit,
+  HybridQueryResult,
+  TaskContextPack,
+  RememberInput,
+  LoadedEngineIndex,
+} from './memory-engine/index.js';

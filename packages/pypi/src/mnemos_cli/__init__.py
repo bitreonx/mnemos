@@ -15,7 +15,7 @@ import stat
 import sys
 from pathlib import Path
 
-__version__ = "0.1.0"
+__version__ = "0.3.0"
 
 # Map (system, machine) -> filename inside _bundled/
 _BINARY_MAP = {

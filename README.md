@@ -28,6 +28,7 @@ Mnemos is **pre-launch OSS** — we are polishing before growth, not pretending 
 | **AI Pack v1 + MCP** | Stable | Built for Claude Code, Cursor, Codex |
 | **Fable Mindset (New Gen)** | Stable | `fable-mindset` skill + discipline rules; `mnemos discipline` measures the gap |
 | **Shared Agent Memory** | Stable | `memory build`, `serve`, `stats`, `budget`, `shard` — pre-sharded `.mnemos/*.memory.json` for subagents |
+| **Memory Engine v3** | Stable | SQLite + hybrid retrieval, sessions, encrypted sync — `.mnemos/engine/` |
 | **Dashboard** | Preview | Cockpits work; layout & panels still refining — [help welcome](CONTRIBUTING.md) |
 
 We dogfood Mnemos on this repo. Creator marketing comes **after** dashboard polish — not before.

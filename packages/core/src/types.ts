@@ -43,6 +43,8 @@ export interface GraphEdge {
   target: string;
   kind: EdgeKind;
   metadata?: Record<string, unknown>;
+  /** Edge reliability 0–1 (M3). */
+  confidence?: number;
 }
 
 export interface ParsedSymbol {

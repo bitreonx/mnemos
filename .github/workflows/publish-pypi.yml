@@ -97,6 +97,16 @@ jobs:
           cp -r dist-binaries/* packages/pypi/src/mnemos_cli/_bundled/ || true
           ls -la packages/pypi/src/mnemos_cli/_bundled/
 
+      - name: Verify tag matches package version
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          TAG="${GITHUB_REF#refs/tags/v}"
+          PKG_VERSION=$(python -c "import tomllib; print(tomllib.load(open('packages/pypi/pyproject.toml','rb'))['project']['version'])")
+          if [ "$TAG" != "$PKG_VERSION" ]; then
+            echo "::error::Tag v$TAG does not match packages/pypi/pyproject.toml version $PKG_VERSION"
+            exit 1
+          fi
+
       - name: Build wheel
         working-directory: packages/pypi
         run: |
@@ -108,3 +118,5 @@ jobs:
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
           packages-dir: packages/pypi/dist/
+          # PyPI rejects re-uploading the same filename/hash; skip instead of failing.
+          skip-existing: true

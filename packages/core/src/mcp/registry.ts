@@ -411,6 +411,139 @@ export const TOOL_REGISTRY: ToolRegistration<any>[] = [
   },
   {
     definition: {
+      name: 'memory_query',
+      description:
+        'Hybrid local memory retrieval — BM25 + on-device embeddings. No cloud. Best for semantic architecture questions.',
+      inputSchema: {
+        type: 'object' as const,
+        properties: {
+          question: { type: 'string' as const, minLength: 1 },
+          limit: { type: 'integer' as const, minimum: 1, maximum: 50, default: 12 },
+        },
+        required: ['question'],
+        additionalProperties: false,
+      },
+      outputSchema: ENVELOPE_OUTPUT_SCHEMA,
+      annotations: READONLY_TOOL_ANNOTATIONS,
+    },
+    normalize: (raw) => {
+      const args = expectArgsObject(raw);
+      assertNoUnknownFields(args, ['question', 'limit']);
+      return {
+        question: stringArg(args, 'question'),
+        limit: numberArg(args, 'limit', { required: false, min: 1, max: 50, integer: true, default: 12 }),
+      };
+    },
+    run: async (runtime, args: { question: string; limit: number }) =>
+      runtime.memoryQuery(args.question, args.limit),
+  },
+  {
+    definition: {
+      name: 'memory_remember',
+      description: 'Store episodic memory locally — agent observations, decisions, failures. Persists across sessions with decay.',
+      inputSchema: {
+        type: 'object' as const,
+        properties: {
+          content: { type: 'string' as const, minLength: 1 },
+          tags: { type: 'array' as const, items: { type: 'string' as const } },
+        },
+        required: ['content'],
+        additionalProperties: false,
+      },
+      outputSchema: ENVELOPE_OUTPUT_SCHEMA,
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: false,
+      },
+    },
+    normalize: (raw) => {
+      const args = expectArgsObject(raw);
+      assertNoUnknownFields(args, ['content', 'tags']);
+      const tagsRaw = args.tags;
+      const tags = Array.isArray(tagsRaw) ? tagsRaw.map(String) : [];
+      return { content: stringArg(args, 'content'), tags };
+    },
+    run: async (runtime, args: { content: string; tags: string[] }) =>
+      runtime.memoryRemember(args.content, args.tags),
+  },
+  {
+    definition: {
+      name: 'memory_engine_status',
+      description: 'Memory engine Labyrinth status — documents, episodes, contradictions, local embedding index.',
+      inputSchema: { type: 'object' as const, properties: {}, additionalProperties: false },
+      outputSchema: ENVELOPE_OUTPUT_SCHEMA,
+      annotations: READONLY_TOOL_ANNOTATIONS,
+    },
+    normalize: (raw) => {
+      const args = expectArgsObject(raw);
+      assertNoUnknownFields(args, []);
+      return {};
+    },
+    run: async (runtime) => runtime.getMemoryEngineStatus(),
+  },
+  {
+    definition: {
+      name: 'trust_manifest',
+      description: 'Honest capabilities and known limitations — verifiable trust manifest for agents.',
+      inputSchema: { type: 'object' as const, properties: {}, additionalProperties: false },
+      outputSchema: ENVELOPE_OUTPUT_SCHEMA,
+      annotations: READONLY_TOOL_ANNOTATIONS,
+    },
+    normalize: (raw) => {
+      const args = expectArgsObject(raw);
+      assertNoUnknownFields(args, []);
+      return {};
+    },
+    run: async (runtime) => runtime.getTrustManifest(),
+  },
+  {
+    definition: {
+      name: 'memory_session_start',
+      description: 'Start a local agent session trace — records tool calls and queries on-device.',
+      inputSchema: { type: 'object' as const, properties: {}, additionalProperties: false },
+      outputSchema: ENVELOPE_OUTPUT_SCHEMA,
+      annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false },
+    },
+    normalize: (raw) => {
+      const args = expectArgsObject(raw);
+      assertNoUnknownFields(args, []);
+      return {};
+    },
+    run: async (runtime) => runtime.memorySessionStart(),
+  },
+  {
+    definition: {
+      name: 'memory_session_end',
+      description: 'End the active local session trace and return summary.',
+      inputSchema: { type: 'object' as const, properties: {}, additionalProperties: false },
+      outputSchema: ENVELOPE_OUTPUT_SCHEMA,
+      annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true },
+    },
+    normalize: (raw) => {
+      const args = expectArgsObject(raw);
+      assertNoUnknownFields(args, []);
+      return {};
+    },
+    run: async (runtime) => runtime.memorySessionEnd(),
+  },
+  {
+    definition: {
+      name: 'memory_session_list',
+      description: 'List recent local agent session traces.',
+      inputSchema: { type: 'object' as const, properties: {}, additionalProperties: false },
+      outputSchema: ENVELOPE_OUTPUT_SCHEMA,
+      annotations: READONLY_TOOL_ANNOTATIONS,
+    },
+    normalize: (raw) => {
+      const args = expectArgsObject(raw);
+      assertNoUnknownFields(args, []);
+      return {};
+    },
+    run: async (runtime) => runtime.memorySessionList(),
+  },
+  {
+    definition: {
       name: 'refresh_memory',
       description: 'Invalidate cache and reload from .mnemos/ after mnemos build.',
       inputSchema: { type: 'object' as const, properties: {}, additionalProperties: false },

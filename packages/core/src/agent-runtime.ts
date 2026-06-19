@@ -25,7 +25,8 @@ import {
 } from './graph/mermaid.js';
 import { buildHealthGraphBundle } from './context/graph-markdown.js';
 
-export const MNEMOS_VERSION = '0.2.0';
+export const MNEMOS_VERSION = '0.3.0';
+export { PRODUCT, MEMORY_ENGINE, formatProductLabel, formatEngineLabel } from './release/codenames.js';
 export const MNEMOS_MCP_URI = 'mnemos://';
 
 export type AgentErrorCode =
@@ -528,8 +529,31 @@ export class MnemosRuntime {
 
   async search(query: string, limit = 10): Promise<AgentEnvelope> {
     const start = Date.now();
-    const { memory, searchIndex } = await this.load();
+    const { memory, searchIndex, outputDir } = await this.load();
     if (!query.trim()) throw new MnemosAgentError('INVALID_INPUT', 'Search query cannot be empty.');
+
+    const { engineExists, MnemosMemoryEngine } = await import('./memory-engine/engine.js');
+    if (await engineExists(outputDir)) {
+      const engine = new MnemosMemoryEngine(this.root, outputDir);
+      const hybrid = await engine.query(query, { limit: Math.min(limit, 50) });
+      const markdown = [
+        `# Hybrid Search: "${query}"`,
+        '',
+        `_BM25 + local embeddings · ${hybrid.tookMs}ms_`,
+        '',
+        hybrid.hits.length
+          ? hybrid.hits.map((h) =>
+              `- **${h.title}** (${h.kind}, score ${h.score.toFixed(3)}, conf ${h.confidence.toFixed(2)})\n  ${h.snippet}`,
+            ).join('\n')
+          : '_No matches._',
+        hybrid.warnings?.length
+          ? `\n## Quality signals\n${hybrid.warnings.map((w) => `- **${w.severity}** ${w.message}`).join('\n')}`
+          : '',
+      ].join('\n');
+      return this.envelope('search', `${hybrid.hits.length} hybrid hits for "${query}"`, markdown, hybrid, {
+        tookMs: Date.now() - start,
+      });
+    }
 
     const result = searchMemory(searchIndex, query, { limit: Math.min(limit, 50) });
     const markdown = [
@@ -583,8 +607,21 @@ export class MnemosRuntime {
 
   async compileFocus(task: string, tokenBudget = 8000): Promise<AgentEnvelope> {
     const start = Date.now();
-    const { memory, graph, searchIndex } = await this.load();
+    const { memory, graph, searchIndex, outputDir } = await this.load();
     if (!task.trim()) throw new MnemosAgentError('INVALID_INPUT', 'Task description is required.');
+
+    const { engineExists, MnemosMemoryEngine } = await import('./memory-engine/engine.js');
+    if (await engineExists(outputDir)) {
+      const engine = new MnemosMemoryEngine(this.root, outputDir);
+      const ctx = await engine.compileContext(task, tokenBudget);
+      return this.envelope(
+        'compile_focus',
+        `Memory engine context for "${task}" (~${ctx.estimatedTokens} tokens)`,
+        ctx.markdown,
+        ctx,
+        { tookMs: Date.now() - start },
+      );
+    }
 
     const { compileSubgraphContext, formatSubgraphContext } = await import('./context/subgraph-compiler.js');
     const ctx = compileSubgraphContext(memory, task, graph, { tokenBudget, searchIndex });
@@ -596,6 +633,109 @@ export class MnemosRuntime {
       ctx.json,
       { tookMs: Date.now() - start },
     );
+  }
+
+  async memoryQuery(question: string, limit = 12): Promise<AgentEnvelope> {
+    const start = Date.now();
+    const { outputDir } = await this.load();
+    const { engineExists, MnemosMemoryEngine } = await import('./memory-engine/engine.js');
+    if (!(await engineExists(outputDir))) {
+      throw new MnemosAgentError(
+        'NOT_BUILT',
+        'Memory engine not built.',
+        'Run `mnemos build .` to build the hybrid memory index.',
+      );
+    }
+    const engine = new MnemosMemoryEngine(this.root, outputDir);
+    const result = await engine.query(question, { limit });
+    const markdown = [
+      `# Memory Query: "${question}"`,
+      '',
+      `_Hybrid BM25 + local embeddings · ${result.tookMs}ms · fully on-device_`,
+      '',
+      ...result.hits.map((h) => `- **${h.title}** (${h.kind}) — ${h.snippet}`),
+      result.contradictions.length ? `\n## Contradictions\n${result.contradictions.map((c) => `- ${c.subject}: ${c.severity}`).join('\n')}` : '',
+    ].join('\n');
+    return this.envelope('memory_query', `${result.hits.length} memories for "${question}"`, markdown, result, {
+      tookMs: Date.now() - start,
+    });
+  }
+
+  async memoryRemember(content: string, tags: string[] = []): Promise<AgentEnvelope> {
+    const start = Date.now();
+    const { outputDir } = await this.load();
+    const { MnemosMemoryEngine } = await import('./memory-engine/engine.js');
+    const engine = new MnemosMemoryEngine(this.root, outputDir);
+    const episode = await engine.remember({ content, tags, source: 'agent' });
+    return this.envelope(
+      'memory_remember',
+      `Stored episodic memory (${episode.id})`,
+      `# Remembered\n\n${content}\n\n_Tags: ${tags.join(', ') || 'none'} · ${episode.createdAt}_`,
+      episode,
+      { tookMs: Date.now() - start },
+    );
+  }
+
+  async getMemoryEngineStatus(): Promise<AgentEnvelope> {
+    const { outputDir } = await this.load();
+    const { engineExists, loadEngineIndex } = await import('./memory-engine/engine.js');
+    if (!(await engineExists(outputDir))) {
+      return this.envelope('memory_engine_status', 'Memory engine not built', 'Run `mnemos build .` first.', { ready: false });
+    }
+    const index = await loadEngineIndex(outputDir);
+    const m = index!.manifest;
+    const markdown = [
+      '# Memory Engine · Labyrinth',
+      '',
+      `- **Codename:** ${m.codename ?? 'Labyrinth'}`,
+      `- **Documents:** ${m.documentCount}`,
+      `- **Episodes:** ${m.episodeCount}`,
+      `- **Facts:** ${m.factCount}`,
+      `- **Contradictions:** ${m.contradictionCount}`,
+      `- **Store:** ${m.stats.storeBackend ?? 'unknown'}`,
+      `- **Embeddings:** ${m.stats.embeddingBackend ?? 'hash'} (local, on-device)`,
+      `- **Incremental:** ${m.stats.incrementalUpserted ?? 0} upserted, ${m.stats.incrementalSkipped ?? 0} skipped`,
+    ].join('\n');
+    return this.envelope('memory_engine_status', `Engine ready · ${m.documentCount} docs`, markdown, m);
+  }
+
+  async getTrustManifest(): Promise<AgentEnvelope> {
+    const { outputDir } = await this.load();
+    const { MnemosMemoryEngine } = await import('./memory-engine/engine.js');
+    const engine = new MnemosMemoryEngine(this.root, outputDir);
+    const trust = await engine.getTrustManifest();
+    const { formatTrustMarkdown } = await import('./release/trust-manifest.js');
+    return this.envelope(
+      'trust_manifest',
+      `Honesty ${trust.honestyScore}/100 · ${trust.limitations.length} known limits disclosed`,
+      formatTrustMarkdown(trust),
+      trust,
+    );
+  }
+
+  async memorySessionStart(): Promise<AgentEnvelope> {
+    const { outputDir } = await this.load();
+    const { MnemosMemoryEngine } = await import('./memory-engine/engine.js');
+    const engine = new MnemosMemoryEngine(this.root, outputDir);
+    const sessionId = await engine.sessionStart({ agent: 'mcp' });
+    return this.envelope('memory_session_start', `Session ${sessionId}`, `# Session started\n\n${sessionId}`, { sessionId });
+  }
+
+  async memorySessionEnd(): Promise<AgentEnvelope> {
+    const { outputDir } = await this.load();
+    const { MnemosMemoryEngine } = await import('./memory-engine/engine.js');
+    const engine = new MnemosMemoryEngine(this.root, outputDir);
+    const summary = await engine.sessionEnd();
+    return this.envelope('memory_session_end', summary ? `Ended ${summary.sessionId}` : 'No active session', JSON.stringify(summary, null, 2), summary);
+  }
+
+  async memorySessionList(): Promise<AgentEnvelope> {
+    const { outputDir } = await this.load();
+    const { MnemosMemoryEngine } = await import('./memory-engine/engine.js');
+    const engine = new MnemosMemoryEngine(this.root, outputDir);
+    const sessions = await engine.listSessions();
+    const markdown = sessions.map((s) => `- **${s.sessionId}** · ${s.eventCount} events · ${s.startedAt}`).join('\n');
+    return this.envelope('memory_session_list', `${sessions.length} sessions`, markdown || '_No sessions_', sessions);
   }
 
   async getDnaDiff(): Promise<AgentEnvelope> {

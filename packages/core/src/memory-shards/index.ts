@@ -13,7 +13,12 @@
 import type { MemoryModel, Domain, Flow, ApiEndpoint, Service, CriticalPath, ArchitectureSmell } from '../types.js';
 import { estimateTokens } from '../proxy/compress-output.js';
 
-export const SHARD_SCHEMA_VERSION = 'mnemos/shared-memory/v1';
+import { SHARD_PACK } from '../release/codenames.js';
+
+export const SHARD_SCHEMA_VERSION = SHARD_PACK.schema;
+export const SHARD_CODENAME = SHARD_PACK.codename;
+/** @deprecated legacy schema id */
+export const SHARD_SCHEMA_LEGACY = 'mnemos/shared-memory/v1';
 
 export type ShardKind =
   | 'domain'

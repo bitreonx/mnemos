@@ -1,0 +1,30 @@
+{
+  "name": "@mnemos/sdk",
+  "version": "0.3.0",
+  "description": "Local-first AI memory SDK for Mnemos — hybrid retrieval, episodic memory, task context",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && node --test dist/**/*.test.js"
+  },
+  "dependencies": {
+    "@mnemos/core": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.21",
+    "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT",
+  "keywords": ["mnemos", "ai-memory", "local-first", "embeddings", "retrieval", "mcp"]
+}

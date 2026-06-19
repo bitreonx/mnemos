@@ -5,6 +5,8 @@ import {
   LANGUAGE_DEFINITIONS,
   inferLanguage,
   getExtractorProfile,
+  getLanguageTier,
+  parseConfidenceForLanguage,
 } from '../languages/index.js';
 import { parseContent } from '../parser/index.js';
 import { maskCommentsAndStrings, maskOutsideScriptRegions, prepareAnalyzableSource, isMatchInCode, isImportMatchInCode } from '../parser/source-mask.js';
@@ -26,6 +28,15 @@ describe('language support', () => {
     assert.equal(inferLanguage('contract.sol'), 'solidity');
     assert.equal(inferLanguage('infra/main.tf'), 'terraform');
     assert.equal(inferLanguage('unknown.xyz'), 'unknown');
+  });
+
+  it('assigns parse tiers and confidence by language depth', () => {
+    assert.equal(getLanguageTier('typescript'), 1);
+    assert.equal(getLanguageTier('rust'), 2);
+    assert.equal(getLanguageTier('unknown'), 3);
+    assert.ok(parseConfidenceForLanguage('typescript', true) > parseConfidenceForLanguage('typescript', false));
+    assert.ok(parseConfidenceForLanguage('typescript', true) > parseConfidenceForLanguage('rust', false));
+    assert.ok(parseConfidenceForLanguage('unknown', false) < parseConfidenceForLanguage('rust', false));
   });
 
   it('every non-legacy language has an extractor profile', () => {

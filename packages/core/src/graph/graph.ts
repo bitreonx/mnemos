@@ -1,6 +1,7 @@
 import Graph from 'graphology';
 import type { AbstractGraph } from 'graphology-types';
 import type { EdgeKind, GraphEdge, GraphNode, NodeKind } from '../types.js';
+import { computeEdgeConfidence } from './edge-confidence.js';
 
 export type MnemosGraph = AbstractGraph<GraphNode, GraphEdge>;
 
@@ -34,16 +35,19 @@ export function addEdge(
   target: string,
   kind: EdgeKind,
   metadata?: Record<string, unknown>,
+  language?: string,
 ): void {
   if (!graph.hasNode(source) || !graph.hasNode(target)) return;
   const edgeId = `${source}->${target}:${kind}`;
   if (!graph.hasEdge(edgeId)) {
+    const confidence = computeEdgeConfidence(kind, metadata, language);
     graph.addEdgeWithKey(edgeId, source, target, {
       id: edgeId,
       source,
       target,
       kind,
       metadata,
+      confidence,
     });
   }
 }

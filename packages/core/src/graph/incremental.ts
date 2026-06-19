@@ -180,14 +180,15 @@ export function wireGraphEdges(
       addEdge(graph, sourceId, targetId, 'IMPORTS', {
         specifiers: imp.specifiers,
         importSource: imp.source,
-      });
-      addEdge(graph, sourceId, targetId, 'DEPENDS_ON');
+        isTypeOnly: imp.isTypeOnly,
+      }, file.language);
+      addEdge(graph, sourceId, targetId, 'DEPENDS_ON', undefined, file.language);
     }
 
     for (const call of file.calls) {
       const targetSymId = resolveCallTargetSymbol(call.callee, localImports, symbolIndex, reexports);
       if (targetSymId) {
-        addEdge(graph, sourceId, targetSymId, 'CALLS', { line: call.line, resolved: true });
+        addEdge(graph, sourceId, targetSymId, 'CALLS', { line: call.line, resolved: true }, file.language);
       }
     }
   }
