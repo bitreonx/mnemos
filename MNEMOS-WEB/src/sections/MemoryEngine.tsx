@@ -2,6 +2,8 @@ import { motion } from "framer-motion";
 import { Shield, Brain, Zap, Lock } from "lucide-react";
 import GlowCard from "../components/ui/GlowCard";
 
+const EASE = [0.22, 0.8, 0.18, 1] as const;
+
 const FEATURES = [
   {
     icon: Lock,
@@ -27,37 +29,61 @@ const FEATURES = [
 
 export function MemoryEngine() {
   return (
-    <section id="memory-engine" className="relative py-24 px-6">
-      <div className="max-w-6xl mx-auto">
+    <section id="memory-engine" className="relative overflow-hidden py-28">
+      {/* ambient glow */}
+      <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden>
+        <div className="absolute left-1/4 top-20 h-[500px] w-[500px] rounded-full bg-[var(--brand)] opacity-[0.08] blur-[120px]" />
+        <div className="absolute right-1/4 bottom-20 h-[400px] w-[400px] rounded-full bg-[var(--cyan)] opacity-[0.06] blur-[100px]" />
+      </div>
+
+      <div className="container-px mx-auto max-w-6xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
+          transition={{ duration: 0.6, ease: EASE }}
+          className="mb-16 text-center"
         >
-          <span className="text-emerald-400 text-sm font-mono tracking-wider uppercase">
+          <span className="inline-flex items-center gap-2 font-mono text-[0.8125rem] uppercase tracking-[0.12em] text-[var(--text-faint)]">
+            <span className="h-1 w-1 rounded-full bg-[var(--brand)]" />
             Memory Engine · Labyrinth
           </span>
-          <h2 className="mt-4 text-4xl md:text-5xl font-bold bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
-            Local AI memory infrastructure
+          <h2 className="mt-5 font-serif text-[2.5rem] font-normal leading-[1.08] tracking-tight text-[var(--text)] md:text-[3.2rem]">
+            Local AI memory <span className="italic text-[var(--brand)]">infrastructure</span>
           </h2>
-          <p className="mt-4 text-lg text-white/60 max-w-2xl mx-auto">
-            Release codename <strong className="text-white/80">Labyrinth</strong> — part of Mneme 0.2.0. Your repository never leaves your machine.
+          <p className="mx-auto mt-5 max-w-2xl text-[1.0625rem] leading-relaxed text-[var(--text-dim)]">
+            Release codename <strong className="font-semibold text-[var(--text)]">Labyrinth</strong> — part of Mneme 0.3.0.{" "}
+            Your repository never leaves your machine.
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+        <div className="mb-8 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
           {FEATURES.map((f, i) => (
-            <GlowCard key={f.title} delay={i * 0.1}>
-              <f.icon className="w-8 h-8 text-emerald-400 mb-3" />
-              <h3 className="font-semibold text-white mb-2">{f.title}</h3>
-              <p className="text-sm text-white/50">{f.desc}</p>
-            </GlowCard>
+            <motion.div
+              key={f.title}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: i * 0.08, ease: EASE }}
+            >
+              <GlowCard className="h-full" accent="var(--brand)">
+                <f.icon className="mb-3 h-7 w-7 text-[var(--brand)]" strokeWidth={1.5} />
+                <h3 className="mb-2 text-[0.9375rem] font-semibold text-[var(--text)]">{f.title}</h3>
+                <p className="text-[0.875rem] leading-relaxed text-[var(--text-dim)]">{f.desc}</p>
+              </GlowCard>
+            </motion.div>
           ))}
         </div>
 
-        <GlowCard>
-          <pre className="text-sm text-emerald-300/90 font-mono overflow-x-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.3, ease: EASE }}
+        >
+          <GlowCard accent="var(--cyan)">
+            <pre className="overflow-x-auto font-mono text-[0.8125rem] leading-[1.75] text-[var(--text-dim)]">
+              <code>
 {`# Build hybrid index (automatic with mnemos build)
 npx mnemos .
 
@@ -69,8 +95,10 @@ npx mnemos memory context "fix login bug" --budget 8000
 
 # Persist episodic memory
 npx mnemos memory remember "JWT in httpOnly cookie" --tag auth`}
-          </pre>
-        </GlowCard>
+              </code>
+            </pre>
+          </GlowCard>
+        </motion.div>
       </div>
     </section>
   );
