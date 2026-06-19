@@ -8,6 +8,15 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const cliDir = path.resolve(__dirname, '..');
 const out = path.join(cliDir, 'dist', 'mnemos.cjs');
 
+// Native / WASM-heavy optional deps — excluded from SEA bundle; hash embeddings used at runtime.
+const NATIVE_EXTERNALS = [
+  '@xenova/transformers',
+  'onnxruntime-node',
+  'onnxruntime-common',
+  'onnxruntime-web',
+  'sharp',
+];
+
 await build({
   entryPoints: [path.join(cliDir, 'src', 'index.ts')],
   bundle: true,
@@ -15,7 +24,7 @@ await build({
   target: 'node20',
   format: 'cjs',
   outfile: out,
-  external: [],
+  external: NATIVE_EXTERNALS,
   // Bundle everything in the workspace too, including @mnemos/core.
   nodePaths: [path.resolve(cliDir, '..', '..', 'node_modules')],
   banner: { js: '' },
