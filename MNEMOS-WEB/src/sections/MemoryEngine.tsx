@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Shield, Brain, Zap, Lock } from "lucide-react";
-import { GlowCard } from "../components/ui/GlowCard";
+import GlowCard from "../components/ui/GlowCard";
 
 const FEATURES = [
   {
