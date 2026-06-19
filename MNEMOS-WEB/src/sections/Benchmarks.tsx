@@ -291,16 +291,7 @@ export default function Benchmarks() {
                 <div className="flex items-baseline gap-1">
                   <span
                     className="text-4xl font-semibold tracking-tight sm:text-5xl"
-                    style={
-                      hero
-                        ? { color: "var(--brand)" }
-                        : {
-                            background: "var(--grad-text)",
-                            WebkitBackgroundClip: "text",
-                            backgroundClip: "text",
-                            color: "transparent",
-                          }
-                    }
+                    style={{ color: hero ? "var(--brand)" : "var(--text)" }}
                   >
                     <AnimatedCounter value={b.value} suffix={b.suffix} decimals={Number.isInteger(b.value) ? 0 : 1} />
                   </span>

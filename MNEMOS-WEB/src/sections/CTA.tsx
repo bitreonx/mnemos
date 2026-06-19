@@ -8,25 +8,24 @@ export default function CTA() {
   return (
     <section className="container-px mx-auto max-w-[1200px] py-24 sm:py-28">
       <Reveal>
-        <div className="relative isolate overflow-hidden rounded-[2rem] border border-[var(--border-strong)] px-6 py-20 text-center sm:px-16">
-          {/* aurora backdrop */}
-          <div className="absolute inset-0 -z-10" style={{ background: "var(--grad-brand)", opacity: 0.14 }} aria-hidden />
+        <div className="relative isolate overflow-hidden rounded-[2rem] border border-[var(--border-strong)] bg-[var(--brand)] px-6 py-20 text-center text-white sm:px-16">
+          {/* ambient brand glow */}
           <div
-            className="absolute left-1/2 top-0 -z-10 h-[400px] w-[700px] -translate-x-1/2 animate-aurora rounded-full opacity-50 blur-[90px]"
-            style={{ background: "radial-gradient(circle, var(--brand), transparent 70%)" }}
+            className="absolute left-1/2 top-0 -z-10 h-[400px] w-[700px] -translate-x-1/2 animate-aurora rounded-full opacity-40 blur-[90px]"
+            style={{ background: "var(--brand-deep)" }}
             aria-hidden
           />
-          <div className="absolute inset-0 -z-10 bg-dots opacity-[0.12]" aria-hidden />
+          <div className="absolute inset-0 -z-10 opacity-[0.08]" style={{ backgroundImage: "radial-gradient(rgba(255,255,255,0.6) 1px, transparent 1px)", backgroundSize: "22px 22px" }} aria-hidden />
 
-          <div className="mx-auto mb-6 grid h-16 w-16 place-items-center rounded-2xl border border-[var(--border-strong)] bg-[var(--surface-solid)] text-[var(--brand)] shadow-[var(--shadow-glow)]">
-            <MnemosMark size={36} color="var(--brand)" />
+          <div className="mx-auto mb-6 grid h-16 w-16 place-items-center rounded-2xl border border-white/20 bg-white/10 text-white shadow-[0_18px_60px_-18px_rgba(0,0,0,0.45)]">
+            <MnemosMark size={36} color="#ffffff" />
           </div>
 
-          <h2 className="mx-auto max-w-2xl text-balance text-[2.3rem] font-semibold leading-[1.05] tracking-tight text-[var(--text)] sm:text-[3rem]">
+          <h2 className="mx-auto max-w-2xl text-balance text-[2.3rem] font-semibold leading-[1.05] tracking-tight text-white sm:text-[3rem]">
             This is the future of
-            <br /> <span className="gradient-text font-serif italic">software understanding.</span>
+            <br /> <span className="font-serif italic text-white">software understanding.</span>
           </h2>
-          <p className="mx-auto mt-5 max-w-xl text-[1.05rem] leading-relaxed text-[var(--text-dim)]">
+          <p className="mx-auto mt-5 max-w-xl text-[1.05rem] leading-relaxed text-white/80">
             Don't let your code be forgotten. Give your repository a memory that humans
             and AI can use — in one command.
           </p>

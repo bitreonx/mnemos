@@ -46,8 +46,13 @@
   --glow: rgba(134, 59, 255, 0.45);
   --glow-cyan: rgba(71, 191, 255, 0.35);
 
-  --grad-brand: linear-gradient(120deg, #9b5bff 0%, #7e14ff 45%, #47bfff 100%);
-  --grad-text: linear-gradient(110deg, #c4a6ff 0%, #9b5bff 40%, #47bfff 100%);
+  /* Solid brand colors — gradients are replaced with focused single hues
+     so the violet knot reads as intentional, premium, and on-system. */
+  --grad-brand: #9b5bff;
+  --grad-text: #9b5bff;
+  --grad-cyan: #47bfff;
+  --grad-deep: #7e14ff;
+  --grad-mint: #3ecf8e;
   --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 20px 60px -24px rgba(0, 0, 0, 0.8);
   --shadow-glow: 0 0 0 1px rgba(155, 91, 255, 0.25), 0 18px 60px -18px rgba(126, 20, 255, 0.55);
 }
@@ -77,8 +82,12 @@
   --glow: rgba(134, 59, 255, 0.28);
   --glow-cyan: rgba(71, 191, 255, 0.25);
 
-  --grad-brand: linear-gradient(120deg, #863bff 0%, #7e14ff 45%, #1d8fe0 100%);
-  --grad-text: linear-gradient(110deg, #7e14ff 0%, #863bff 40%, #1d8fe0 100%);
+  /* Light theme — solid brand. */
+  --grad-brand: #7e14ff;
+  --grad-text: #7e14ff;
+  --grad-cyan: #1d8fe0;
+  --grad-deep: #6109d6;
+  --grad-mint: #1aa86a;
   --shadow-card: 0 1px 2px rgba(20, 10, 50, 0.04), 0 18px 50px -28px rgba(126, 20, 255, 0.4);
   --shadow-glow: 0 0 0 1px rgba(126, 20, 255, 0.18), 0 18px 60px -18px rgba(126, 20, 255, 0.35);
 }
@@ -127,12 +136,9 @@
   .text-pretty { text-wrap: pretty; }
 
   .gradient-text {
-    background: var(--grad-text);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    color: var(--brand);
   }
-  .gradient-bg { background: var(--grad-brand); }
+  .gradient-bg { background: var(--brand); }
 
   .glass {
     background: var(--surface);
@@ -646,7 +652,7 @@
 }
 .docs-progress__bar {
   height: 100%;
-  background: linear-gradient(90deg, var(--brand) 0%, var(--cyan) 100%);
+  background: var(--brand);
   transform-origin: 0 50%;
   box-shadow: 0 0 14px var(--glow);
 }
@@ -896,10 +902,7 @@
   text-wrap: balance;
 }
 .docs-hero__title .accent {
-  background: linear-gradient(110deg, var(--brand) 0%, var(--cyan) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--brand);
   font-style: italic;
 }
 .docs-hero__lede {

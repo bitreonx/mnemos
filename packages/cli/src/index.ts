@@ -80,6 +80,14 @@ import {
   aiPackToJson,
   startGraphSync,
   compressCommandOutput,
+  buildMemoryShards,
+  writeMemoryShards,
+  loadMemoryShardSet,
+  getMemoryStats,
+  allocateTokenBudget,
+  findDomainShard,
+  findFlowShard,
+  analyzeShardImpact,
   type AiPackSection,
   type Mode as AiPackMode,
 } from '@mnemos/core';
@@ -933,6 +941,335 @@ program
 
     await new Promise(() => {});
   });
+
+// ============================================================
+// Shared Agent Memory
+// ============================================================
+const memoryCmd = program
+  .command('memory')
+  .description('Shared Agent Memory — pre-sharded memory for AI agents and subagents');
+
+memoryCmd
+  .command('build [path]')
+  .description('Analyze the repository and write pre-shared memory shards to .mnemos/')
+  .option('-p, --path <path>', 'Repository path (alias of positional)', '.')
+  .option('-o, --output <dir>', 'Output directory', '.mnemos')
+  .option('--no-build', 'Skip full build; only (re)write shards from existing memory.json')
+  .action(async (targetPath = '.', options) => {
+    const root = path.resolve(options.path && options.path !== '.' ? options.path : targetPath);
+    const outputDir = path.isAbsolute(options.output) ? options.output : path.join(root, options.output);
+
+    if (options.build !== false) {
+      const spinner = ora(`Building shared memory for ${root}`).start();
+      try {
+        await build({ root, outputDir, verbose: false });
+        spinner.succeed(chalk.green('Memory model ready'));
+      } catch (err) {
+        spinner.fail(chalk.red('Build failed'));
+        console.error(err);
+        process.exit(1);
+      }
+    }
+
+    const loaded = await loadMemoryModel(root);
+    if (!loaded) {
+      console.log(chalk.yellow(`No memory model found at ${outputDir}. Run ${chalk.cyan('mnemos build .')} first.`));
+      process.exit(1);
+    }
+
+    const spinner = ora('Writing shared memory shards…').start();
+    try {
+      const set = buildMemoryShards(loaded.memory);
+      const { files } = await writeMemoryShards(set, outputDir);
+      spinner.succeed(chalk.green(`Shared memory built · ${set.shards.length} shards`));
+      console.log('');
+      console.log(chalk.bold('  Shards'));
+      for (const s of set.shards.slice(0, 12)) {
+        console.log(`    ${chalk.cyan(s.filename.padEnd(40))} ${chalk.dim(s.kind.padEnd(8))} ${String(s.estimatedTokens).padStart(5)}t`);
+      }
+      if (set.shards.length > 12) {
+        console.log(`    ${chalk.dim('… ' + (set.shards.length - 12) + ' more')}`);
+      }
+      console.log('');
+      console.log(`  Total: ${chalk.cyan(set.totalEstimatedTokens.toLocaleString())} tokens · ${chalk.dim(formatBytes(set.totalBytes))}`);
+      console.log(`  Path:  ${chalk.dim(outputDir)}`);
+      console.log(`  Files: ${chalk.dim(String(files.length))} written`);
+      console.log('');
+      console.log(chalk.dim('  Serve over HTTP:    mnemos memory serve'));
+      console.log(chalk.dim('  Inspect stats:      mnemos memory stats'));
+      console.log(chalk.dim('  Token budgeting:    mnemos memory budget 10000'));
+    } catch (err) {
+      spinner.fail(chalk.red('Shard write failed'));
+      console.error(err);
+      process.exit(1);
+    }
+  });
+
+memoryCmd
+  .command('serve [path]')
+  .description('Start a read-only memory server (localhost:4000) with shard endpoints')
+  .option('-p, --path <path>', 'Repository path (alias of positional)', '.')
+  .option('--port <port>', 'Port number', '4000')
+  .option('--host <host>', 'Host', '127.0.0.1')
+  .action(async (targetPath = '.', options) => {
+    const root = path.resolve(options.path && options.path !== '.' ? options.path : targetPath);
+    const loaded = await loadMemoryModel(root);
+    if (!loaded) {
+      console.log(chalk.yellow(`No memory model found for ${root}. Run ${chalk.cyan('mnemos build .')} first.`));
+      process.exit(1);
+    }
+
+    const handle = await startMemoryServer({
+      root,
+      port: parseInt(options.port, 10),
+      host: options.host,
+    });
+
+    console.log(chalk.bold(`\nMnemos Shared Memory Server v${MNEMOS_VERSION}`));
+    console.log(chalk.green(`  http://${options.host}:${handle.port}`));
+    console.log('');
+    console.log('  Shard endpoints (read-only, fast):');
+    console.log(chalk.cyan('    GET /shards · /memory') + chalk.dim('                       — full manifest'));
+    console.log(chalk.cyan('    GET /memory/stats · /stats') + chalk.dim('                 — compression + savings'));
+    console.log(chalk.cyan('    GET /memory/budget?budget=10000') + chalk.dim('            — token budget allocation'));
+    console.log(chalk.cyan('    GET /shards/file/:filename') + chalk.dim('                  — raw shard JSON'));
+    console.log(chalk.cyan('    GET /domain/:name') + chalk.dim('                           — domain shard (auth, …)'));
+    console.log(chalk.cyan('    GET /flow/:name') + chalk.dim('                             — flow shard'));
+    console.log(chalk.cyan('    GET /shard/:kind/:name') + chalk.dim('                      — typed shard lookup'));
+    console.log(chalk.cyan('    GET /impact/:node?fast=1') + chalk.dim('                    — shard-based impact'));
+    console.log('');
+    console.log('  Also available:');
+    console.log(chalk.cyan('    GET /dna · /capabilities · /domains · /flows') + chalk.dim('    — canonical endpoints'));
+    console.log('');
+    console.log(chalk.dim('  Re-run `mnemos memory build` after editing source files to refresh shards.'));
+    console.log(chalk.dim('  Press Ctrl+C to stop.\n'));
+
+    await new Promise(() => {});
+  });
+
+memoryCmd
+  .command('stats [path]')
+  .description('Print Shared Agent Memory statistics (shards, tokens, savings)')
+  .option('-p, --path <path>', 'Repository path (alias of positional)', '.')
+  .option('--json', 'Output as JSON')
+  .action(async (targetPath = '.', options) => {
+    const root = path.resolve(options.path && options.path !== '.' ? options.path : targetPath);
+    const outputDir = path.join(root, '.mnemos');
+
+    const set = await loadMemoryShardSet(outputDir);
+    if (!set) {
+      console.log(chalk.yellow(`No shared memory shards at ${outputDir}. Run ${chalk.cyan('mnemos memory build .')} first.`));
+      process.exit(1);
+    }
+    const stats = getMemoryStats(set);
+
+    if (options.json) {
+      console.log(JSON.stringify(stats, null, 2));
+      return;
+    }
+
+    console.log('');
+    console.log(chalk.bold('Shared Agent Memory · Stats'));
+    console.log('');
+    console.log(`  ${chalk.dim('Repository'.padEnd(28))} ${chalk.cyan(set.repository)}`);
+    console.log(`  ${chalk.dim('Built at'.padEnd(28))} ${chalk.cyan(set.builtAt)}`);
+    console.log(`  ${chalk.dim('Total shards'.padEnd(28))} ${chalk.cyan(stats.totalShards.toString())}`);
+    console.log(`  ${chalk.dim('Total bytes'.padEnd(28))} ${chalk.cyan(formatBytes(stats.totalBytes))}`);
+    console.log(`  ${chalk.dim('Total estimated tokens'.padEnd(28))} ${chalk.cyan(stats.totalEstimatedTokens.toLocaleString())}`);
+    console.log(`  ${chalk.dim('Compression ratio'.padEnd(28))} ${chalk.cyan(stats.compressionRatio.toFixed(2) + '×')}`);
+    console.log(`  ${chalk.dim('AI readiness score'.padEnd(28))} ${chalk.cyan(String(stats.aiReadinessScore))}`);
+    console.log('');
+    console.log(chalk.bold('  Shards by kind'));
+    for (const k of stats.byKind) {
+      console.log(`    ${k.kind.padEnd(16)} ${String(k.count).padStart(3)} shards · ${String(k.tokens).padStart(6)} tokens`);
+    }
+    console.log('');
+    console.log(chalk.bold('  Subagent savings'));
+    console.log(`    Without Mnemos:   ~${chalk.red(stats.subagentSavings.withoutMnemos.toLocaleString())} tokens / subagent`);
+    console.log(`    With Mnemos:      ~${chalk.green(stats.subagentSavings.withMnemos.toLocaleString())} tokens / subagent`);
+    console.log(`    Saved per run:    ${chalk.cyan(stats.subagentSavings.savedPerRun.toLocaleString())} tokens (${chalk.cyan(stats.subagentSavings.savedPercent + '%')})`);
+    console.log('');
+    console.log(chalk.bold('  Top shards'));
+    for (const s of stats.topShards.slice(0, 8)) {
+      console.log(`    ${s.filename.padEnd(36)} ${chalk.dim(s.kind.padEnd(8))} ${String(s.estimatedTokens).padStart(6)}t`);
+    }
+    console.log('');
+    console.log(chalk.dim(`  Path: ${outputDir}`));
+  });
+
+memoryCmd
+  .command('budget <amount> [path]')
+  .description('Allocate a token budget across Architecture / Flows / Domains / APIs / Critical Paths')
+  .option('-p, --path <path>', 'Repository path (alias of positional)', '.')
+  .option('--json', 'Output as JSON')
+  .action(async (amount, targetPath = '.', options) => {
+    const root = path.resolve(options.path && options.path !== '.' ? options.path : targetPath);
+    const outputDir = path.join(root, '.mnemos');
+    const set = await loadMemoryShardSet(outputDir);
+    if (!set) {
+      console.log(chalk.yellow(`No shared memory shards at ${outputDir}. Run ${chalk.cyan('mnemos memory build .')} first.`));
+      process.exit(1);
+    }
+
+    const budget = Number(amount);
+    if (!Number.isFinite(budget) || budget <= 0) {
+      console.log(chalk.red(`Invalid budget: ${amount}. Use a positive number, e.g. ${chalk.cyan('mnemos memory budget 10000')}`));
+      process.exit(1);
+    }
+    const allocation = allocateTokenBudget(set, budget);
+
+    if (options.json) {
+      console.log(JSON.stringify(allocation, null, 2));
+      return;
+    }
+
+    console.log('');
+    console.log(chalk.bold(`Token Budget Allocation · ${budget.toLocaleString()} tokens`));
+    console.log('');
+    for (const b of allocation.buckets) {
+      console.log(`  ${b.label.padEnd(16)} ${chalk.cyan(String(b.allocatedTokens).padStart(6))}t`);
+      console.log(`  ${chalk.dim('                ' + b.description)}`);
+    }
+    console.log('');
+    console.log(`  ${'Total allocated'.padEnd(16)} ${chalk.cyan(String(budget - allocation.unallocated).padStart(6))}t`);
+    console.log(`  ${'Unallocated'.padEnd(16)} ${chalk.dim(String(allocation.unallocated).padStart(6))}t`);
+    console.log('');
+    if (allocation.assignments.length > 0) {
+      console.log(chalk.bold('  Sample assignments'));
+      for (const a of allocation.assignments.slice(0, 6)) {
+        const flag = a.truncated ? chalk.yellow('~truncated') : chalk.green('full');
+        console.log(`    ${a.shard.filename.padEnd(36)} ${chalk.dim(a.bucket.padEnd(14))} ${String(a.allocatedTokens).padStart(5)}t  ${flag}`);
+      }
+      if (allocation.assignments.length > 6) {
+        console.log(`    ${chalk.dim('… ' + (allocation.assignments.length - 6) + ' more')}`);
+      }
+    }
+    console.log('');
+  });
+
+memoryCmd
+  .command('shard [path]')
+  .description('List every memory shard written to .mnemos/')
+  .option('-p, --path <path>', 'Repository path (alias of positional)', '.')
+  .option('--kind <kind>', 'Filter by kind: domain|flow|api|service|capability|journey|critical-path|dna')
+  .option('--json', 'Output as JSON')
+  .action(async (targetPath = '.', options) => {
+    const root = path.resolve(options.path && options.path !== '.' ? options.path : targetPath);
+    const outputDir = path.join(root, '.mnemos');
+    const set = await loadMemoryShardSet(outputDir);
+    if (!set) {
+      console.log(chalk.yellow(`No shared memory shards at ${outputDir}. Run ${chalk.cyan('mnemos memory build .')} first.`));
+      process.exit(1);
+    }
+
+    const filtered = options.kind ? set.shards.filter((s) => s.kind === options.kind) : set.shards;
+    if (options.json) {
+      console.log(JSON.stringify({
+        repository: set.repository,
+        builtAt: set.builtAt,
+        totalShards: filtered.length,
+        shards: filtered.map((s) => ({
+          kind: s.kind,
+          name: s.name,
+          filename: s.filename,
+          estimatedTokens: s.estimatedTokens,
+          bytes: s.bytes,
+        })),
+      }, null, 2));
+      return;
+    }
+
+    console.log('');
+    console.log(chalk.bold(`Shared Memory Shards · ${set.repository}`));
+    console.log(`  ${filtered.length} shard${filtered.length === 1 ? '' : 's'} · built ${set.builtAt}`);
+    console.log('');
+    for (const s of filtered) {
+      console.log(`  ${chalk.cyan(s.filename.padEnd(40))} ${chalk.dim(s.kind.padEnd(14))} ${String(s.estimatedTokens).padStart(5)}t`);
+    }
+    console.log('');
+    console.log(chalk.dim('  Point an agent at any shard file directly:'));
+    if (filtered[0]) console.log(chalk.dim(`    cat ${outputDir}/${filtered[0].filename}`));
+  });
+
+memoryCmd
+  .command('inspect <kind> <name> [path]')
+  .description('Print a single shard (domain auth, flow login, service UserService, …)')
+  .option('-p, --path <path>', 'Repository path (alias of positional)', '.')
+  .action(async (kind, name, targetPath = '.', options) => {
+    const root = path.resolve(options.path && options.path !== '.' ? options.path : targetPath);
+    const outputDir = path.join(root, '.mnemos');
+    const set = await loadMemoryShardSet(outputDir);
+    if (!set) {
+      console.log(chalk.yellow(`No shared memory shards at ${outputDir}. Run ${chalk.cyan('mnemos memory build .')} first.`));
+      process.exit(1);
+    }
+
+    const k = kind as 'domain' | 'flow' | 'api' | 'service' | 'capability' | 'journey' | 'critical-path' | 'dna';
+    let shard = null;
+    if (k === 'domain') shard = findDomainShard(set, name);
+    else if (k === 'flow') shard = findFlowShard(set, name);
+    else {
+      shard = set.shards.find((s) => s.kind === k && s.name.toLowerCase().includes(name.toLowerCase())) ?? null;
+    }
+
+    if (!shard) {
+      console.log(chalk.yellow(`No ${k} shard matching "${name}".`));
+      process.exit(1);
+    }
+
+    console.log('');
+    console.log(chalk.bold(`${shard.kind} · ${shard.name}`));
+    console.log(chalk.dim(`  ${shard.filename} · ${shard.estimatedTokens} tokens · ${formatBytes(shard.bytes)}`));
+    console.log('');
+    console.log(JSON.stringify(shard.data, null, 2));
+  });
+
+memoryCmd
+  .command('impact <node> [path]')
+  .description('Shard-based impact analysis (no graph traversal)')
+  .option('-p, --path <path>', 'Repository path (alias of positional)', '.')
+  .action(async (node, targetPath = '.', options) => {
+    const root = path.resolve(options.path && options.path !== '.' ? options.path : targetPath);
+    const outputDir = path.join(root, '.mnemos');
+    const set = await loadMemoryShardSet(outputDir);
+    if (!set) {
+      console.log(chalk.yellow(`No shared memory shards at ${outputDir}. Run ${chalk.cyan('mnemos memory build .')} first.`));
+      process.exit(1);
+    }
+
+    const result = analyzeShardImpact(set, node);
+
+    console.log('');
+    console.log(chalk.bold(`Shard impact · ${result.node}`));
+    console.log(`  Match:           ${result.matchedShard ? chalk.cyan(`${result.matchedShard.kind}/${result.matchedShard.name}`) : chalk.dim('—')}`);
+    console.log(`  Risk:            ${result.risk === 'high' ? chalk.red(result.risk) : result.risk === 'medium' ? chalk.yellow(result.risk) : chalk.green(result.risk)}`);
+    console.log(`  Total affected:  ${chalk.cyan(String(result.totalAffected))}`);
+    console.log('');
+    if (result.affectedDomains.length > 0) {
+      console.log(`  ${chalk.bold('Domains (' + result.affectedDomains.length + ')')}`);
+      for (const d of result.affectedDomains.slice(0, 10)) console.log(`    • ${d}`);
+    }
+    if (result.affectedServices.length > 0) {
+      console.log(`  ${chalk.bold('Services (' + result.affectedServices.length + ')')}`);
+      for (const s of result.affectedServices.slice(0, 10)) console.log(`    • ${s}`);
+    }
+    if (result.affectedApis.length > 0) {
+      console.log(`  ${chalk.bold('APIs (' + result.affectedApis.length + ')')}`);
+      for (const a of result.affectedApis.slice(0, 10)) console.log(`    • ${a}`);
+    }
+    if (result.affectedFlows.length > 0) {
+      console.log(`  ${chalk.bold('Flows (' + result.affectedFlows.length + ')')}`);
+      for (const f of result.affectedFlows.slice(0, 10)) console.log(`    • ${f}`);
+    }
+    console.log('');
+    console.log(chalk.dim('  ' + result.reason));
+  });
+
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+}
 
 program
   .command('mcp [path]')

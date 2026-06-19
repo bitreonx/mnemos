@@ -1,6 +1,7 @@
 node_modules/
 dist/
 .mnemos/
+.mnemos-test/
 test-repos/
 benchmark/
 mnemos-bench/repos/*/

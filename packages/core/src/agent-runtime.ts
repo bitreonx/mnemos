@@ -25,7 +25,7 @@ import {
 } from './graph/mermaid.js';
 import { buildHealthGraphBundle } from './context/graph-markdown.js';
 
-export const MNEMOS_VERSION = '0.1.0';
+export const MNEMOS_VERSION = '0.2.0';
 export const MNEMOS_MCP_URI = 'mnemos://';
 
 export type AgentErrorCode =

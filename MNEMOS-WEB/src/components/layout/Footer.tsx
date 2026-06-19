@@ -17,6 +17,7 @@ const COLUMNS = [
     links: [
       { label: "Introduction", href: "/docs/introduction", route: true },
       { label: "Repository DNA", href: "/docs/repository-dna", route: true },
+      { label: "Shared Agent Memory", href: "/docs/shared-agent-memory", route: true },
       { label: "CLI Reference", href: "/docs/cli-default", route: true },
       { label: "Examples", href: "/docs/examples", route: true },
     ],

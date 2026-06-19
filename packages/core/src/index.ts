@@ -203,3 +203,27 @@ export { optimizeContextWindow, extractSummary } from './routing/optimize-contex
 export { minimizeOverhead } from './routing/minimize-overhead.js';
 export type { RoutePlan, RouteQueryOptions, RoutedQueryResult, QueryBudget } from './routing/types.js';
 export { REPORT_CSS, REPORT_FONT_LINK, renderHealthRingHtml, healthRingTone } from './report/design-tokens.js';
+export {
+  buildMemoryShards,
+  writeMemoryShards,
+  loadMemoryShardSet,
+  allocateTokenBudget,
+  getMemoryStats,
+  findShard,
+  findDomainShard,
+  findFlowShard,
+  shardSlug,
+  shardFilePath,
+  SHARD_SCHEMA_VERSION,
+} from './memory-shards/index.js';
+export type {
+  MemoryShard,
+  MemoryShardSet,
+  MemoryShardStats,
+  MemoryBudgetAllocation,
+  MemoryBudgetBucket,
+  ShardKind,
+  ShardSummary,
+} from './memory-shards/index.js';
+export { analyzeShardImpact } from './memory-shards/impact.js';
+export type { ShardImpactResult } from './memory-shards/impact.js';

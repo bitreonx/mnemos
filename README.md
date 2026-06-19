@@ -23,10 +23,11 @@ Mnemos is **pre-launch OSS** — we are polishing before growth, not pretending 
 
 | Surface | Status | Notes |
 |---------|--------|-------|
-| **CLI** | Stable | `npx mnemos .`, `sync`, `wrap`, `pack`, `serve`, `mcp` |
+| **CLI** | Stable | `npx mnemos .`, `sync`, `wrap`, `pack`, `serve`, `mcp`, **`memory`** |
 | **HTML report** | Stable | Dashboard-aligned design, offline shareable |
 | **AI Pack v1 + MCP** | Stable | Built for Claude Code, Cursor, Codex |
 | **Fable Mindset (New Gen)** | Stable | `fable-mindset` skill + discipline rules; `mnemos discipline` measures the gap |
+| **Shared Agent Memory** | Stable | `memory build`, `serve`, `stats`, `budget`, `shard` — pre-sharded `.mnemos/*.memory.json` for subagents |
 | **Dashboard** | Preview | Cockpits work; layout & panels still refining — [help welcome](CONTRIBUTING.md) |
 
 We dogfood Mnemos on this repo. Creator marketing comes **after** dashboard polish — not before.
@@ -96,6 +97,10 @@ npx mnemos serve
 
 # 4. Export AI Pack v1
 npx mnemos pack --section=summary --pretty
+
+# 5. Shared Agent Memory (subagents load shards, not raw source)
+npx mnemos memory build .
+npx mnemos memory serve    # → localhost:4000/domain/auth
 ```
 
 **Expected outputs in `.mnemos/`:** `project.dna.json`, `memory.json`, `agent_context.json`, `context/*.md`, `report/index.html`

@@ -534,7 +534,7 @@ export default function ArchitectureCanvas() {
             {/* legend */}
             <div className="pointer-events-none absolute bottom-4 left-4 flex items-center gap-3 rounded-full border border-[var(--border)] bg-[var(--surface-solid)] px-3 py-1.5 font-mono text-[10px] text-[var(--text-dim)]">
               <span className="flex items-center gap-1.5">
-                <span className="h-1.5 w-3 rounded-full" style={{ background: "var(--grad-brand)" }} />
+                <span className="h-1.5 w-3 rounded-full" style={{ background: "var(--brand)" }} />
                 strong
               </span>
               <span className="flex items-center gap-1.5">
@@ -550,7 +550,7 @@ export default function ArchitectureCanvas() {
               <motion.div
                 key={current.id}
                 className="h-full"
-                style={{ background: "var(--grad-brand)" }}
+                style={{ background: "var(--brand)" }}
                 initial={{ width: 0 }}
                 animate={{ width: "100%" }}
                 transition={{ duration: 1.1, ease: EASE }}

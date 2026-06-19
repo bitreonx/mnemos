@@ -9,6 +9,16 @@ import {
 } from './agent-runtime.js';
 import { buildMcpSetupMarkdown } from './mcp-config.js';
 import { buildAiPack, AI_PACK_VERSION, AI_PACK_SCHEMA, type AiPackSection, type Mode } from './ai-pack.js';
+import {
+  loadMemoryShardSet,
+  findDomainShard,
+  findFlowShard,
+  findShard,
+  analyzeShardImpact,
+  getMemoryStats,
+  allocateTokenBudget,
+  type MemoryShardSet,
+} from './memory-shards/index.js';
 
 export interface ServeOptions {
   root: string;
@@ -26,6 +36,15 @@ export async function startMemoryServer(options: ServeOptions): Promise<ServeHan
   const port = options.port ?? 4000;
   const host = options.host ?? '127.0.0.1';
   const runtime = new MnemosRuntime(root);
+  const outputDir = path.join(root, '.mnemos');
+  let cachedShards: { set: MemoryShardSet | null; loadedAt: number } | null = null;
+  const loadShardsCached = async (): Promise<MemoryShardSet | null> => {
+    const now = Date.now();
+    if (cachedShards && now - cachedShards.loadedAt < 5000) return cachedShards.set;
+    const set = await loadMemoryShardSet(outputDir);
+    cachedShards = { set, loadedAt: now };
+    return set;
+  };
 
   const server = http.createServer(async (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -68,6 +87,91 @@ export async function startMemoryServer(options: ServeOptions): Promise<ServeHan
         res.setHeader('Content-Type', resource.mimeType);
         res.end(resource.text);
         return;
+      }
+
+      // -------- Shared Memory (shard-based) endpoints --------
+      if (pathname === '/shards' || pathname === '/memory') {
+        const set = await loadShardsCached();
+        if (!set) return json(res, { error: 'Shared memory shards not built yet. Run `mnemos memory build`.' }, 404);
+        return json(res, {
+          $schema: set.$schema,
+          repository: set.repository,
+          builtAt: set.builtAt,
+          totalShards: set.shards.length,
+          totalBytes: set.totalBytes,
+          totalEstimatedTokens: set.totalEstimatedTokens,
+          shards: set.shards.map((s) => ({
+            kind: s.kind,
+            name: s.name,
+            filename: s.filename,
+            estimatedTokens: s.estimatedTokens,
+            bytes: s.bytes,
+          })),
+        });
+      }
+
+      if (pathname === '/memory/stats' || pathname === '/stats') {
+        const set = await loadShardsCached();
+        if (!set) return json(res, { error: 'Shared memory shards not built yet.' }, 404);
+        return json(res, getMemoryStats(set));
+      }
+
+      if (pathname === '/memory/budget') {
+        const set = await loadShardsCached();
+        if (!set) return json(res, { error: 'Shared memory shards not built yet.' }, 404);
+        const budget = Number(url.searchParams.get('budget') ?? 10000);
+        if (!Number.isFinite(budget) || budget <= 0) return json(res, { error: 'Missing or invalid budget query param.' }, 400);
+        return json(res, allocateTokenBudget(set, budget));
+      }
+
+      const shardFileMatch = pathname.match(/^\/shards\/file\/(.+)$/);
+      if (shardFileMatch) {
+        const set = await loadShardsCached();
+        if (!set) return json(res, { error: 'Shared memory shards not built yet.' }, 404);
+        const filename = decodeURIComponent(shardFileMatch[1]!);
+        const safe = filename.replace(/[^a-zA-Z0-9._-]/g, '');
+        if (safe !== filename || safe.includes('..')) {
+          return json(res, { error: 'Invalid shard filename.' }, 400);
+        }
+        try {
+          const raw = await readFile(path.join(outputDir, safe), 'utf-8');
+          res.setHeader('Content-Type', 'application/json');
+          res.end(raw);
+          return;
+        } catch {
+          return json(res, { error: `Shard not found: ${safe}` }, 404);
+        }
+      }
+
+      const domainShardMatch = pathname.match(/^\/domain\/(.+)$/);
+      if (domainShardMatch) {
+        const set = await loadShardsCached();
+        if (!set) return json(res, { error: 'Shared memory shards not built yet. Run `mnemos memory build`.' }, 404);
+        const name = decodeURIComponent(domainShardMatch[1]!);
+        const shard = findDomainShard(set, name);
+        if (!shard) return json(res, { error: `No domain shard matching "${name}".` }, 404);
+        return json(res, shard);
+      }
+
+      const flowShardMatch = pathname.match(/^\/flow\/(.+)$/);
+      if (flowShardMatch) {
+        const set = await loadShardsCached();
+        if (!set) return json(res, { error: 'Shared memory shards not built yet. Run `mnemos memory build`.' }, 404);
+        const name = decodeURIComponent(flowShardMatch[1]!);
+        const shard = findFlowShard(set, name);
+        if (!shard) return json(res, { error: `No flow shard matching "${name}".` }, 404);
+        return json(res, shard);
+      }
+
+      const shardByKindMatch = pathname.match(/^\/shard\/(domain|flow|api|service|capability|journey|critical-path)\/(.+)$/);
+      if (shardByKindMatch) {
+        const set = await loadShardsCached();
+        if (!set) return json(res, { error: 'Shared memory shards not built yet.' }, 404);
+        const kind = shardByKindMatch[1] as 'domain' | 'flow' | 'api' | 'service' | 'capability' | 'journey' | 'critical-path';
+        const name = decodeURIComponent(shardByKindMatch[2]!);
+        const shard = findShard(set, kind, name);
+        if (!shard) return json(res, { error: `No ${kind} shard matching "${name}".` }, 404);
+        return json(res, shard);
       }
 
       let envelope: AgentEnvelope;
@@ -222,7 +326,14 @@ export async function startMemoryServer(options: ServeOptions): Promise<ServeHan
 
       const impactMatch = pathname.match(/^\/impact\/(.+)$/);
       if (impactMatch) {
-        envelope = await runtime.impactAnalysis(decodeURIComponent(impactMatch[1]!));
+        const target = decodeURIComponent(impactMatch[1]!);
+        const fast = url.searchParams.get('fast');
+        if (fast === '1' || fast === 'true') {
+          const set = await loadShardsCached();
+          if (!set) return json(res, { error: 'Shared memory shards not built yet.' }, 404);
+          return json(res, analyzeShardImpact(set, target));
+        }
+        envelope = await runtime.impactAnalysis(target);
         return json(res, envelope);
       }
 
@@ -249,9 +360,14 @@ export async function startMemoryServer(options: ServeOptions): Promise<ServeHan
           schema: AI_PACK_SCHEMA,
           example: `GET /copilot/pack/:repoId?section=score|issues|graph|flows|smells|dna|all&mode=vibe|ai|coder`,
         },
+        sharedMemory: {
+          description: 'Pre-sharded, agent-ready memory. Each shard is one JSON file agents can load directly.',
+          example: `GET /domain/auth  · GET /flow/login  · GET /impact/UserService?fast=1`,
+          schema: 'mnemos/shared-memory/v1',
+        },
         endpoints: [
           'GET /health · /status',
-          'GET /dna',
+          'GET /dna · /project.dna.json · /repository.dna.json',
           'GET /query?q= · /copilot?q=',
           'GET /focus?task= · /compile_focus?task=',
           'GET /search?q=&limit=',
@@ -262,6 +378,14 @@ export async function startMemoryServer(options: ServeOptions): Promise<ServeHan
           'GET /focus?task= · /diff · /hotspots · /history',
           'GET /resources · /resource/:uri',
           'GET /mcp-setup',
+          'GET /shards · /memory                 — shared memory manifest',
+          'GET /memory/stats · /stats             — compression + savings',
+          'GET /memory/budget?budget=10000        — token budget allocation',
+          'GET /shards/file/:filename             — raw shard JSON',
+          'GET /domain/:name                      — domain shard (auth, payments, …)',
+          'GET /flow/:name                        — flow shard',
+          'GET /shard/:kind/:name                 — typed shard lookup',
+          'GET /impact/:node?fast=1               — shard-based impact (no graph)',
           'POST /review { diff } · POST /refresh',
         ],
         mcp: 'Run `mnemos mcp` for stdio MCP (Cursor, Claude Desktop, VS Code)',

@@ -647,10 +647,7 @@ export default function Pipeline() {
             From a folder of files to{" "}
             <span
               style={{
-                background: "var(--grad-brand)",
-                WebkitBackgroundClip: "text",
-                backgroundClip: "text",
-                color: "transparent",
+                color: "var(--brand)",
               }}
             >
               living intelligence.

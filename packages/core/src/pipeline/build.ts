@@ -62,6 +62,7 @@ import {
 
 import { invalidateMnemosRuntime } from '../agent-runtime.js';
 import { buildSearchIndex, serializeSearchIndex } from '../search/index.js';
+import { buildMemoryShards, writeMemoryShards } from '../memory-shards/index.js';
 
 
 
@@ -427,6 +428,15 @@ export async function build(options: BuildOptions): Promise<BuildResult> {
   const dnaDiff = await appendBuildSnapshot(memory, outputDir);
   if (options.verbose && dnaDiff.changes.length > 0) {
     console.log(`DNA diff: ${dnaDiff.summary} (risk: ${dnaDiff.regressionRisk})`);
+  }
+
+  if (options.verbose) {
+    console.log('Writing shared memory shards…');
+  }
+  const shardSet = buildMemoryShards(memory);
+  await writeMemoryShards(shardSet, outputDir);
+  if (options.verbose) {
+    console.log(`Shared memory: ${shardSet.shards.length} shards · ${shardSet.totalEstimatedTokens.toLocaleString()} estimated tokens`);
   }
 
 

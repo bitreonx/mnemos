@@ -44,7 +44,7 @@ export default function Comparison() {
                   {cols.map((c, i) => (
                     <th key={c} className="px-4 py-5 text-center">
                       {i === 0 ? (
-                        <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold text-white" style={{ background: "var(--grad-brand)" }}>
+                        <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold text-white" style={{ background: "var(--brand)" }}>
                           {c}
                         </span>
                       ) : (

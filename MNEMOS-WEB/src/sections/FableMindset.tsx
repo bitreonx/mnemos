@@ -88,7 +88,7 @@ function HabitBars() {
             <div className="h-2 overflow-hidden rounded-full bg-[var(--surface-2)]">
               <div
                 className="h-full rounded-full transition-[width] duration-1000 ease-out"
-                style={{ width: inView ? `${h.source}%` : "0%", background: "var(--grad-brand)", transitionDelay: `${i * 80}ms` }}
+                style={{ width: inView ? `${h.source}%` : "0%", background: "var(--brand)", transitionDelay: `${i * 80}ms` }}
               />
             </div>
             <div className="h-2 overflow-hidden rounded-full bg-[var(--surface-2)]">
@@ -127,19 +127,13 @@ function DisciplineSummary() {
       {/* Radial score */}
       <div className="relative grid h-[148px] w-[148px] shrink-0 place-items-center">
         <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full -rotate-90">
-          <defs>
-            <linearGradient id="scoreGrad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="var(--brand)" />
-              <stop offset="100%" stopColor="var(--cyan)" />
-            </linearGradient>
-          </defs>
           <circle cx="50" cy="50" r="36" fill="none" stroke="var(--surface-solid)" strokeWidth="9" />
           <motion.circle
             cx="50"
             cy="50"
             r="36"
             fill="none"
-            stroke="url(#scoreGrad)"
+            stroke="var(--brand)"
             strokeWidth="9"
             strokeLinecap="round"
             strokeDasharray={C}
@@ -180,7 +174,7 @@ function DisciplineSummary() {
             <motion.path
               d="M 12 24 Q 60 4 120 24 T 240 24 T 348 24"
               fill="none"
-              stroke="url(#scoreGrad)"
+              stroke="var(--brand)"
               strokeWidth="1.4"
               strokeLinecap="round"
               strokeDasharray="3 4"
@@ -188,12 +182,6 @@ function DisciplineSummary() {
               animate={inView ? { pathLength: 1, opacity: 0.85 } : {}}
               transition={{ duration: 1.6, ease: "easeInOut" }}
             />
-            <defs>
-              <linearGradient id="orbGrad" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="var(--brand)" />
-                <stop offset="100%" stopColor="var(--cyan)" />
-              </linearGradient>
-            </defs>
             <motion.circle
               r="4"
               fill="var(--brand)"
@@ -241,7 +229,7 @@ export default function FableMindset() {
         title={
           <>
             Make any agent work like{" "}
-            <span style={{ background: "var(--grad-brand)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>
+            <span style={{ color: "var(--brand)" }}>
               Fable&nbsp;5
             </span>
           </>
