@@ -95,6 +95,12 @@ import {
   formatTrustMarkdown,
   formatProductLabel,
   MEMORY_ENGINE,
+  writeFullBurnPack,
+  formatFullBurnSummary,
+  buildFullBurnPack,
+  auditRepositorySecurity,
+  formatSecurityAuditReport,
+  writeSecurityAuditReport,
   type AiPackSection,
   type Mode as AiPackMode,
 } from '@mnemos/core';
@@ -569,6 +575,73 @@ program
 
     console.log('');
     console.log(formatArchitectureStory(loaded.memory));
+  });
+
+const runSupernovaCommand = async (targetPath = '.', options: { path?: string; json?: boolean; build?: boolean }) => {
+  const root = path.resolve(options.path && options.path !== '.' ? options.path : targetPath);
+
+  if (options.build || !(await loadMemoryModel(root))) {
+    const spinner = ora('Supernova: building memory model...').start();
+    await build({ root, incremental: true });
+    spinner.succeed(chalk.green('Build complete'));
+  }
+
+  const loaded = await requireMemoryModel(root);
+  const graph = await loadGraphFromMemory(loaded.outputDir);
+  const spinner = ora('Supernova: writing beast-mode intelligence pack...').start();
+  const result = await writeFullBurnPack(loaded.memory, loaded.outputDir, graph);
+  spinner.succeed(chalk.green.bold('Supernova complete'));
+
+  const pack = buildFullBurnPack(loaded.memory, graph);
+
+  if (options.json) {
+    console.log(JSON.stringify(pack, null, 2));
+    return;
+  }
+
+  console.log('');
+  console.log(formatFullBurnSummary(pack));
+  console.log('');
+  console.log(chalk.bold('Written to'));
+  for (const f of result.files) {
+    console.log(`  ${chalk.cyan(path.basename(f))}  ${chalk.dim(f)}`);
+  }
+};
+
+for (const [name, description] of [
+  ['supernova', 'Supernova — beast-mode all-fire intelligence (tours, layers, personas, concepts)'],
+  ['fullburn', 'Alias for supernova (legacy)'],
+  ['beastmode', 'Alias for supernova'],
+] as const) {
+  const cmd = program
+    .command(`${name} [path]`)
+    .description(description)
+    .option('-p, --path <path>', 'Repository path (alias of positional)', '.')
+    .option('--json', 'Output pack JSON only')
+    .option('--build', 'Run mnemos build first if .mnemos is missing')
+    .action(async (targetPath = '.', options) => runSupernovaCommand(targetPath, options));
+  void cmd;
+}
+
+program
+  .command('audit [path]')
+  .description('Dependency security scan — npm audit + .mnemos/security-audit.json')
+  .option('-p, --path <path>', 'Repository path (alias of positional)', '.')
+  .option('--json', 'Output JSON only')
+  .action(async (targetPath = '.', options) => {
+    const root = path.resolve(options.path && options.path !== '.' ? options.path : targetPath);
+    const result = await auditRepositorySecurity(root);
+    const outPath = await writeSecurityAuditReport(root, path.join(root, '.mnemos'));
+
+    if (options.json) {
+      console.log(JSON.stringify(result, null, 2));
+      return;
+    }
+
+    console.log('');
+    console.log(formatSecurityAuditReport(result));
+    console.log('');
+    console.log(chalk.dim(`Written: ${outPath}`));
   });
 
 program

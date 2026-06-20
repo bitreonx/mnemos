@@ -1,114 +1,119 @@
-# Mnemos Bench
+# INFERNO-bench
 
-Open, reproducible benchmark for codebase understanding tools.
+**Independent Framework for Evaluating Repository Navigation Objectives**
 
-**No subjective scores.** Every number comes from measured wall-clock time, byte counts, and keyword coverage against per-repo ground truth verified by manual grep.
+The adversarial codebase understanding benchmark — where every tool faces the fire.
+
+> SWE-bench tests whether models can **fix** real bugs. INFERNO tests whether tools and models can **understand** real systems — auth flows, blast radius, architecture, capabilities, and context efficiency.
+
+## Why INFERNO?
+
+OpenAI, Anthropic, and Google publish model cards citing SWE-bench, HumanEval, and MMLU. Codebase understanding had no equivalent — until now.
+
+INFERNO is designed for the same audience:
+
+- **Pinned fixtures** at exact commit SHAs (no drift)
+- **Multi-signal verification** (keywords AND/OR, path assertions, forbidden traps)
+- **Tier A/B/C/F gates** — report tier, not vibes
+- **Independent ground-truth checks** — grep evidence without running Mnemos
+- **Fair competitor baselines** — digest keyword search, not hardcoded zeros
+
+Full governance: [GOVERNANCE.md](./GOVERNANCE.md) · Dataset: [dataset/v1.0.0.json](./dataset/v1.0.0.json)
 
 ## Structure
 
 ```
 mnemos-bench/
-├── repos/           # Real cloned repositories (not simulated)
-├── tasks/           # Universal questions + per-repo ground truth
-├── results/         # Measured JSON outputs (committed after runs)
-├── scorer/          # Objective benchmark runner
-└── blind-eval/      # Blind A/B evaluation protocol
+├── dataset/         # Versioned INFERNO dataset (pinned SHAs)
+├── GOVERNANCE.md    # Verification protocol (SWE-bench-style)
+├── repos/           # Real cloned repositories (pinned, never simulated)
+├── tasks/           # Six universal questions + per-repo ground truth
+├── scorer/
+│   ├── verify.mjs   # Multi-signal verification harness
+│   ├── run.mjs      # Benchmark runner
+│   └── regression.mjs
+├── results/         # Measured JSON + leaderboard
+└── blind-eval/      # Human A/B protocol
 ```
 
 ## Repository tiers
 
-| Tier | Repository | Purpose |
-|------|------------|---------|
-| Small | [expressjs/express](https://github.com/expressjs/express) | Fast regression, capability accuracy |
-| Medium | [nestjs/nest](https://github.com/nestjs/nest) | Auth, DI, modules |
-| Large | [vercel/next.js](https://github.com/vercel/next.js) | Stress: performance, compression |
-| Huge | [microsoft/vscode](https://github.com/microsoft/vscode) | Maximum scale (optional) |
+| Tier | Repository | Status |
+|------|------------|--------|
+| Small | [expressjs/express](https://github.com/expressjs/express) @ `18e5985` | **Verified** |
+| Medium | [nestjs/nest](https://github.com/nestjs/nest) @ `6859216` | **Verified** |
+| Large | [vercel/next.js](https://github.com/vercel/next.js) | Planned v1.1 |
+| Huge | [microsoft/vscode](https://github.com/microsoft/vscode) | Planned v1.1 |
 
 ## The six universal tasks
 
-Every tool answers the same questions:
+Every entrant answers the same questions:
 
-1. **Where does login start?** — Route, controller, service
-2. **What breaks if X changes?** — Dependencies, APIs, flows
-3. **Explain the repository** — Under 300 words, accurate architecture
-4. **Find the most critical subsystem** — Centrality-based
-5. **List business capabilities** — Not folder names
-6. **Generate AI context package** — Size, coverage, token count
+1. **Where does login start?** — auth entry points
+2. **What breaks if X changes?** — impact / blast radius
+3. **Explain the repository** — architecture overview
+4. **Find the most critical subsystem** — centrality
+5. **List business capabilities** — not folder names
+6. **Generate AI context package** — artifacts + compression
 
-## Scoring (objective)
+## Verification tiers
 
-| Metric | How it's measured |
-|--------|-------------------|
-| **Accuracy** | % of ground-truth keywords found in tool output |
-| **Coverage** | Count of required concepts matched |
-| **Latency** | Wall-clock `Date.now()` around each tool invocation |
-| **Token compression** | `raw_repo_tokens / tool_output_tokens` |
-| **TTU** | Time To Understanding: baseline (90s/file + 45s/search) vs Mnemos (build + ask + 120s read DNA) |
+| Tier | Meaning |
+|------|---------|
+| **A** | All gates pass — production-trustworthy |
+| **B** | Strong partial |
+| **C** | Weak — onboarding risk |
+| **F** | Fail — adversarial trap or rubric miss |
 
-## Run a benchmark
+## Quick start
 
 ```bash
-# From Mnemos repo root
 npm run build
 
-# Clone repos (first time)
-git clone --depth 1 https://github.com/expressjs/express.git mnemos-bench/repos/express
+# Pin fixtures to dataset commit SHAs
+npm run bench:pin -- express nestjs
 
-# Run measured benchmark
+# Independent ground-truth verification (grep only)
+npm run bench:verify-gt -- express
+
+# Run INFERNO harness
 npm run bench:express
+npm run bench:nestjs
 
-# Fresh rebuild (clears stale .mnemos cache)
-npm run bench:fresh:express
+# Verification unit tests (no clones needed)
+npm run bench:verify
+
+# Regression + leaderboard
+npm run bench:regression
+npm run bench:leaderboard
 ```
 
-Windows PowerShell:
+## Scoring signals
 
-```powershell
-Remove-Item -Recurse -Force mnemos-bench\repos\express\.mnemos -ErrorAction SilentlyContinue
-npm run bench:express
-```
-
-Results are written to `mnemos-bench/results/express.json`. Latest verified scores: **100%** on Express and NestJS — see [results/VERIFIED.md](./results/VERIFIED.md).
-
-## Competitors
-
-| Tool | What we measure | Limitations (documented honestly) |
-|------|-----------------|-----------------------------------|
-| **Mnemos** | Full pipeline: build, ask, explain, context | Local static analysis only |
-| **Gitingest** | Raw digest size + latency | No structured Q&A |
-| **Graphify** | lib/ code-only extract + query | Full repo needs LLM API key for docs |
+| Signal | Source benchmark inspiration |
+|--------|------------------------------|
+| Keyword AND | HumanEval functional checks |
+| Keyword OR (`required_any`) | MMLU partial credit |
+| Path assertions | SWE-bench file-level correctness |
+| Forbidden traps | Adversarial GAIA-style failure modes |
+| Context artifacts | Custom — task6 compression floor |
 
 ## AI model evaluation
 
-Test any LLM against Mnemos Bench without raw repo access:
+Test LLMs without raw repo access — give `project.dna.json` + `agent_context.json`, score against ground truth:
 
 ```bash
-npm run bench:express          # generates results + rebuilds .mnemos
-node mnemos-bench/scorer/ai-eval.mjs express
+npm run bench:ai-eval -- express
 ```
 
-Give the model only `project.dna.json` + `agent_context.json`, ask the 6 universal tasks, score with keyword coverage against ground truth.
+## Latest verified results
 
-## Regression gate
-
-```bash
-npm run bench:regression
-```
-
-Fails if accuracy/compression drops below verified thresholds.
-
-## Blind evaluation
-
-See [blind-eval/README.md](./blind-eval/README.md) — hide tool names, ask developers which report helped them understand fastest.
-
-## Reproducibility
-
-- Ground truth includes `verified_at` and `verification_method`
-- Results include `measured_at` ISO timestamp
-- Re-run anytime; diff `results/*.json` for regression detection
+See [results/VERIFIED.md](./results/VERIFIED.md) and [results/leaderboard.json](./results/leaderboard.json).
 
 ## Killer metric: Time To Understanding (TTU)
 
-> How long until a new developer understands the repository?
+How long until a new developer understands the repository? Modeled baseline vs tool-assisted path — see `ttu` block in each result file. Human gold standard: [blind-eval/](./blind-eval/).
 
-Measured, not claimed. See `ttu` block in each result file.
+---
+
+*Mnemos Bench is the implementation harness. INFERNO-bench is the open standard name for enterprise model evaluation.*

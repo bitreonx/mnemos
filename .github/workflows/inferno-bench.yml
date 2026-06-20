@@ -1,0 +1,86 @@
+name: inferno-bench
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'mnemos-bench/**'
+      - 'packages/core/**'
+      - 'packages/cli/**'
+      - '.github/workflows/inferno-bench.yml'
+  pull_request:
+    paths:
+      - 'mnemos-bench/**'
+      - 'packages/core/**'
+      - 'packages/cli/**'
+  workflow_dispatch:
+
+jobs:
+  verify-harness:
+    name: INFERNO harness tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+      - run: npm run bench:verify
+
+  regression:
+    name: INFERNO regression (committed results)
+    runs-on: ubuntu-latest
+    needs: verify-harness
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm run bench:regression
+      - run: npm run bench:leaderboard
+
+  full-bench:
+    name: INFERNO full run (main only)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    needs: verify-harness
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build --workspace @mnemos/core
+      - run: npm run build --workspace @mnemos/cli
+
+      - name: Pin fixtures
+        run: npm run bench:pin -- express nestjs
+
+      - name: Verify ground truth independently
+        run: |
+          npm run bench:verify-gt -- express
+          npm run bench:verify-gt -- nestjs
+
+      - name: Run INFERNO benchmark
+        run: |
+          npm run bench:express
+          npm run bench:nestjs
+
+      - name: Regression gate
+        run: npm run bench:regression
+
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: inferno-results
+          path: mnemos-bench/results/*.json

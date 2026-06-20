@@ -1,6 +1,20 @@
-# Mnemos Roadmap (from verified benchmarks)
+# Mnemos Roadmap (from INFERNO-bench / verified benchmarks)
 
-Ordered by impact. Weaknesses discovered during Mnemos Bench runs — not hidden.
+Ordered by impact. Weaknesses discovered during INFERNO-bench runs — not hidden.
+
+## INFERNO v1.0.0 (2026-06-20)
+
+- [x] Rebrand as **INFERNO-bench** — Independent Framework for Evaluating Repository Navigation Objectives
+- [x] Multi-signal verification harness (`scorer/verify.mjs`) — AND/OR keywords, paths, forbidden traps, context gates
+- [x] Pinned fixture SHAs (express @ 18e5985, nestjs @ 6859216)
+- [x] Independent ground-truth grep checks (`scripts/verify-ground-truth.mjs`)
+- [x] Fair Gitingest baseline (digest keyword search, not hardcoded 0%)
+- [x] Task6 context export scoring
+- [x] Tier A/B/C/F verification gates + CI workflow
+- [x] Leaderboard generator (`results/leaderboard.json`)
+- [ ] nextjs + vscode fixtures (v1.1)
+- [ ] Blind human eval (10+ developers)
+- [ ] LLM-as-judge audit sample for explain task
 
 ## P0 — Accuracy gaps (benchmark-measured)
 

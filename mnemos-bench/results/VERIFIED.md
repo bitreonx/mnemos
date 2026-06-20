@@ -1,50 +1,74 @@
-# Mnemos Bench — Verified Results
+# INFERNO-bench — Verified Results
+
+**Independent Framework for Evaluating Repository Navigation Objectives**
 
 Re-run: `npm run bench:express` / `npm run bench:nestjs`
 
-Fresh rebuild (Windows PowerShell):
+Pin fixtures first: `npm run bench:pin -- express nestjs`
 
-```powershell
-Remove-Item -Recurse -Force mnemos-bench\repos\express\.mnemos -ErrorAction SilentlyContinue
-npm run bench:express
-```
+## Verification methodology (v1.0.0)
 
-Cross-platform: `npm run bench:fresh:express`
+| Layer | Command | Purpose |
+|-------|---------|---------|
+| Harness tests | `npm run bench:verify` | OR/AND semantics, traps, tiers |
+| Independent grep | `npm run bench:verify-gt -- express` | Ground truth vs raw repo (no Mnemos) |
+| Multi-signal score | `scorer/verify.mjs` | Keywords + paths + forbidden + context |
+| Regression gate | `npm run bench:regression` | Tier A + accuracy floors |
 
-## Express — 2026-06-18 (v3 — CommonJS import fix)
+**Report verification tier alongside accuracy.** Tier A = all gates pass.
 
-| Tool | Accuracy | Build | Tokens | Compression | TTU |
-|------|----------|-------|--------|-------------|-----|
-| **Mnemos** | **100%** | 500ms | 8,901 | 19.9× | 2 min |
-| Gitingest | 0% | 3.5s | 1,100,000 | 0.16× | — |
-| Graphify | 0% | 1.2s | 26 | — | — |
+## Express — dataset v1.0.0 @ `18e5985`
 
-Per-task: login 100% · impact 100% · critical 100% · capabilities 100% · explain 100%
+| Tool | Tier | Accuracy | Build | Tokens | Compression | TTU |
+|------|------|----------|-------|--------|-------------|-----|
+| **Mnemos** | **A** | **100%** | 500ms | 8,493 | 20.9× | 2 min |
+| Mnemos Full Burn | A | 100% | +instant | 11,734 | 15.1× | — |
+| Understand-Anything (structural) | B/C | 42% | 789ms | 14,981 | 11.9× | — |
+| Gitingest (digest search) | varies | digest-dependent | 14.6s | 1,100,000 | 0.16× | — |
+| Graphify (lib/) | F | 0% | 1.7s | 26 | — | — |
+
+Per-task (Mnemos): login · impact · critical · capabilities · explain · context export
 
 [express.json](./express.json)
 
-## NestJS — 2026-06-18 (v3 — CommonJS import fix)
+## NestJS — dataset v1.0.0 @ `6859216`
 
-| Tool | Accuracy | Build | Tokens | Compression | TTU |
-|------|----------|-------|--------|-------------|-----|
-| **Mnemos** | **100%** | 73s | 212,366 | 4.8× | 3.3 min |
-| Gitingest | 0% | 304s | 6,000,000 | 0.17× | — |
-| Graphify | 0% | N/A | 0 | — | — |
+| Tool | Tier | Accuracy | Build | Tokens | Compression | TTU |
+|------|------|----------|-------|--------|-------------|-----|
+| **Mnemos** | **A** | **100%** | 53s | 210,409 | 4.9× | 3 min |
+| Mnemos Full Burn | A | 100% | +instant | 40,507 | 25.3× | — |
+| Understand-Anything (structural) | F | 17% | 3.6s | 496,748 | 2.1× | — |
+| Gitingest (digest search) | varies | digest-dependent | 373s | 6,500,000 | 0.16× | — |
+| Graphify | F | 0% | N/A | 0 | — | — |
 
-Per-task: login 100% · impact 100% · critical 100% · capabilities 100% · explain 100%
-
-NestJS compression is lower because the richer dependency graph produces larger flow/context docs — accuracy is the primary gate.
+Per-task (Mnemos): login · impact · critical · capabilities · explain · context export
 
 [nestjs.json](./nestjs.json) · [nestjs-stress.json](./nestjs-stress.json)
 
+## Leaderboard
+
+Auto-generated: `npm run bench:leaderboard` → [leaderboard.json](./leaderboard.json)
+
 ## AI eval packs
 
-- [ai-eval-express.json](./ai-eval-express.json) — golden Q&A for LLM testing
+- [ai-eval-express.json](./ai-eval-express.json) — golden Q&A for LLM testing (SWE-bench-style model eval)
 
-## Regression
+## Regression thresholds
 
 ```bash
 npm run bench:regression
 ```
 
-Thresholds: Express ≥95% accuracy & ≥15× compression · NestJS ≥95% accuracy & ≥4× compression.
+Express: tier A · ≥95% accuracy · ≥15× compression · ≥5/6 tasks verified  
+NestJS: tier A · ≥95% accuracy · ≥4× compression · ≥5/6 tasks verified
+
+## Positioning vs SWE-bench
+
+| | SWE-bench | INFERNO-bench |
+|---|-----------|---------------|
+| Task | Fix GitHub issues | Understand architecture |
+| Verification | Test suite pass/fail | Multi-signal rubrics + tiers |
+| Fixtures | 2,000+ instances | 2 verified (v1.0), expanding |
+| Use case | Agent coding | Onboarding, context, navigation |
+
+Complementary — not competitive.

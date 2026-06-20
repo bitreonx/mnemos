@@ -3,9 +3,9 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "mnemos-cli"
+name = "getmnemos"
 version = "0.3.0"
-description = "The memory layer for software — AI-ready codebase analysis."
+description = "MnemosX — the memory layer for software. AI-ready codebase analysis."
 readme = "README.md"
 requires-python = ">=3.8"
 license = "MIT"
@@ -23,7 +23,7 @@ classifiers = [
 dependencies = []
 
 [project.urls]
-Homepage = "https://github.com/bitreonx/mnemos"
+Homepage = "https://getmnemos.vercel.app"
 Repository = "https://github.com/bitreonx/mnemos"
 Issues = "https://github.com/bitreonx/mnemos/issues"
 

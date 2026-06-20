@@ -1,43 +1,23 @@
-# @mnemos/cli
+# getmnemos
 
-> The memory layer for software — CLI to transform codebases into structured intelligence
+> **Get Mnemos** — the memory layer for software.
 
-Mnemos turns any repository into architecture humans and AI understand instantly — flows, domains, APIs, and capabilities.
-
-## Installation
+## Install
 
 ```bash
-npm install -g @mnemos/cli
+npm install -g getmnemos
+npx getmnemos .
 ```
 
-## Quick Start
+## Commands
 
 ```bash
-# Analyze your codebase
-mnemos .
-
-# Query with hybrid retrieval (BM25 + embeddings)
-mnemos memory query "auth middleware"
-
-# Get task context for AI agents
-mnemos memory context "fix login bug" --budget 8000
-
-# Persist episodic memory
-mnemos memory remember "JWT in httpOnly cookie" --tag auth
+getmnemos .              # analyze repo → .mnemos/
+getmnemos supernova .    # beast-mode intelligence pack
+getmnemos audit .        # security scan → security-audit.json
+getmnemos ui
 ```
 
-## Features
+Both `getmnemos` and `mnemos` commands work after install.
 
-- **100% On-Device** — No cloud, no API keys, no telemetry
-- **Hybrid Retrieval** — BM25 + local 384-dim embeddings with RRF
-- **Episodic Memory** — Agents remember decisions across sessions
-- **Architecture DNA** — Flows, domains, services, and API contracts
-- **Repository Intelligence** — Risk heatmaps, dead code, and trends
-
-## Documentation
-
-Full documentation at [mnemos.dev](https://mnemos.dev)
-
-## License
-
-MIT © [Mnemos](https://github.com/bitreonx/mnemos)
+[getmnemos.vercel.app](https://getmnemos.vercel.app) · [GitHub](https://github.com/bitreonx/mnemos)

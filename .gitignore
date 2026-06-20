@@ -6,6 +6,9 @@ test-repos/
 benchmark/
 mnemos-bench/repos/*/
 !mnemos-bench/repos/manifest.json
+mnemos-bench/vendor/
+tmp-npm-test/
+packages/cli/package.json.publish-backup
 mnemos-bench/results/*.txt
 *.log
 .DS_Store

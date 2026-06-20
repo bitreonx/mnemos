@@ -1,0 +1,124 @@
+{
+  "$schema": "inferno-bench/leaderboard/v1",
+  "name": "INFERNO-bench",
+  "generated_at": "2026-06-20T05:24:41.628Z",
+  "dataset_version": "1.0.0",
+  "governance": "mnemos-bench/GOVERNANCE.md",
+  "entries": [
+    {
+      "repo": "express",
+      "tier": "small",
+      "commit_sha": "18e5985b8a9d5e8423db0a9121f22bdaecd5b120",
+      "measured_at": "2026-06-19T20:17:01.701Z",
+      "dataset_version": "1.0.0",
+      "tools": {
+        "mnemos": {
+          "tool": "mnemos",
+          "accuracy": 100,
+          "verification_tier": "A",
+          "verified": true,
+          "compression_ratio": 20.9,
+          "build_latency_ms": 500,
+          "tokens": 8493
+        },
+        "understand-anything": {
+          "tool": "understand-anything",
+          "accuracy": 42,
+          "verification_tier": "F",
+          "verified": false,
+          "compression_ratio": 11.9,
+          "build_latency_ms": 789,
+          "tokens": 14981
+        },
+        "gitingest": {
+          "tool": "gitingest",
+          "accuracy": 0,
+          "verification_tier": "F",
+          "verified": false,
+          "compression_ratio": 0.16,
+          "build_latency_ms": 14603,
+          "tokens": 1100000
+        },
+        "graphify": {
+          "tool": "graphify",
+          "accuracy": 0,
+          "verification_tier": "F",
+          "verified": false,
+          "compression_ratio": 6829,
+          "build_latency_ms": 6102,
+          "tokens": 26
+        }
+      },
+      "winner": {
+        "accuracy": "mnemos",
+        "compression": "mnemos",
+        "latency": "mnemos",
+        "features": "mnemos"
+      },
+      "ttu": {
+        "without_tool_seconds": 3060,
+        "with_mnemos_seconds": 126,
+        "savings_percent": 96,
+        "methodology": "Senior engineer onboarding: read lib/*.js (6), index.js, key test/app.js patterns, grep login/auth/route/middleware across repo. 90s per file + 45s per search."
+      }
+    },
+    {
+      "repo": "nestjs",
+      "tier": "medium",
+      "commit_sha": "6859216d56e8f4e0e6e8d80035e48fce95f5311c",
+      "measured_at": "2026-06-19T20:24:39.361Z",
+      "dataset_version": "1.0.0",
+      "tools": {
+        "mnemos": {
+          "tool": "mnemos",
+          "accuracy": 100,
+          "verification_tier": "A",
+          "verified": true,
+          "compression_ratio": 4.9,
+          "build_latency_ms": 53000,
+          "tokens": 210409
+        },
+        "understand-anything": {
+          "tool": "understand-anything",
+          "accuracy": 17,
+          "verification_tier": "F",
+          "verified": false,
+          "compression_ratio": 2.1,
+          "build_latency_ms": 3617,
+          "tokens": 496748
+        },
+        "gitingest": {
+          "tool": "gitingest",
+          "accuracy": 0,
+          "verification_tier": "F",
+          "verified": false,
+          "compression_ratio": 0.16,
+          "build_latency_ms": 372917,
+          "tokens": 6500000
+        },
+        "graphify": {
+          "tool": "graphify",
+          "accuracy": 0,
+          "verification_tier": "F",
+          "verified": false,
+          "compression_ratio": 0,
+          "build_latency_ms": 3570,
+          "tokens": 0
+        }
+      },
+      "winner": {
+        "accuracy": "mnemos",
+        "compression": "mnemos",
+        "latency": "understand-anything",
+        "features": "mnemos"
+      },
+      "ttu": {
+        "without_tool_seconds": 8775,
+        "with_mnemos_seconds": 180,
+        "savings_percent": 98,
+        "methodology": "NestJS framework onboarding: packages/core, common, sample modules, DI graph, guards. 90s/file + 45s/search."
+      }
+    }
+  ],
+  "ranking_note": "Primary sort: verification_tier (A > B > C > F), then accuracy, then compression_ratio. Report tier — not accuracy alone."
+}

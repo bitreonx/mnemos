@@ -1,23 +1,32 @@
 {
-  "name": "@mnemos/cli",
+  "name": "getmnemos",
   "version": "0.3.0",
-  "description": "The memory layer for software — CLI to transform codebases into structured intelligence",
+  "description": "Get Mnemos — the memory layer for software. One command, instant codebase intelligence.",
   "type": "module",
   "bin": {
-    "mnemos": "./dist/index.js"
+    "getmnemos": "./dist/npm.cjs",
+    "mnemos": "./dist/npm.cjs"
   },
+  "main": "./dist/index.js",
   "files": [
-    "dist",
+    "dist/npm.cjs",
+    "dist/discipline/fable-mindset.md",
     "README.md"
   ],
   "keywords": [
     "mnemos",
+    "getmnemos",
     "memory",
     "ai",
     "codebase",
     "architecture",
     "intelligence",
-    "cli"
+    "cli",
+    "cursor",
+    "claude",
+    "mcp",
+    "security",
+    "knowledge-graph"
   ],
   "repository": {
     "type": "git",
@@ -27,12 +36,15 @@
   "bugs": {
     "url": "https://github.com/bitreonx/mnemos/issues"
   },
-  "homepage": "https://mnemos.dev",
+  "homepage": "https://getmnemos.vercel.app",
   "license": "MIT",
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "bundle": "node scripts/bundle.mjs",
-    "pkg": "node scripts/pkg.mjs"
+    "pkg": "node scripts/pkg.mjs",
+    "prepare:publish": "node scripts/prepare-npm-publish.mjs",
+    "prepublishOnly": "npm run build --prefix ../core && npm run build && node scripts/prepare-npm-publish.mjs",
+    "postpublish": "node scripts/strip-publish-deps.mjs restore"
   },
   "dependencies": {
     "@mnemos/core": "*",
@@ -48,5 +60,9 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
   }
 }

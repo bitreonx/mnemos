@@ -1,20 +1,12 @@
-# mnemos-cli
+# getmnemos
 
-The memory layer for software — AI-ready codebase analysis.
-
-Install:
+**Get Mnemos** — AI-ready codebase analysis for Python users.
 
 ```bash
-pip install mnemos-cli
+pip install getmnemos
 mnemos .
 ```
 
-Requires Node.js is **not** required; this package ships a prebuilt binary for your platform.
+npm: `npm install -g getmnemos`
 
-Alternative install via npm:
-
-```bash
-npx mnemos .
-```
-
-See [github.com/bitreonx/mnemos](https://github.com/bitreonx/mnemos) for documentation.
+[getmnemos.vercel.app](https://getmnemos.vercel.app)

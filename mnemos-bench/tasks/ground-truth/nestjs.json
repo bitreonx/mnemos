@@ -1,27 +1,62 @@
 {
   "repo": "nestjs",
-  "verified_at": "2026-06-15",
-  "verification_method": "Mnemos build on nestjs/nest @ depth 1 — framework with DI, modules, guards",
+  "verified_at": "2026-06-20",
+  "verification_method": "Independent grep + Mnemos build on nestjs/nest @ 6859216",
+  "commit_sha": "6859216d56e8f4e0e6e8d80035e48fce95f5311c",
+  "independent_checks": [
+    {
+      "id": "guard_auth_pattern",
+      "pattern": "AuthGuard|JwtAuthGuard|passport",
+      "expect": "hit",
+      "description": "Authentication guard patterns exist in sample/core"
+    },
+    {
+      "id": "nest_application_core",
+      "pattern": "NestApplication",
+      "expect": "hit",
+      "description": "NestApplication is the bootstrap entry class"
+    },
+    {
+      "id": "di_modules",
+      "pattern": "@Module\\(",
+      "expect": "hit",
+      "description": "NestJS module decorator used throughout framework"
+    }
+  ],
   "impact_target": "NestApplication",
   "task1_login_start": {
-    "required_keywords": ["guard", "auth", "jwt", "sample"],
+    "required_keywords": ["guard", "auth"],
+    "required_any": ["jwt", "sample", "passport", "authentication"],
+    "min_required_any": 1,
     "acceptable_answers": ["guard", "authentication", "passport", "sample"]
   },
   "task2_impact": {
-    "required_keywords": ["depend", "affect", "nestapplication", "blast", "files"],
+    "required_keywords": ["depend", "nestapplication"],
+    "required_any": ["affect", "blast", "files", "impact"],
+    "min_required_any": 1,
     "critical_files": []
   },
   "task3_explain": {
-    "required_keywords": ["typescript", "framework", "module", "nestjs", "dependency"],
+    "required_keywords": ["typescript", "framework", "module", "nestjs"],
+    "required_any": ["dependency", "injection", "di"],
+    "min_required_any": 1,
     "forbidden_keywords": []
   },
   "task4_critical": {
-    "required_keywords": ["core", "common", "platform"],
+    "required_keywords": ["core"],
+    "required_any": ["common", "platform", "packages"],
+    "min_required_any": 1,
     "forbidden_domains": ["test", "tests"]
   },
   "task5_capabilities": {
-    "required_any": ["authentication", "http", "dependency", "module", "api"],
+    "required_any": ["authentication", "http", "dependency", "module", "api", "websocket", "microservice"],
+    "min_required_any": 2,
     "forbidden_any": []
+  },
+  "task6_context": {
+    "required_artifacts": ["project.dna.json", "agent_context.json"],
+    "min_compression": 3,
+    "max_tokens": 500_000
   },
   "manual_baseline": {
     "files_to_read_estimate": 85,

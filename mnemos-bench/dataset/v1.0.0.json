@@ -1,0 +1,72 @@
+{
+  "$schema": "inferno-bench/dataset/v1",
+  "name": "INFERNO-bench",
+  "version": "1.0.0",
+  "released_at": "2026-06-20",
+  "tagline": "Independent Framework for Evaluating Repository Navigation Objectives",
+  "description": "Adversarial codebase understanding benchmark. SWE-bench tests patch correctness; INFERNO tests comprehension, navigation, and context efficiency under fire.",
+  "positioning": {
+    "swe_bench": "Fix real GitHub issues — verify with test suite pass/fail",
+    "inferno_bench": "Answer architecture questions on real repos — verify with multi-signal rubrics + pinned fixtures",
+    "complementary": true
+  },
+  "instances": [
+    {
+      "id": "express",
+      "tier": "small",
+      "repo": "expressjs/express",
+      "commit_sha": "18e5985b8a9d5e8423db0a9121f22bdaecd5b120",
+      "tasks": 6,
+      "status": "verified",
+      "ground_truth": "tasks/ground-truth/express.json"
+    },
+    {
+      "id": "nestjs",
+      "tier": "medium",
+      "repo": "nestjs/nest",
+      "commit_sha": "6859216d56e8f4e0e6e8d80035e48fce95f5311c",
+      "tasks": 6,
+      "status": "verified",
+      "ground_truth": "tasks/ground-truth/nestjs.json"
+    },
+    {
+      "id": "nextjs",
+      "tier": "large",
+      "repo": "vercel/next.js",
+      "commit_sha": null,
+      "tasks": 6,
+      "status": "planned",
+      "ground_truth": null
+    },
+    {
+      "id": "vscode",
+      "tier": "huge",
+      "repo": "microsoft/vscode",
+      "commit_sha": null,
+      "tasks": 6,
+      "status": "planned",
+      "optional": true
+    }
+  ],
+  "verification_signals": [
+    "keywords_required",
+    "keywords_any",
+    "paths",
+    "forbidden_traps",
+    "context_artifacts",
+    "compression_floor"
+  ],
+  "verification_tiers": {
+    "A": "All gates pass — production-trustworthy answer",
+    "B": "Strong partial — usable with caveats",
+    "C": "Weak — onboarding risk",
+    "F": "Fail — adversarial traps triggered or rubric miss"
+  },
+  "leaderboard_metrics": [
+    "accuracy",
+    "verification_tier",
+    "compression_ratio",
+    "build_latency_ms",
+    "ttu_seconds"
+  ]
+}

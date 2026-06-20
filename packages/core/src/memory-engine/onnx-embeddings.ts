@@ -12,7 +12,14 @@ let onnxPipeline: ((text: string) => Promise<Float32Array>) | null | undefined;
 async function loadOnnxPipeline(): Promise<((text: string) => Promise<Float32Array>) | null> {
   if (onnxPipeline !== undefined) return onnxPipeline;
   try {
-    const { pipeline } = await import('@xenova/transformers');
+    // Optional peer — install @xenova/transformers manually for ONNX mode only
+    const { pipeline } = await import('@xenova/transformers' as string) as {
+      pipeline: (
+        task: string,
+        model: string,
+        opts: { quantized: boolean },
+      ) => Promise<(text: string, opts: { pooling: string; normalize: boolean }) => Promise<{ data: Float32Array }>>;
+    };
     const extractor = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2', {
       quantized: true,
     });

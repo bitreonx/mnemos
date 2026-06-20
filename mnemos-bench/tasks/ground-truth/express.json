@@ -1,30 +1,63 @@
 {
   "repo": "express",
-  "verified_at": "2026-06-15",
-  "verification_method": "Manual grep + Mnemos build on expressjs/express @ depth 1",
+  "verified_at": "2026-06-20",
+  "verification_method": "Independent grep + Mnemos build on expressjs/express @ 18e5985",
+  "commit_sha": "18e5985b8a9d5e8423db0a9121f22bdaecd5b120",
+  "independent_checks": [
+    {
+      "id": "auth_example_exists",
+      "pattern": "examples/auth",
+      "expect": "hit",
+      "description": "Login example lives under examples/auth/"
+    },
+    {
+      "id": "application_core",
+      "pattern": "application\\.js",
+      "expect": "hit",
+      "description": "Core application module present in lib/"
+    },
+    {
+      "id": "no_school_hallucination",
+      "pattern": "school administration",
+      "expect": "miss",
+      "description": "Adversarial trap — repo is not a school system"
+    }
+  ],
   "impact_target": "application",
   "task1_login_start": {
     "has_production_login": false,
     "example_entry": "examples/auth/index.js",
     "example_route": "GET/POST /login",
-    "required_keywords": ["login", "route", "examples/auth"],
+    "required_keywords": ["login", "route"],
+    "required_paths": ["examples/auth"],
     "acceptable_answers": ["no production login", "examples/auth", "/login"]
   },
   "task2_impact": {
-    "required_keywords": ["application", "request", "response", "depend", "dependents", "blast"],
+    "required_keywords": ["application", "depend"],
+    "required_any": ["request", "response", "blast", "dependents"],
+    "min_required_any": 1,
+    "required_paths": ["application"],
     "critical_files": ["lib/application.js"]
   },
   "task3_explain": {
-    "required_keywords": ["http", "middleware", "routing", "framework", "express", "javascript"],
+    "required_keywords": ["http", "middleware", "routing", "framework", "express"],
     "forbidden_keywords": ["school", "attendance", "bus"]
   },
   "task4_critical": {
-    "required_keywords": ["lib", "application", "core", "general"],
+    "required_keywords": ["application", "core"],
+    "required_any": ["lib", "middleware", "routing"],
+    "min_required_any": 1,
     "forbidden_domains": ["test", "tests", "mvc"]
   },
   "task5_capabilities": {
-    "required_any": ["http framework", "middleware", "routing", "request", "response"],
+    "required_any": ["http", "middleware", "routing", "request", "response", "framework"],
+    "min_required_any": 2,
     "forbidden_any": ["school administration", "attendance", "transport & routing"]
+  },
+  "task6_context": {
+    "required_artifacts": ["project.dna.json", "agent_context.json"],
+    "min_compression": 10,
+    "max_tokens": 50_000
   },
   "manual_baseline": {
     "files_to_read_estimate": 28,

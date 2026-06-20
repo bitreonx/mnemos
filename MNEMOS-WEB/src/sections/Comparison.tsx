@@ -4,7 +4,7 @@ import { COMPARISON } from "../lib/site";
 import SectionHeading from "../components/ui/SectionHeading";
 import Reveal from "../components/ui/Reveal";
 
-function Cell({ value }: { value: boolean | "partial" }) {
+function Cell({ value }: { value: boolean | "partial" | "llm" }) {
   if (value === true)
     return (
       <span className="mx-auto grid h-7 w-7 place-items-center rounded-full" style={{ background: "color-mix(in srgb, var(--mint) 16%, transparent)", color: "var(--mint)" }}>
@@ -15,6 +15,12 @@ function Cell({ value }: { value: boolean | "partial" }) {
     return (
       <span className="mx-auto grid h-7 w-7 place-items-center rounded-full border border-[var(--border)] text-[var(--text-faint)]">
         <Minus size={15} />
+      </span>
+    );
+  if (value === "llm")
+    return (
+      <span className="mx-auto text-center text-[0.65rem] font-medium uppercase tracking-wide text-[var(--text-faint)]">
+        LLM
       </span>
     );
   return (
@@ -37,7 +43,7 @@ export default function Comparison() {
       <Reveal delay={0.1}>
         <div className="mt-12 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[640px] border-collapse text-left">
+            <table className="w-full min-w-[860px] border-collapse text-left">
               <thead>
                 <tr className="border-b border-[var(--border)]">
                   <th className="px-6 py-5 text-sm font-medium text-[var(--text-dim)]">Capability</th>
@@ -68,6 +74,7 @@ export default function Comparison() {
                     <td className="px-4 py-4" style={{ background: "color-mix(in srgb, var(--brand) 6%, transparent)" }}>
                       <Cell value={row.mnemos} />
                     </td>
+                    <td className="px-4 py-4"><Cell value={row.understandAnything} /></td>
                     <td className="px-4 py-4"><Cell value={row.graphify} /></td>
                     <td className="px-4 py-4"><Cell value={row.gitingest} /></td>
                     <td className="px-4 py-4"><Cell value={row.madge} /></td>

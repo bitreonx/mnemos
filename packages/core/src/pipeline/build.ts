@@ -61,6 +61,7 @@ import {
 } from '../cache.js';
 
 import { invalidateMnemosRuntime } from '../agent-runtime.js';
+import { writeSecurityAuditReport } from '../analysis/security-audit.js';
 import { buildSearchIndex, serializeSearchIndex } from '../search/index.js';
 import { buildMemoryShards, writeMemoryShards } from '../memory-shards/index.js';
 
@@ -378,6 +379,12 @@ export async function build(options: BuildOptions): Promise<BuildResult> {
 
 
   await writeMemoryModel(memory, outputDir);
+
+  try {
+    await writeSecurityAuditReport(root, outputDir);
+  } catch {
+    /* security audit is best-effort when npm is unavailable */
+  }
 
   await compileContext(memory, graph, outputDir);
 

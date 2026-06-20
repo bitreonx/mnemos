@@ -174,6 +174,12 @@ export type { DnaSnapshot, DnaDiffResult, DnaDiffChange } from './snapshot/dna-d
 export { analyzeGitHotspots, formatGitIntelReport, enrichMemoryWithGitHotspots } from './analysis/git-intel.js';
 export type { GitHotspot, GitIntelSummary } from './analysis/git-intel.js';
 export {
+  auditRepositorySecurity,
+  formatSecurityAuditReport,
+  writeSecurityAuditReport,
+} from './analysis/security-audit.js';
+export type { SecurityAuditResult, SecurityAdvisory } from './analysis/security-audit.js';
+export {
   buildSearchIndex,
   serializeSearchIndex,
   deserializeSearchIndex,
@@ -249,6 +255,21 @@ export {
 export { buildTrustManifest, formatTrustMarkdown } from './release/trust-manifest.js';
 export type { TrustManifest, TrustClaim, TrustLimitation } from './release/trust-manifest.js';
 export { redactSecrets } from './memory-engine/redaction.js';
+export {
+  buildFullBurnPack,
+  writeFullBurnPack,
+  formatFullBurnSummary,
+  detectArchitectureLayers,
+  detectLanguageConcepts,
+  buildIgnitionTour,
+} from './fullburn/index.js';
+export type {
+  FullBurnPack,
+  FullBurnPersona,
+  ArchitectureLayer,
+  LanguageConcept,
+  IgnitionTourStep,
+} from './fullburn/index.js';
 export type {
   MemoryDocument,
   MemoryDocumentKind,

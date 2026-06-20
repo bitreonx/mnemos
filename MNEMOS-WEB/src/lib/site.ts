@@ -2,15 +2,19 @@
 
 export const SITE = {
   name: "Mnemos",
+  brand: "Get Mnemos",
   tagline: "Give AI a memory of your codebase.",
   description:
-    "Mnemos transforms repositories into understanding. Humans and AI instantly grasp architecture, flows, domains, APIs, and business capabilities.",
+    "Get Mnemos transforms repositories into understanding. Humans and AI instantly grasp architecture, flows, domains, APIs, and business capabilities.",
+  url: "https://getmnemos.vercel.app",
   github: "https://github.com/bitreonx/mnemos",
   avatar: "https://avatars.githubusercontent.com/u/207326426?v=4",
   author: "bitreonx",
   authorByline: "by bitreonx",
   authorTitle: "Mnemos Creator",
-  install: "npx mnemos .",
+  install: "npx getmnemos .",
+  npm: "getmnemos",
+  pypi: "getmnemos",
 } as const;
 
 export const NAV_LINKS = [
@@ -165,7 +169,8 @@ export const COMPARISON = {
     { feature: "MCP server for IDEs", mnemos: true, graphify: false, gitingest: false, madge: false },
     { feature: "Impact / blast radius", mnemos: true, graphify: "partial", gitingest: false, madge: "partial" },
     { feature: "Local-first, no cloud", mnemos: true, graphify: true, gitingest: true, madge: true },
-    { feature: "Shareable HTML report", mnemos: true, graphify: false, gitingest: false, madge: false },
+    { feature: "Security dependency audit", mnemos: true, graphify: false, gitingest: false, madge: false },
+    { feature: "Supernova beast-mode intelligence", mnemos: true, graphify: false, gitingest: false, madge: false },
   ],
   cols: ["Mnemos", "Graphify", "gitingest", "Madge"],
 } as const;
@@ -210,6 +215,6 @@ export const FABLE = {
     { value: 94, suffix: "%", label: "Context vs raw dumps", hint: "Agents read the compact DNA pack instead of grepping the whole repo." },
     { value: 0, suffix: "", label: "Cloud / API keys", hint: "Local-first. Nothing leaves your machine.", display: "Zero" },
   ],
-  install: "npx mnemos . && mnemos setup --platform claude",
+  install: "npx getmnemos . && getmnemos setup --platform claude",
   skillNote: "Installs the fable-mindset skill + CLAUDE.md context so Opus, Sonnet — any agent — adopts the discipline.",
 } as const;

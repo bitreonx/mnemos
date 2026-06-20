@@ -1,6 +1,6 @@
 name: publish-npm
 
-# Publishes @mnemos/cli to npm registry when a version tag is pushed
+# Publishes getmnemos to npm via trusted publishing (OIDC) or NPM_TOKEN fallback
 
 on:
   push:
@@ -8,18 +8,19 @@ on:
       - 'v*'
   workflow_dispatch:
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   publish:
-    name: publish @mnemos/cli to npm
+    name: publish getmnemos to npm
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write  # needed for provenance
-    
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Node
+      - name: Set up Node for trusted publishing
         uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -32,7 +33,10 @@ jobs:
         run: npm run build --workspace @mnemos/core
 
       - name: Build CLI package
-        run: npm run build --workspace @mnemos/cli
+        run: npm run build --workspace getmnemos
+
+      - name: Prepare self-contained bundle
+        run: npm run prepare:publish --workspace getmnemos
 
       - name: Verify tag matches package version
         if: startsWith(github.ref, 'refs/tags/v')
@@ -44,8 +48,12 @@ jobs:
             exit 1
           fi
 
-      - name: Publish to npm
+      - name: Publish to npm (OIDC trusted publishing preferred)
         working-directory: packages/cli
         run: npm publish --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Restore package.json after publish
+        if: always()
+        run: node packages/cli/scripts/strip-publish-deps.mjs restore

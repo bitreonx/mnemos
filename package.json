@@ -17,12 +17,25 @@
     "bench:fresh:express": "node mnemos-bench/scripts/fresh.mjs express",
     "bench:fresh:nestjs": "node mnemos-bench/scripts/fresh.mjs nestjs",
     "bench:regression": "node mnemos-bench/scorer/regression.mjs",
+    "bench:verify": "node mnemos-bench/scorer/verify.test.mjs",
+    "bench:leaderboard": "node mnemos-bench/scorer/leaderboard.mjs",
+    "bench:pin": "node mnemos-bench/scripts/pin-fixtures.mjs",
+    "bench:verify-gt": "node mnemos-bench/scripts/verify-ground-truth.mjs",
     "bench:ai-eval": "node mnemos-bench/scorer/ai-eval.mjs",
     "dabt:ui": "node packages/cli/dist/index.js ui --workspace packages/ui/dabt.workspace.json",
     "docs:sync": "npm run build --workspace @mnemos/core && node scripts/sync-docs.mjs",
     "docs:dev": "npm --workspace @mnemos/docs-site run dev",
     "docs:build": "npm --workspace @mnemos/docs-site run build",
-    "docs:preview": "npm --workspace @mnemos/docs-site run preview"
+    "docs:preview": "npm --workspace @mnemos/docs-site run preview",
+    "audit:deps": "npm audit --omit=dev"
+  },
+  "overrides": {
+    "protobufjs": "^7.4.0",
+    "tmp": "^0.2.5",
+    "cookie": "^0.7.0",
+    "uuid": "^11.1.0",
+    "react-router": "^7.18.0",
+    "react-router-dom": "^7.18.0"
   },
   "engines": {
     "node": ">=20"

@@ -6,7 +6,7 @@ import type { DiscoveredJourney } from './analysis/journeys.js';
 import { MNEMOS_VERSION } from './agent-runtime.js';
 
 export const AI_PACK_VERSION = '1.0.0';
-export const AI_PACK_SCHEMA = 'https://mnemos.dev/schemas/ai-pack/v1.json';
+export const AI_PACK_SCHEMA = 'https://getmnemos.vercel.app/schemas/ai-pack/v1.json';
 
 export type Mode = 'vibe' | 'ai' | 'coder';
 export type IssueType = 'smell' | 'hotspot' | 'build' | 'deadcode' | 'complexity';

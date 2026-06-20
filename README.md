@@ -1,17 +1,19 @@
-# Mnemos
+# Get Mnemos
 
 **The memory layer for software.** One command turns a codebase into architecture intelligence that humans and AI can use immediately.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-3ecf8e.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D20-6366f1.svg)](package.json)
-[![AI Pack](https://img.shields.io/badge/AI%20Pack-v1.0.0-f59e0b.svg)](docs/ai-pack.md)
-[![Status](https://img.shields.io/badge/status-polishing%20core-6366f1.svg)](#project-status)
+[![npm](https://img.shields.io/badge/npm-getmnemos-e82127.svg)](https://www.npmjs.com/package/getmnemos)
+[![Website](https://img.shields.io/badge/site-getmnemos.vercel.app-6366f1.svg)](https://getmnemos.vercel.app)
 
-[Documentation](docs/architecture.md) · [Graphs](docs/GRAPHS.md) · [Languages](docs/LANGUAGES.md) · [AI Pack v1](docs/ai-pack.md) · [Fable discipline](docs/fable-discipline.md) · [Modes](docs/modes.md) · [Benchmarks](mnemos-bench/) · [Contributing](docs/contributing.md)
+[Documentation](docs/architecture.md) · [Install](INSTALL.md) · [Graphs](docs/GRAPHS.md) · [Languages](docs/LANGUAGES.md) · [AI Pack v1](docs/ai-pack.md) · [Benchmarks](mnemos-bench/) · [Contributing](docs/contributing.md)
 
 ```bash
-npx mnemos .
+npx getmnemos .
 ```
+
+> **Install:** npm package is **`getmnemos`** — not the squatted `mnemos` name. See [INSTALL.md](INSTALL.md).
 
 Local-first. No cloud. No API keys. No guesswork.
 
@@ -23,7 +25,7 @@ Mnemos is **pre-launch OSS** — we are polishing before growth, not pretending 
 
 | Surface | Status | Notes |
 |---------|--------|-------|
-| **CLI** | Stable | `npx mnemos .`, `sync`, `wrap`, `pack`, `serve`, `mcp`, **`memory`** |
+| **CLI** | Stable | `npx getmnemos .`, `audit`, `supernova`, `pack`, `serve`, `mcp`, **`memory`** |
 | **HTML report** | Stable | Dashboard-aligned design, offline shareable |
 | **AI Pack v1 + MCP** | Stable | Built for Claude Code, Cursor, Codex |
 | **Fable Mindset (New Gen)** | Stable | `fable-mindset` skill + discipline rules; `mnemos discipline` measures the gap |

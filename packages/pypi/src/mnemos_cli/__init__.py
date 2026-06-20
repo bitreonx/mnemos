@@ -69,7 +69,7 @@ def _run() -> None:
         sys.stderr.write(
             "mnemos: no prebuilt binary for this platform "
             f"({platform.system()} {platform.machine()}).\n"
-            "Install via npm instead: npm i -g @mnemos/cli\n"
+            "Install via npm instead: pip install getmnemos  # or: npm i -g getmnemos\n"
         )
         sys.exit(1)
 

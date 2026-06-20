@@ -83,15 +83,16 @@ async function buildEvalPack(repoId) {
   };
 
   const pack = {
-    $schema: 'mnemos-bench/ai-eval/v1',
+    $schema: 'inferno-bench/ai-eval/v1',
+    benchmark: 'INFERNO-bench',
     repo: repoId,
     generated_at: new Date().toISOString(),
-    purpose: 'Evaluate AI models: give model the Mnemos context package, then ask tasks. Score against ground_truth keywords.',
+    purpose: 'Evaluate AI models on INFERNO-bench: give model the Mnemos context package, ask six universal tasks, score with verify.mjs.',
     protocol: {
       step1: 'Provide model with project.dna.json + agent_context.json only (no raw repo)',
-      step2: 'Ask each task question verbatim',
-      step3: 'Score response with mnemos-bench/scorer/run.mjs keyword scorer',
-      step4: 'Compare model score vs mnemos baseline in this file',
+      step2: 'Ask each task question verbatim from tasks/universal.json',
+      step3: 'Score with mnemos-bench/scorer/verify.mjs (multi-signal, tier A/B/C/F)',
+      step4: 'Compare model tier + accuracy vs mnemos baseline in this file',
     },
     context_for_ai: {
       dna_path: `.mnemos/project.dna.json`,
@@ -104,9 +105,10 @@ async function buildEvalPack(repoId) {
     ground_truth: groundTruthMap,
     mnemos_baseline: mnemosAnswers,
     scoring: {
-      method: 'keyword_coverage',
-      metrics: ['accuracy', 'coverage', 'latency_ms', 'token_count'],
-      pass_threshold: { express: 70, nestjs: 55 },
+      method: 'inferno_multi_signal',
+      harness: 'mnemos-bench/scorer/verify.mjs',
+      metrics: ['accuracy', 'verification_tier', 'coverage', 'latency_ms', 'token_count'],
+      pass_threshold: { express: { tier: 'B', accuracy: 70 }, nestjs: { tier: 'C', accuracy: 55 } },
     },
   };
 

@@ -1,35 +1,42 @@
 {
-  "$schema": "mnemos-bench/repos/v1",
-  "description": "Verified open-source repositories for Mnemos benchmarking. All repos are cloned locally — never simulated.",
+  "$schema": "inferno-bench/repos/v1",
+  "benchmark": "INFERNO-bench",
+  "dataset_version": "1.0.0",
+  "description": "Pinned open-source fixtures for INFERNO-bench. Real clones only — never simulated.",
   "repos": [
     {
       "id": "express",
       "tier": "small",
       "url": "https://github.com/expressjs/express",
-      "description": "Minimal Node.js HTTP framework — industry standard small repo",
-      "clone": "git clone --depth 1 https://github.com/expressjs/express.git repos/express"
+      "commit_sha": "18e5985b8a9d5e8423db0a9121f22bdaecd5b120",
+      "description": "Minimal Node.js HTTP framework — fast regression, capability accuracy",
+      "pin": "npm run bench:pin -- express"
     },
     {
       "id": "nestjs",
       "tier": "medium",
       "url": "https://github.com/nestjs/nest",
+      "commit_sha": "6859216d56e8f4e0e6e8d80035e48fce95f5311c",
       "description": "Enterprise TypeScript framework with auth, DI, modules",
-      "clone": "git clone --depth 1 https://github.com/nestjs/nest.git repos/nestjs"
+      "pin": "npm run bench:pin -- nestjs"
     },
     {
       "id": "nextjs",
       "tier": "large",
       "url": "https://github.com/vercel/next.js",
+      "commit_sha": null,
       "description": "React meta-framework — stress test for scale",
-      "clone": "git clone --depth 1 --filter=blob:none https://github.com/vercel/next.js.git repos/nextjs"
+      "status": "planned",
+      "pin": "npm run bench:pin -- nextjs"
     },
     {
       "id": "vscode",
       "tier": "huge",
       "url": "https://github.com/microsoft/vscode",
+      "commit_sha": null,
       "description": "VS Code editor — maximum scale stress test",
-      "clone": "git clone --depth 1 --filter=blob:none https://github.com/microsoft/vscode.git repos/vscode",
       "optional": true,
+      "status": "planned",
       "note": "Clone is large (~1GB+). Run stress test separately."
     }
   ]

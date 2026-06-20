@@ -1,6 +1,6 @@
 {
   "repo": "express",
-  "measured_at": "2026-06-18T08:13:44.740Z",
+  "measured_at": "2026-06-19T20:17:01.701Z",
   "raw_repo": {
     "fileCount": 148,
     "totalChars": 710212,
@@ -9,12 +9,12 @@
   "tools": {
     "mnemos": {
       "tool": "mnemos",
-      "build_latency_ms": 700,
-      "ask_latency_ms": 3479,
-      "total_latency_ms": 5145,
-      "tokens": 8901,
-      "context_bytes": 35602,
-      "compression_ratio": 19.9,
+      "build_latency_ms": 500,
+      "ask_latency_ms": 4331,
+      "total_latency_ms": 6078,
+      "tokens": 8493,
+      "context_bytes": 33972,
+      "compression_ratio": 20.9,
       "accuracy": 100,
       "coverage": 18,
       "tasks": [
@@ -30,8 +30,8 @@
             "examples/auth"
           ],
           "forbidden_hits": [],
-          "latency_ms": 761,
-          "answer_preview": "\nConfidence: 78% · 2ms\n\nNo production login in core framework. Example implementation: `examples/auth/index.js` (see GET/POST /login routes).\n"
+          "latency_ms": 1135,
+          "answer_preview": "\n  Answer\n  78% confidence · 13ms · auth-standard\n\n  No production login in core framework. Example implementation: `examples/auth/index.js` (see GET/POST /login routes).\n"
         },
         {
           "task": "task2",
@@ -48,8 +48,8 @@
             "blast"
           ],
           "forbidden_hits": [],
-          "latency_ms": 785,
-          "answer_preview": "\nConfidence: 92% · 4ms\n\nChanging **lib/application.js** affects **123** nodes (forward + reverse).\n\n**Dependencies / blast radius:**\n• APIs affected: 0\n• Files affected: 122\n• Domains affected: 1\n• Tests affected: 0\n\n**Direct dependents (8):**\n• index.js\n• lib/view.js\n• lib/utils.js\n• lib/express.js\n• lib/request.js\n• lib/response.js\n• lib\n• examples/route-map/index.js\n\n**Request/response impact:*"
+          "latency_ms": 1029,
+          "answer_preview": "\n  Answer\n  92% confidence · 12ms · impact-standard\n\n  Changing **lib/application.js** affects **123** nodes (forward + reverse).\n  \n  **Dependencies / blast radius:**\n  • APIs affected: 0\n  • Files affected: 122\n  • Domains affected: 1\n  • Tests affected: 0\n  \n  **Direct dependents (8):**\n  • index.js\n  • lib/view.js\n  • lib/utils.js\n  • lib/express.js\n  • lib/request.js\n  • lib/response.js\n  • l"
         },
         {
           "task": "task4",
@@ -64,8 +64,8 @@
             "general"
           ],
           "forbidden_hits": [],
-          "latency_ms": 923,
-          "answer_preview": "\nConfidence: 85% · 7ms\n\n**Lib** is the most critical general-purpose core subsystem in this repository. Risk score: **100/100** (issues: 6 circular dependencies, 3 dead modules, 1 high-severity smell).\n\nIt anchors the dependency graph: every change to its API propagates through the framework. Key modules include the application factory plus request/response pipeline.\n\nHub file: `index.js` — core a"
+          "latency_ms": 1129,
+          "answer_preview": "\n  Answer\n  85% confidence · 14ms · critical-standard\n\n  **Lib** is the most critical general-purpose core subsystem in this repository. Risk score: **100/100** (issues: 6 circular dependencies, 3 dead modules, 1 high-severity smell).\n  \n  It anchors the dependency graph: every change to its API propagates through the framework. Key modules include the application factory plus request/response pip"
         },
         {
           "task": "task5",
@@ -81,8 +81,8 @@
             "response"
           ],
           "forbidden_hits": [],
-          "latency_ms": 1010,
-          "answer_preview": "\nConfidence: 90% · 3ms\n\n1 capabilities:\n• **HTTP Framework & Middleware** — Provides HTTP server, routing pipeline, middleware chain, and request/response handling.\n\nCapability keywords: web_framework, middleware, router, application, request.\n\nRelated: HTTP Framework & Middleware\n"
+          "latency_ms": 1038,
+          "answer_preview": "\n  Answer\n  90% confidence · 5ms · list-standard\n\n  1 capabilities:\n  • **HTTP Framework & Middleware** — Provides HTTP server, routing pipeline, middleware chain, and request/response handling.\n  \n  Capability keywords: web_framework, middleware, router, application, request.\n\n  Related: HTTP Framework & Middleware\n"
         }
       ],
       "explain": {
@@ -98,43 +98,101 @@
           "javascript"
         ],
         "forbidden_hits": [],
-        "latency_ms": 966
+        "latency_ms": 1247
       },
       "context_sizes": {
-        "project.dna.json": 2993,
-        "agent_context.json": 3273,
-        "repository_summary.json": 1903,
-        "health-score.json": 154,
-        "context/apis.md": 130,
-        "context/architecture.md": 2322,
-        "context/critical_paths.md": 2224,
-        "context/dependencies.md": 2726,
-        "context/domains.md": 519,
-        "context/flows.md": 2328,
+        "project.dna.json": 2254,
+        "agent_context.json": 2797,
+        "repository_summary.json": 1531,
+        "health-score.json": 129,
+        "context/apis.md": 129,
+        "context/architecture.md": 2318,
+        "context/critical_paths.md": 2222,
+        "context/dependencies.md": 2725,
+        "context/domains.md": 517,
+        "context/flows.md": 2326,
         "context/graphs.md": 7068,
-        "context/languages.md": 3368,
+        "context/languages.md": 3367,
         "context/README.md": 2241,
-        "context/repository_summary.md": 1108,
-        "context/services.md": 397,
-        "context/smells.md": 2848
+        "context/repository_summary.md": 1106,
+        "context/services.md": 396,
+        "context/smells.md": 2846
       },
-      "ttu_seconds_with_tool": 125,
-      "ttu_note": "120s added for human reading project.dna.json (~4k tokens at 200 wpm)"
+      "ttu_seconds_with_tool": 126,
+      "ttu_note": "120s added for human reading project.dna.json (~4k tokens at 200 wpm)",
+      "fullburn": {
+        "ok": true,
+        "latency_ms": 1031,
+        "tokens": 11734,
+        "context_bytes": 46936,
+        "files": 10,
+        "features": [
+          "guided_tour",
+          "architecture_layers",
+          "language_concepts",
+          "persona_pm",
+          "persona_dev",
+          "persona_ai",
+          "ai_pack"
+        ]
+      }
+    },
+    "understand-anything": {
+      "ok": true,
+      "latencyMs": 789,
+      "graphChars": 59922,
+      "tokens": 14981,
+      "nodeCount": 196,
+      "edgeCount": 55,
+      "layerCount": 4,
+      "tourSteps": 5,
+      "queries": [
+        {
+          "question": "Where does login start?",
+          "answer": "[function] tryStat (lib/view.js): tryStat\n[file] express.static.js (test/express.static.js): test/express.static.js\n[file] res.sendStatus.js (test/res.sendStatus.js): test/res.sendStatus.js\n[file] res.status.js (test/res.status.js): test/res.status.js\n[function] restrict (examples/auth/index.js): restrict\n[function] andRestrictToSelf (examples/route-middleware/index.js): andRestrictToSelf\n[function] andRestrictTo (examples/route-middleware/index.js): andRestrictTo\n[function] logerror (lib/application.js): logerror",
+          "ok": true,
+          "hitCount": 10
+        },
+        {
+          "question": "List business capabilities",
+          "answer": "No matching nodes found.",
+          "ok": true,
+          "hitCount": 0
+        },
+        {
+          "question": "Find the most critical subsystem",
+          "answer": "[function] initializeRedis (examples/search/index.js): initializeRedis",
+          "ok": true,
+          "hitCount": 1
+        }
+      ],
+      "note": "Code-only tree-sitter scan — no LLM summaries/tours/domain view (full /understand needs tokens)",
+      "mode": "structural-only",
+      "compression_ratio": 11.9,
+      "accuracy": 42,
+      "requires_llm_for_full": true,
+      "llm_features_missing": [
+        "semantic_summaries",
+        "domain_view",
+        "guided_tour_narrative",
+        "business_capabilities",
+        "diff_impact_qa"
+      ]
     },
     "gitingest": {
       "ok": true,
-      "latencyMs": 4194,
+      "latencyMs": 14603,
       "tokens": 1100000,
-      "bytes": 4349820,
-      "stdout": "Analysis complete! Output written to: D:\\Mnemos\\mnemos-bench\\results\\express-gitingest.txt\r\n\r\nSummary:\r\nDirectory: D:\\Mnemos\\mnemos-bench\\repos\\express\r\nFiles analyzed: 291\r\n\r\nEstimated tokens: 1.1M\r\n",
-      "stderr": "Analyzing source, output will be written to 'D:\\Mnemos\\mnemos-bench\\results\\express-gitingest.txt'...\r\n\u001b[32m2026-06-18 12:13:36.934\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mgitingest.entrypoint\u001b[0m:\u001b[36mingest_async\u001b[0m:\u001b[36m89\u001b[0m | Starting ingestion process | {\"source\":\"D:\\\\Mnemos\\\\mnemos-bench\\\\repos\\\\express\"}\r\n\u001b[32m2026-06-18 12:13:36.935\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mgitingest.entrypoint\u001b[0m:\u001b[36mingest_async\u001b[0m:\u001b[36m105\u001b[0m | Processing local directory | {\"source\":\"D:\\\\Mnemos\\\\mnemos-bench\\\\repos\\\\express\"}\r\n\u001b[32m2026-06-18 12:13:36.936\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mgitingest.entrypoint\u001b[0m:\u001b[36mingest_async\u001b[0m:\u001b[36m134\u001b[0m | Starting local directory processing\r\n\u001b[32m2026-06-18 12:13:36.948\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mgitingest.entrypoint\u001b[0m:\u001b[36mingest_async\u001b[0m:\u001b[36m140\u001b[0m | Processing files and generating output\r\n\u001b[32m2026-06-18 12:13:36.948\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mgitingest.ingestion\u001b[0m:\u001b[36mingest_query\u001b[0m:\u001b[36m44\u001b[0m | Starting file ingestion | {\"slug\":\"D:\\\\Mnemos\\\\mnemos-bench\\\\repos\\\\express\",\"subpath\":\"/\",\"local_path\":\"D:\\\\Mnemos\\\\mnemos-bench\\\\repos\\\\express\",\"max_file_size\":10485760}\r\n\u001b[32m2026-06-18 12:13:36.949\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mgitingest.ingestion\u001b[0m:\u001b[36mingest_query\u001b[0m:\u001b[36m96\u001b[0m | Processing directory | {\"directory_path\":\"D:\\\\Mnemos\\\\mnemos-bench\\\\repos\\\\express\"}\r\n\u001b[32m2026-06-18 12:13:37.815\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mgitingest.ingestion\u001b[0m:\u001b[36mingest_query\u001b[0m:\u001b[36m109\u001b[0m | Directory processing completed | {\"total_files\":291,\"total_directories\":74,\"total_size_bytes\":4146244,\"stats_total_files\":291,\"stats_total_size\":4146244}\r\n\u001b[32m2026-06-18 12:13:40.046\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mgitingest.entrypoint\u001b[0m:\u001b[36mingest_async\u001b[0m:\u001b[36m147\u001b[0m | Ingestion completed successfully\r\n",
+      "bytes": 4422755,
+      "stdout": "Analysis complete! Output written to: D:\\Mnemos\\mnemos-bench\\results\\express-gitingest.txt\r\n\r\nSummary:\r\nDirectory: D:\\Mnemos\\mnemos-bench\\repos\\express\r\nFiles analyzed: 316\r\n\r\nEstimated tokens: 1.1M\r\n",
+      "stderr": "Analyzing source, output will be written to 'D:\\Mnemos\\mnemos-bench\\results\\express-gitingest.txt'...\r\n\u001b[32m2026-06-20 00:16:41.125\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mgitingest.entrypoint\u001b[0m:\u001b[36mingest_async\u001b[0m:\u001b[36m89\u001b[0m | Starting ingestion process | {\"source\":\"D:\\\\Mnemos\\\\mnemos-bench\\\\repos\\\\express\"}\r\n\u001b[32m2026-06-20 00:16:41.126\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mgitingest.entrypoint\u001b[0m:\u001b[36mingest_async\u001b[0m:\u001b[36m105\u001b[0m | Processing local directory | {\"source\":\"D:\\\\Mnemos\\\\mnemos-bench\\\\repos\\\\express\"}\r\n\u001b[32m2026-06-20 00:16:41.130\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mgitingest.entrypoint\u001b[0m:\u001b[36mingest_async\u001b[0m:\u001b[36m134\u001b[0m | Starting local directory processing\r\n\u001b[32m2026-06-20 00:16:41.159\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mgitingest.entrypoint\u001b[0m:\u001b[36mingest_async\u001b[0m:\u001b[36m140\u001b[0m | Processing files and generating output\r\n\u001b[32m2026-06-20 00:16:41.160\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mgitingest.ingestion\u001b[0m:\u001b[36mingest_query\u001b[0m:\u001b[36m44\u001b[0m | Starting file ingestion | {\"slug\":\"D:\\\\Mnemos\\\\mnemos-bench\\\\repos\\\\express\",\"subpath\":\"/\",\"local_path\":\"D:\\\\Mnemos\\\\mnemos-bench\\\\repos\\\\express\",\"max_file_size\":10485760}\r\n\u001b[32m2026-06-20 00:16:41.160\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mgitingest.ingestion\u001b[0m:\u001b[36mingest_query\u001b[0m:\u001b[36m96\u001b[0m | Processing directory | {\"directory_path\":\"D:\\\\Mnemos\\\\mnemos-bench\\\\repos\\\\express\"}\r\n\u001b[32m2026-06-20 00:16:42.474\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mgitingest.ingestion\u001b[0m:\u001b[36mingest_query\u001b[0m:\u001b[36m109\u001b[0m | Directory processing completed | {\"total_files\":316,\"total_directories\":76,\"total_size_bytes\":4215527,\"stats_total_files\":316,\"stats_total_size\":4215527}\r\n\u001b[32m2026-06-20 00:16:53.253\u001b[0m | \u001b[1mINFO    \u001b[0m | \u001b[36mgitingest.entrypoint\u001b[0m:\u001b[36mingest_async\u001b[0m:\u001b[36m147\u001b[0m | Ingestion completed successfully\r\n",
       "compression_ratio": 0.16,
       "accuracy": 0,
       "note": "Gitingest produces raw file dump — no structured task answers"
     },
     "graphify": {
       "ok": true,
-      "latencyMs": 1655,
+      "latencyMs": 6102,
       "graphChars": 101,
       "tokens": 26,
       "note": "Code-only extract on lib/ — full repo requires LLM API key for docs",
@@ -162,13 +220,14 @@
   },
   "ttu": {
     "without_tool_seconds": 3060,
-    "with_mnemos_seconds": 125,
+    "with_mnemos_seconds": 126,
     "savings_percent": 96,
     "methodology": "Senior engineer onboarding: read lib/*.js (6), index.js, key test/app.js patterns, grep login/auth/route/middleware across repo. 90s per file + 45s per search."
   },
   "winner": {
     "accuracy": "mnemos",
     "compression": "mnemos",
-    "latency": "mnemos"
+    "latency": "mnemos",
+    "features": "mnemos"
   }
 }

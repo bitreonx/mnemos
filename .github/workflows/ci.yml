@@ -31,3 +31,7 @@ jobs:
 
       - name: Run core tests
         run: npm run test --workspace @mnemos/core
+
+      - name: Dependency security audit (production)
+        run: npm audit --omit=dev --audit-level=high
+        continue-on-error: true
