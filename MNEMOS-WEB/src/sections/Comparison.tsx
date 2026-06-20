@@ -1,10 +1,10 @@
 import { Check, Minus, X } from "lucide-react";
 import { motion } from "framer-motion";
-import { COMPARISON } from "../lib/site";
+import { COMPARISON, type ComparisonCell } from "../lib/site";
 import SectionHeading from "../components/ui/SectionHeading";
 import Reveal from "../components/ui/Reveal";
 
-function Cell({ value }: { value: boolean | "partial" | "llm" }) {
+function Cell({ value }: { value: ComparisonCell }) {
   if (value === true)
     return (
       <span className="mx-auto grid h-7 w-7 place-items-center rounded-full" style={{ background: "color-mix(in srgb, var(--mint) 16%, transparent)", color: "var(--mint)" }}>
@@ -37,7 +37,7 @@ export default function Comparison() {
       <SectionHeading
         eyebrow="Comparison"
         title="Built to understand, not just to parse."
-        subtitle="Other tools dump files or draw a dependency graph. Mnemos delivers architecture, flows, capabilities, and an agent-ready contract."
+        subtitle="Other tools dump files or draw a dependency graph. Mnemos delivers architecture, flows, capabilities, agent memory, and an agent-ready contract — local-first."
       />
 
       <Reveal delay={0.1}>
@@ -47,14 +47,14 @@ export default function Comparison() {
               <thead>
                 <tr className="border-b border-[var(--border)]">
                   <th className="px-6 py-5 text-sm font-medium text-[var(--text-dim)]">Capability</th>
-                  {cols.map((c, i) => (
-                    <th key={c} className="px-4 py-5 text-center">
-                      {i === 0 ? (
+                  {cols.map((col) => (
+                    <th key={col.key} className="px-4 py-5 text-center">
+                      {col.highlight ? (
                         <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold text-white" style={{ background: "var(--brand)" }}>
-                          {c}
+                          {col.label}
                         </span>
                       ) : (
-                        <span className="text-sm font-medium text-[var(--text-dim)]">{c}</span>
+                        <span className="text-sm font-medium text-[var(--text-dim)]">{col.label}</span>
                       )}
                     </th>
                   ))}
@@ -71,13 +71,15 @@ export default function Comparison() {
                     className="border-b border-[var(--border)] transition-colors last:border-0 hover:bg-[var(--surface-2)]"
                   >
                     <td className="px-6 py-4 text-[0.95rem] font-medium text-[var(--text)]">{row.feature}</td>
-                    <td className="px-4 py-4" style={{ background: "color-mix(in srgb, var(--brand) 6%, transparent)" }}>
-                      <Cell value={row.mnemos} />
-                    </td>
-                    <td className="px-4 py-4"><Cell value={row.understandAnything} /></td>
-                    <td className="px-4 py-4"><Cell value={row.graphify} /></td>
-                    <td className="px-4 py-4"><Cell value={row.gitingest} /></td>
-                    <td className="px-4 py-4"><Cell value={row.madge} /></td>
+                    {cols.map((col) => (
+                      <td
+                        key={col.key}
+                        className="px-4 py-4"
+                        style={col.highlight ? { background: "color-mix(in srgb, var(--brand) 6%, transparent)" } : undefined}
+                      >
+                        <Cell value={row[col.key]} />
+                      </td>
+                    ))}
                   </motion.tr>
                 ))}
               </tbody>
@@ -87,7 +89,7 @@ export default function Comparison() {
       </Reveal>
 
       <p className="mt-4 text-center text-xs text-[var(--text-faint)]">
-        Comparison reflects positioning and feature scope, not a controlled benchmark of every tool.
+        Comparison reflects positioning and feature scope, not a controlled benchmark of every tool. LLM = requires token spend.
       </p>
     </section>
   );

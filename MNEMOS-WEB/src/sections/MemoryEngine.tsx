@@ -17,13 +17,13 @@ const FEATURES = [
   },
   {
     icon: Zap,
-    title: "Episodic Memory",
-    desc: "Agents remember decisions across sessions. Temporal decay prunes stale notes.",
+    title: "Chronoshift + Provenance",
+    desc: "Import Claude JSONL back-catalog into episodic memory. Ask with cited answers that admit gaps honestly.",
   },
   {
     icon: Shield,
-    title: "Contradiction Guard",
-    desc: "Detects conflicting architecture facts before agents act on bad context.",
+    title: "Veil + Spiralfuse",
+    desc: "Team/client scoped memory at query time. Loop token fuse stops runaway agent spend.",
   },
 ];
 
@@ -87,14 +87,15 @@ export function MemoryEngine() {
 {`# Build hybrid index (automatic with mnemos build)
 npx mnemos .
 
-# Query — BM25 + local embeddings
-npx mnemos memory query "auth middleware"
+# Cited recall — admits gaps honestly (Provenance)
+npx mnemos memory ask "what did we decide about auth?"
 
-# Task context for agents (Cursor, Claude Code)
-npx mnemos memory context "fix login bug" --budget 8000
+# Import Claude session back-catalog (Chronoshift)
+npx mnemos memory chronoshift ~/.claude/projects/
 
-# Persist episodic memory
-npx mnemos memory remember "JWT in httpOnly cookie" --tag auth`}
+# Agent loop token fuse (Spiralfuse)
+npx mnemos memory loop start --max-tokens 250000
+npx mnemos memory loop tick --tokens 12000`}
               </code>
             </pre>
           </GlowCard>
