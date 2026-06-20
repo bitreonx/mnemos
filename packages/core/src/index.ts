@@ -243,6 +243,10 @@ export {
   MEMORY_ENGINE_SCHEMA,
   MEMORY_ENGINE_CODENAME,
   EMBEDDING_DIMS,
+  formatProvenanceMarkdown,
+  formatVeilStatus,
+  formatSpiralfuseStatus,
+  parseVisibility,
 } from './memory-engine/index.js';
 export {
   PRODUCT,

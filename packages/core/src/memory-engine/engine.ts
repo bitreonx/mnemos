@@ -38,6 +38,19 @@ import {
   SYNC_BUNDLE_EXT,
   type SyncBundleManifest,
 } from './team-sync.js';
+import { chronoshiftImport, promoteChronoshiftShortTerm, type ChronoshiftOptions } from './chronoshift.js';
+import { loadVeilPolicy, saveVeilPolicy, defaultVeilPolicy, resolveEpisodeScope } from './veil.js';
+import type { VeilPolicy, ProvenanceAnswer, ChronoshiftImportResult, FrozenSnapshot, SpiralfuseBudget, VeilActor } from './types.js';
+import { synthesizeProvenanceAnswer, formatProvenanceMarkdown } from './provenance.js';
+import { spindleRemember, buildFrozenSnapshot, writeFrozenSnapshot } from './spindle.js';
+import {
+  spiralfuseStart,
+  spiralfuseTick,
+  spiralfuseLoad,
+  spiralfuseReset,
+  type SpiralfuseTickInput,
+  type SpiralfuseTickResult,
+} from './spiralfuse.js';
 
 export interface BuildEngineOptions {
   embeddingMode?: EmbeddingMode;
@@ -144,8 +157,20 @@ export class MnemosMemoryEngine {
   async query(text: string, options?: import('./retrieval.js').QueryOptions): Promise<HybridQueryResult> {
     const index = await this.load();
     const searchIndex = await this.getSearchIndex();
+    const veil = await loadVeilPolicy(this.engineDir);
     await logSessionEventAuto(this.engineDir, 'query', { text, limit: options?.limit });
     return hybridQuery(index, searchIndex, text, {
+      ...options,
+      embeddingMode: options?.embeddingMode ?? this.embeddingMode,
+      veilPolicy: veil,
+    });
+  }
+
+  async ask(text: string, options?: import('./provenance.js').AskOptions): Promise<ProvenanceAnswer> {
+    const index = await this.load();
+    const searchIndex = await this.getSearchIndex();
+    await logSessionEventAuto(this.engineDir, 'query', { text, provenance: true });
+    return synthesizeProvenanceAnswer(index, searchIndex, this.engineDir, text, {
       ...options,
       embeddingMode: options?.embeddingMode ?? this.embeddingMode,
     });
@@ -153,7 +178,9 @@ export class MnemosMemoryEngine {
 
   async remember(input: RememberInput): Promise<MemoryEpisode> {
     const redacted = redactSecrets(input.content);
+    const veil = await loadVeilPolicy(this.engineDir);
     const episode = createEpisode({ ...input, content: redacted.text });
+    episode.scope = resolveEpisodeScope(veil);
     await appendEpisode(this.engineDir, episode);
     await logSessionEventAuto(this.engineDir, 'remember', {
       content: redacted.redacted ? '[redacted]' : input.content.slice(0, 80),
@@ -241,6 +268,78 @@ export class MnemosMemoryEngine {
     });
     this.invalidate();
     return result;
+  }
+
+  // Chronoshift — back-catalog session import
+  async chronoshift(sessionsPath: string, options?: ChronoshiftOptions): Promise<ChronoshiftImportResult> {
+    const result = await chronoshiftImport(this.engineDir, sessionsPath, options);
+    if (!options?.dryRun && result.episodesCreated > 0) {
+      await promoteChronoshiftShortTerm(this.engineDir);
+      this.invalidate();
+    }
+    return result;
+  }
+
+  // Veil — scoped team memory
+  async getVeilPolicy(): Promise<VeilPolicy | null> {
+    return loadVeilPolicy(this.engineDir);
+  }
+
+  async setVeilPolicy(actor: Partial<VeilActor>, options?: { defaultVisibility?: VeilPolicy['defaultVisibility']; enforceAtQuery?: boolean }): Promise<VeilPolicy> {
+    const existing = await loadVeilPolicy(this.engineDir);
+    const policy = existing ?? defaultVeilPolicy(actor);
+    if (actor.id) policy.actor = { ...policy.actor, ...actor, teams: actor.teams ?? policy.actor.teams, clients: actor.clients ?? policy.actor.clients };
+    if (options?.defaultVisibility) policy.defaultVisibility = options.defaultVisibility;
+    if (options?.enforceAtQuery !== undefined) policy.enforceAtQuery = options.enforceAtQuery;
+    await saveVeilPolicy(this.engineDir, policy);
+    return policy;
+  }
+
+  // Spindle — turn capture
+  async spindleCapture(content: string, options?: { tags?: string[]; source?: RememberInput['source'] }): Promise<MemoryEpisode | null> {
+    const result = await spindleRemember(this.engineDir, content, options);
+    if (!result.captured || !result.episode) return null;
+    const { appendEpisode } = await import('./episodes.js');
+    await appendEpisode(this.engineDir, result.episode);
+    await logSessionEventAuto(this.engineDir, 'remember', { spindle: true, reason: result.reason });
+    if (this.cachedIndex) {
+      this.cachedIndex.episodes.push(result.episode);
+      const doc = episodeToDocument(result.episode);
+      this.cachedIndex.documents.push(doc);
+      const { embedDocument } = await import('./onnx-embeddings.js');
+      const { vector } = await embedDocument(`${doc.title}\n${doc.body}`, this.embeddingMode);
+      this.cachedIndex.vectors.set(doc.id, vector);
+    }
+    return result.episode;
+  }
+
+  async buildFrozenSnapshot(soul?: string, user?: string): Promise<FrozenSnapshot> {
+    const episodes = await loadEpisodes(this.engineDir);
+    const manifest = await this.getManifest();
+    const snapshot = buildFrozenSnapshot(episodes, manifest?.repository ?? path.basename(this.root), soul, user);
+    await writeFrozenSnapshot(this.engineDir, snapshot);
+    return snapshot;
+  }
+
+  // Spiralfuse — loop budget
+  async loopStart(options?: { label?: string; maxTokens?: number; maxIterations?: number }): Promise<SpiralfuseBudget> {
+    return spiralfuseStart(this.engineDir, options);
+  }
+
+  async loopTick(input: SpiralfuseTickInput): Promise<SpiralfuseTickResult> {
+    return spiralfuseTick(this.engineDir, input);
+  }
+
+  async loopStatus(): Promise<SpiralfuseBudget | null> {
+    return spiralfuseLoad(this.engineDir);
+  }
+
+  async loopReset(): Promise<void> {
+    return spiralfuseReset(this.engineDir);
+  }
+
+  formatProvenance(answer: ProvenanceAnswer): string {
+    return formatProvenanceMarkdown(answer);
   }
 }
 

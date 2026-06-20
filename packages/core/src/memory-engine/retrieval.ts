@@ -13,6 +13,7 @@ import { embedDocument, type EmbeddingMode } from './onnx-embeddings.js';
 import { reciprocalRankFusion, rankHits, snippet } from './ranking.js';
 import { attachQualityWarnings, formatWarningsMarkdown } from './quality-gate.js';
 import { estimateTokens } from '../proxy/compress-output.js';
+import { applyVeilToEpisodes } from './veil.js';
 
 export interface QueryOptions {
   limit?: number;
@@ -20,6 +21,7 @@ export interface QueryOptions {
   minConfidence?: number;
   includeContradictions?: boolean;
   embeddingMode?: EmbeddingMode;
+  veilPolicy?: import('./types.js').VeilPolicy | null;
 }
 
 function docById(index: LoadedEngineIndex): Map<string, MemoryDocument> {
@@ -100,7 +102,9 @@ export async function hybridQuery(
   const started = Date.now();
   const limit = options.limit ?? 12;
   const fetchLimit = Math.max(limit * 3, 24);
-  const docs = docById(index);
+  const visibleEpisodes = applyVeilToEpisodes(index.episodes, options.veilPolicy ?? null);
+  const visibleIds = new Set(visibleEpisodes.map((e) => e.id));
+  const docs = docById({ ...index, episodes: visibleEpisodes });
 
   const bm25Hits = bm25Search(searchIndex, query, fetchLimit);
   const { hits: vectorHits, backend } = await vectorSearch(index, query, fetchLimit, options.embeddingMode);
@@ -117,6 +121,7 @@ export async function hybridQuery(
     .map((f) => {
       const doc = docs.get(f.id);
       if (!doc) return null;
+      if (doc.kind === 'episode' && !visibleIds.has(f.id)) return null;
       if (options.kinds && !options.kinds.includes(doc.kind)) return null;
       if (options.minConfidence && doc.confidence < options.minConfidence) return null;
       return toHit(doc, f.score, bm25RankMap.get(f.id), vectorRankMap.get(f.id));

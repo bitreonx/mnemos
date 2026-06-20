@@ -10,6 +10,7 @@ import {
   stripMnemosSection,
 } from './ai-toolkit.js';
 import { buildDisciplineCursorRule, buildFableMindsetSkillMd } from './discipline/agent-discipline.js';
+import { buildLoomCursorRule, buildLoomSkillMd } from './discipline/loom-skill.js';
 import { loadFableMindsetMd } from './discipline/fable-mindset.js';
 import { buildMcpServerConfig, formatMcpConfigJson } from './mcp-config.js';
 import type { MemoryModel } from './types.js';
@@ -76,9 +77,9 @@ export const ALL_PLATFORMS: Platform[] = [
 
 /** Relative paths written by each platform (for uninstall). */
 export const PLATFORM_FILES: Record<Platform, string[]> = {
-  cursor: ['.cursor/rules/mnemos-architecture.mdc', '.cursor/rules/mnemos-discipline.mdc', '.cursor/mcp.json'],
+  cursor: ['.cursor/rules/mnemos-architecture.mdc', '.cursor/rules/mnemos-discipline.mdc', '.cursor/rules/mnemos-loom.mdc', '.cursor/mcp.json'],
   kiro: ['.kiro/skills/mnemos/SKILL.md', '.kiro/steering/mnemos.md'],
-  claude: ['.claude/skills/mnemos/SKILL.md', '.claude/skills/fable-mindset/SKILL.md', 'CLAUDE.md'],
+  claude: ['.claude/skills/mnemos/SKILL.md', '.claude/skills/fable-mindset/SKILL.md', '.claude/skills/mnemos-loom/SKILL.md', 'CLAUDE.md'],
   codex: ['.codex/skills/mnemos/SKILL.md', 'AGENTS.md'],
   vscode: ['.vscode/mnemos.instructions.md'],
   aider: ['AGENTS.md'],
@@ -139,6 +140,7 @@ async function installPlatform(
     cursor: async () => {
       await writeIfMissing(root, '.cursor/rules/mnemos-architecture.mdc', toolkit.cursorRule, force, written, skipped);
       await writeIfMissing(root, '.cursor/rules/mnemos-discipline.mdc', buildDisciplineCursorRule(), force, written, skipped);
+      await writeIfMissing(root, '.cursor/rules/mnemos-loom.mdc', buildLoomCursorRule(), force, written, skipped);
       await mergeMcpConfig(root, force, written, skipped);
     },
     kiro: async () => {
@@ -148,6 +150,7 @@ async function installPlatform(
     claude: async () => {
       await writeIfMissing(root, '.claude/skills/mnemos/SKILL.md', skillMd, force, written, skipped);
       await writeIfMissing(root, '.claude/skills/fable-mindset/SKILL.md', buildFableMindsetSkillMd(), force, written, skipped);
+      await writeIfMissing(root, '.claude/skills/mnemos-loom/SKILL.md', buildLoomSkillMd(), force, written, skipped);
       await appendOrWriteSection(root, 'CLAUDE.md', buildClaudeMdSection(memory, context), force, written, skipped);
     },
     codex: async () => {

@@ -63,6 +63,27 @@ export interface MemoryContradiction {
   resolved: boolean;
 }
 
+/** Veil — scoped access for team / client / private memories (GBrain-inspired). */
+export type VeilVisibility = 'private' | 'team' | 'client' | 'org';
+
+export interface MemoryScope {
+  owner: string;
+  team?: string;
+  client?: string;
+  project?: string;
+  visibility: VeilVisibility;
+}
+
+export interface EpisodeProvenance {
+  sessionId?: string;
+  sessionFile?: string;
+  turnIndex?: number;
+  citedLine?: number;
+  speaker?: 'user' | 'assistant' | 'system';
+  importedAt?: string;
+  importSource?: 'chronoshift' | 'spindle' | 'manual';
+}
+
 export interface MemoryEpisode {
   id: string;
   content: string;
@@ -73,6 +94,80 @@ export interface MemoryEpisode {
   accessCount: number;
   weight: number;
   metadata?: Record<string, unknown>;
+  scope?: MemoryScope;
+  provenance?: EpisodeProvenance;
+}
+
+export interface VeilActor {
+  id: string;
+  displayName?: string;
+  role: 'owner' | 'lead' | 'member' | 'guest';
+  teams: string[];
+  clients: string[];
+}
+
+export interface VeilPolicy {
+  $schema: 'mnemos/veil/v1';
+  actor: VeilActor;
+  defaultVisibility: VeilVisibility;
+  enforceAtQuery: boolean;
+  updatedAt: string;
+}
+
+export interface ProvenanceCitation {
+  episodeId: string;
+  excerpt: string;
+  sourceFile?: string;
+  line?: number;
+  sessionId?: string;
+  decidedAt: string;
+  decidedBy?: string;
+  relevanceScore: number;
+}
+
+export interface ProvenanceAnswer {
+  query: string;
+  answer: string;
+  confidence: number;
+  admitsUnknown: boolean;
+  unknownReason?: string;
+  citations: ProvenanceCitation[];
+  gaps: string[];
+  contradictions: number;
+  tookMs: number;
+  synthesis: 'grounded' | 'partial' | 'insufficient';
+}
+
+export interface ChronoshiftImportResult {
+  filesScanned: number;
+  turnsParsed: number;
+  episodesCreated: number;
+  episodesSkipped: number;
+  errors: string[];
+  durationMs: number;
+}
+
+export interface SpiralfuseBudget {
+  $schema: 'mnemos/spiralfuse/v1';
+  loopId: string;
+  label: string;
+  maxTokens: number;
+  tokensUsed: number;
+  maxIterations: number;
+  iterations: number;
+  fused: boolean;
+  fuseReason?: string;
+  startedAt: string;
+  lastTickAt: string;
+}
+
+export interface FrozenSnapshot {
+  generatedAt: string;
+  soul: string;
+  user: string;
+  memory: string;
+  today: string;
+  estimatedTokens: number;
 }
 
 export interface EngineManifest {

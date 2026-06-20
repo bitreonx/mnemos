@@ -17,6 +17,15 @@ export {
 export type { BuildEngineOptions } from './engine.js';
 export * from './sessions.js';
 export * from './team-sync.js';
+export * from './veil.js';
+export * from './chronoshift.js';
+export * from './provenance.js';
+export * from './spindle.js';
+export * from './spiralfuse.js';
+export { formatProvenanceMarkdown } from './provenance.js';
+export { formatVeilStatus } from './veil.js';
+export { formatSpiralfuseStatus } from './spiralfuse.js';
+export { buildLoomSkillMd, buildLoomCursorRule } from '../discipline/loom-skill.js';
 export { isOnnxAvailable, embedDocument, buildVectorIndexAsync } from './onnx-embeddings.js';
 export type { EmbeddingMode } from './onnx-embeddings.js';
 export { persistToSqlite, loadFromSqlite, recordParseCache } from './sqlite-store.js';
