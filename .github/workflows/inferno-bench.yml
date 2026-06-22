@@ -48,7 +48,7 @@ jobs:
 
       - run: npm ci
       - run: npm run build --workspace @mnestis/core
-      - run: npm run build --workspace @mnestis/cli
+      - run: npm run build --workspace mnestis
 
       - name: Pin fixtures
         run: npm run bench:pin -- express nestjs

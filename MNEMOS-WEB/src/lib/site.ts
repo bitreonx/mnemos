@@ -9,7 +9,7 @@ export const SITE = {
   description:
     "Mnestis transforms repositories into understanding. Humans and AI instantly grasp architecture, flows, domains, APIs, and business capabilities.",
   url: "https://mnestis.vercel.app",
-  github: "https://github.com/bitreonx/mnestis",
+  github: "https://github.com/bitreonx/Mnestis",
   avatar: "https://avatars.githubusercontent.com/u/207326426?v=4",
   author: "bitreonx",
   authorByline: "by bitreonx",

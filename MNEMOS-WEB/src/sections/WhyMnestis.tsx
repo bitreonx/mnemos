@@ -20,7 +20,7 @@ const ICONS: Record<string, typeof Network> = {
   flows: GitBranch,
 };
 
-export default function WhyMNESTIS() {
+export default function WhyMnestis() {
   return (
     <section id="why" className="container-px mx-auto max-w-[1200px] scroll-mt-24 py-24 sm:py-32">
       <SectionHeading

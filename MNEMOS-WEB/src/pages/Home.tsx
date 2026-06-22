@@ -1,6 +1,6 @@
 ﻿import Hero from "../sections/Hero";
 import TrustedBy from "../sections/TrustedBy";
-import WhyMNESTIS from "../sections/WhyMNESTIS";
+import WhyMnestis from "../sections/WhyMnestis";
 import AiReadiness from "../sections/AiReadiness";
 import SharedAgentMemory from "../sections/SharedAgentMemory";
 import { MemoryEngine } from "../sections/MemoryEngine";
@@ -18,7 +18,7 @@ export default function Home() {
     <>
       <Hero />
       <TrustedBy />
-      <WhyMNESTIS />
+      <WhyMnestis />
       <AiReadiness />
       <SharedAgentMemory />
       <MemoryEngine />

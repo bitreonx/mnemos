@@ -12,7 +12,8 @@ const RESULTS = path.join(BENCH, 'results');
 const DATASET = path.join(BENCH, 'dataset', 'v1.0.0.json');
 
 async function loadJson(p) {
-  return JSON.parse(await readFile(p, 'utf-8'));
+  const raw = await readFile(p, 'utf-8');
+  return JSON.parse(raw.replace(/^\uFEFF/, ''));
 }
 
 function summarizeTool(name, tool) {

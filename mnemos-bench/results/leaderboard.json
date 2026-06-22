@@ -1,7 +1,7 @@
-﻿{
+{
   "$schema": "inferno-bench/leaderboard/v1",
   "name": "INFERNO-bench",
-  "generated_at": "2026-06-20T05:24:41.628Z",
+  "generated_at": "2026-06-22T20:44:59.344Z",
   "dataset_version": "1.0.0",
   "governance": "MNESTIS-bench/GOVERNANCE.md",
   "entries": [

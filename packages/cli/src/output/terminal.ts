@@ -6,7 +6,7 @@ const WIDTH = 56;
 export function printMnemosBanner(subtitle = 'Give AI a memory of your codebase'): void {
   const brand = chalk.hex('#863bff');
   console.log('');
-  console.log(`  ${brand('◈')} ${chalk.bold.white('Mnemos')} ${chalk.dim('—')} ${chalk.dim(subtitle)}`);
+  console.log(`  ${brand('◈')} ${chalk.bold.white('Mnestis')} ${chalk.dim('—')} ${chalk.dim(subtitle)}`);
   console.log(chalk.dim('  ' + '─'.repeat(WIDTH)));
   console.log('');
 }

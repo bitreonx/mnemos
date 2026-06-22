@@ -6,8 +6,11 @@
 [![Node](https://img.shields.io/badge/node-%3E%3D20-6366f1.svg)](package.json)
 [![npm](https://img.shields.io/badge/npm-mnestis-e82127.svg)](https://www.npmjs.com/package/mnestis)
 [![Website](https://img.shields.io/badge/site-mnestis.vercel.app-6366f1.svg)](https://mnestis.vercel.app)
+[![GitHub stars](https://img.shields.io/github/stars/bitreonx/Mnestis?style=social)](https://github.com/bitreonx/Mnestis)
 
-[Documentation](docs/architecture.md) · [Install](INSTALL.md) · [Graphs](docs/GRAPHS.md) · [Languages](docs/LANGUAGES.md) · [AI Pack v1](docs/ai-pack.md) · [Benchmarks](Mnestis-bench/) · [Contributing](docs/contributing.md)
+[Documentation](docs/architecture.md) · [Install](INSTALL.md) · [Graphs](docs/GRAPHS.md) · [Languages](docs/LANGUAGES.md) · [AI Pack v1](docs/ai-pack.md) · [Benchmarks](mnemos-bench/) · [Contributing](docs/contributing.md)
+
+> **Star us on GitHub** if Mnestis helps your workflow — it helps other developers discover local-first codebase memory. [github.com/bitreonx/Mnestis](https://github.com/bitreonx/Mnestis)
 
 ```bash
 npx mnestis .

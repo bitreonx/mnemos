@@ -17,6 +17,7 @@ import {
   printPrimaryNextSteps,
   printBuildSummary,
   printContextDocs,
+  printStarUsCallout,
 } from './output/format.js';
 import {
   printMnemosBanner,
@@ -2198,6 +2199,7 @@ async function runDefaultExperience(
   printReaderModes();
   printPrimaryNextSteps();
   printDashboardPreviewNote();
+  printStarUsCallout();
 
   if (steerResult && options.platform) {
     printSteerSummary(options.platform, steerResult.written, steerResult.skipped);

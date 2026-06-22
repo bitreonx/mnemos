@@ -4,7 +4,7 @@
  * AI-developer ecosystem — not endorsements.
  */
 import type { CSSProperties, SVGProps } from "react";
-import knotUrl from "../assets/MNESTIS-knot.png";
+import knotUrl from "../assets/mnemos-knot.png";
 
 import claudeSvg from "../assets/logos/claude-color.svg?raw";
 import cursorSvg from "../assets/logos/cursor.svg?raw";

@@ -28,11 +28,16 @@ const THRESHOLDS = {
 
 const TIER_RANK = { A: 4, B: 3, C: 2, F: 1 };
 
+async function readJson(file) {
+  const raw = await readFile(file, 'utf-8');
+  return JSON.parse(raw.replace(/^\uFEFF/, ''));
+}
+
 async function check(repo) {
   const file = path.join(RESULTS, `${repo}.json`);
   let data;
   try {
-    data = JSON.parse(await readFile(file, 'utf-8'));
+    data = await readJson(file);
   } catch {
     return { repo, ok: false, error: `Missing ${file} — run: npm run bench:${repo}` };
   }

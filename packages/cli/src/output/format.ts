@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 
-/** Mnemos CLI color tokens — keep in sync with report + dashboard accents. */
+/** Mnestis CLI color tokens — keep in sync with report + dashboard accents. */
 export const COLORS = {
   vibe: '#863bff',
   ai: '#47bfff',
@@ -39,17 +39,31 @@ export function printReportPaths(indexPath: string, outputDir: string): void {
 export function printDashboardPreviewNote(): void {
   console.log('');
   console.log(chalk.yellow('ℹ') + ' ' + chalk.dim('Dashboard is in ') + chalk.yellow('preview') + chalk.dim(' — report + CLI are the stable surfaces today.'));
-  console.log(chalk.dim('  Help us polish panels & layout: https://github.com/bitreonx/mnemos/blob/main/CONTRIBUTING.md'));
+  console.log(chalk.dim('  Help us polish panels & layout: https://github.com/bitreonx/Mnestis/blob/main/CONTRIBUTING.md'));
 }
 
 export function printPrimaryNextSteps(): void {
   console.log('');
   console.log(chalk.bold('Recommended next steps'));
-  console.log(`  ${chalk.cyan('mnemos report --open')}  ${chalk.dim('— open the polished HTML report (stable)')}`);
-  console.log(`  ${chalk.cyan('mnemos pack')}           ${chalk.dim('— export AI Pack v1 JSON for agents')}`);
-  console.log(`  ${chalk.cyan('mnemos setup')}         ${chalk.dim('— install AGENTS.md + Cursor rules + Fable discipline')}`);
-  console.log(`  ${chalk.cyan('mnemos discipline')}    ${chalk.dim('— study Fable 5 habits vs your Opus sessions')}`);
-  console.log(`  ${chalk.cyan('mnemos ui')}            ${chalk.dim('— interactive dashboard (preview)')}`);
+  console.log(`  ${chalk.cyan('mnestis report --open')}  ${chalk.dim('— open the polished HTML report (stable)')}`);
+  console.log(`  ${chalk.cyan('mnestis pack')}           ${chalk.dim('— export AI Pack v1 JSON for agents')}`);
+  console.log(`  ${chalk.cyan('mnestis setup')}         ${chalk.dim('— install AGENTS.md + Cursor rules + Fable discipline')}`);
+  console.log(`  ${chalk.cyan('mnestis discipline')}    ${chalk.dim('— study Fable 5 habits vs your Opus sessions')}`);
+  console.log(`  ${chalk.cyan('mnestis ui')}            ${chalk.dim('— interactive dashboard (preview)')}`);
+}
+
+const STAR_REPO = 'https://github.com/bitreonx/Mnestis';
+
+/** Gentle star prompt — shown after successful builds (skip with MNESTIS_NO_STAR=1). */
+export function printStarUsCallout(): void {
+  if (process.env.MNESTIS_NO_STAR === '1' || process.env.MNESTIS_NO_STAR === 'true') return;
+  console.log('');
+  console.log(
+    chalk.dim('  Enjoying Mnestis? ') +
+      chalk.yellow('★ Star us on GitHub') +
+      chalk.dim(' — helps others discover the memory layer for software'),
+  );
+  console.log(chalk.dim(`  ${STAR_REPO}`));
 }
 
 export function printBuildSummary(stats: {
